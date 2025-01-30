@@ -26,12 +26,12 @@ const loginUserFromDB = async (payload: ILoginData) => {
   }
 
   //check verified and status
-  if (!isExistUser.verified) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      'Please verify your account, then try to login again'
-    );
-  }
+  // if (!isExistUser.verified) {
+  //   throw new ApiError(
+  //     StatusCodes.BAD_REQUEST,
+  //     'Please verify your account, then try to login again'
+  //   );
+  // }
 
   //check user status
   if (isExistUser.status === 'delete') {
