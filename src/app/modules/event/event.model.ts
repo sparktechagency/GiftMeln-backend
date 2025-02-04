@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { IEvent, EventModel } from './event.interface';
 import { CATEGORY } from '../../../enums/category';
+import { giftPreferences } from '../../../enums/giftPreferences';
 
 const eventSchema = new Schema<IEvent, EventModel>({
   // Define schema fields here
@@ -13,7 +14,15 @@ const eventSchema = new Schema<IEvent, EventModel>({
     type: String,
     enum: Object.values(CATEGORY),
     required: true,
-  }
-});
+  },
+  giftPreferences: {
+    type: [String],
+    enum: Object.values(giftPreferences),
+    required: true
+  },
+},
+  {
+    timestamps: true
+  });
 
 export const Event = model<IEvent, EventModel>('Event', eventSchema);

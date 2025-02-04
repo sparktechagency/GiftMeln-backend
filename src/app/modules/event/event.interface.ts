@@ -1,5 +1,6 @@
 import { Model } from 'mongoose';
 import { CATEGORY } from '../../../enums/category';
+import { giftPreferences } from '../../../enums/giftPreferences';
 
 export type IEvent = {
   eventName: string;
@@ -8,7 +9,7 @@ export type IEvent = {
   eventDate: Date;
   RecipientName: string
   category: CATEGORY
-  giftPreferences: string[]
+  giftPreferences: giftPreferences[]
 };
 
 export type EventModel = Model<IEvent>;
