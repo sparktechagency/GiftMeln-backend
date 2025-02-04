@@ -6,5 +6,7 @@ import { eventValidation } from './event.validation';
 const router = express.Router();
 
 router.post('/create', EventController.createEvent);
-
+router.get('/', EventController.getAllEvents);
+router.get('/:id', EventController.getSingleEvent);
+router.delete("/:id", EventController.deleteEvent);
 export const EventRoutes = router;

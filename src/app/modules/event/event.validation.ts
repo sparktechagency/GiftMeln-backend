@@ -1,26 +1,19 @@
 import { z } from 'zod';
 import { CATEGORY } from '../../../enums/category';
-const categoryValues = Object.values(CATEGORY) as [string, ...string[]];
+import { giftPreferences } from '../../../enums/giftPreferences';
 
-
-const createEventValidation = {
-    body: z.object({
-        eventName: z.string({ required_error: 'Event Name is required' }),
-        price: z.string({ required_error: 'Price is required' }).nonempty(),
-        sales: z.enum(['inStock', 'soldOut']),
-        eventDate: z
-            .date()
-            .refine((date) => date > new Date(), 'Event date must be in the future'),
-        RecipientName: z.string({
-            required_error: 'Recipient Name is required',
-        }),
-        category: z.enum(categoryValues, {
-            message: 'Invalid category'
-        }),
+const createEventValidation = z.object({
+    eventName: z.string({ required_error: "Event name is required" }),
+    price: z.number({ required_error: "Price is required" }).min(0, { message: "Price must be a positive number" }),
+    sales: z.enum(["inStock", "soldOut"], { required_error: "Sales status is required" }),
+    eventDate: z.date({ required_error: "Event date is required" }),
+    RecipientName: z.string({ required_error: "Recipient name is required" }),
+    category: z.enum(Object.values(CATEGORY) as [CATEGORY, ...CATEGORY[]], { required_error: "Category is required" }),
+    giftPreferences: z.array(z.enum(Object.values(giftPreferences) as [giftPreferences, ...giftPreferences[]]), {
+        required_error: "At least one gift preference must be selected",
     }),
-};
-
+});
 
 export const eventValidation = {
     createEventValidation
-}
+};
