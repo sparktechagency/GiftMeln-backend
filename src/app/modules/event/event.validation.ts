@@ -3,7 +3,7 @@ import { CATEGORY } from '../../../enums/category';
 const categoryValues = Object.values(CATEGORY) as [string, ...string[]];
 
 
-export const EventValidations = {
+const createEventValidation = {
     body: z.object({
         eventName: z.string({ required_error: 'Event Name is required' }),
         price: z.string({ required_error: 'Price is required' }).nonempty(),
@@ -19,3 +19,8 @@ export const EventValidations = {
         }),
     }),
 };
+
+
+export const eventValidation = {
+    createEventValidation
+}

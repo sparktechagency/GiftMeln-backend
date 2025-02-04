@@ -1,6 +1,7 @@
 import { Response } from 'express';
 
 type IData<T> = {
+  Total?: number;
   success: boolean;
   statusCode: number;
   message?: string;
@@ -16,6 +17,7 @@ type IData<T> = {
 const sendResponse = <T>(res: Response, data: IData<T>) => {
   const resData = {
     success: data.success,
+    Total: Array.isArray(data.data) ? data.data.length : undefined,
     message: data.message,
     pagination: data.pagination,
     data: data.data,
