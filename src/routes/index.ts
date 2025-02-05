@@ -3,6 +3,7 @@ import { AuthRoutes } from '../app/modules/auth/auth.route';
 import { UserRoutes } from '../app/modules/user/user.routes';
 import { EventRoutes } from '../app/modules/event/event.routes';
 import { wishlistRoutes } from '../app/modules/wishlist/wishlist.routes';
+import { productRoute } from '../app/modules/product/product.routes';
 const router = express.Router();
 
 const apiRoutes = [
@@ -21,6 +22,10 @@ const apiRoutes = [
   {
     path: "/wishlist",
     route: wishlistRoutes
+  },
+  {
+    path: "/product",
+    route: productRoute
   }
 ];
 

@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { CATEGORY } from "../../../enums/category";
 import { AVAILABILITY } from "../../../enums/availability";
-
-export const ProductValidationSchema = z.object({
+const ProductValidationSchema = z.object({
     body: z.object({
         productName: z.string({ required_error: 'Product is required' }),
         description: z.string({ required_error: 'Description is required' }),
@@ -18,3 +17,8 @@ export const ProductValidationSchema = z.object({
         availability: z.nativeEnum(AVAILABILITY),
     })
 });
+
+
+export const productValidation = {
+    ProductValidationSchema
+}
