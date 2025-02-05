@@ -43,6 +43,9 @@ const getSingleWishlist = catchAsync(async (req, res) => {
     })
 })
 
+
+
+
 export const WishListController = {
     createWishList,
     getAllWishLists,

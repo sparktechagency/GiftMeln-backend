@@ -8,7 +8,7 @@ const wishlistSchema = new Schema<IwishlistItems>({
         ref: 'User',
         required: true,
     },
-    product: {
+    event: {
         type: Types.ObjectId,
         ref: 'Event',
         required: true

@@ -4,12 +4,16 @@ import { IwishlistItems } from "./wishlist.interface";
 import { Wishlist } from "./wishlist.model";
 
 const createWishListService = async (payload: IwishlistItems) => {
-    const wishList = await Wishlist.create(payload);
-    if (!wishList) {
-        throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create wishlist");
+    const existingWishList = await Wishlist.findOne({ user: payload.user, event: payload.event });
+    if (existingWishList) {
+        await Wishlist.findOneAndDelete({ user: payload.user, event: payload.event });
+        return { message: "Wishlist item removed" };
+    } else {
+        const wishList = await Wishlist.create(payload);
+        return { message: "Wishlist item added", data: wishList };
     }
-    return wishList;
-}
+};
+
 
 
 // get all wishlist items
