@@ -6,7 +6,6 @@ import ApiError from "../../../errors/ApiError";
 
 const createWishList = catchAsync(async (req, res) => {
     const wishListData = req.body;
-    console.log("wishListData=???????", wishListData);
     const result = await WishListService.createWishListService(wishListData);
     sendResponse(res, {
         success: true,
