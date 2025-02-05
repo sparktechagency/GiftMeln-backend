@@ -8,7 +8,7 @@ export type IEvent = {
   sales: "inStock" | "soldOut";
   eventDate: Date;
   RecipientName: string
-  category: CATEGORY
+  category: CATEGORY,
   giftPreferences: giftPreferences[]
 };
 

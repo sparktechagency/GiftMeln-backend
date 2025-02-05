@@ -71,10 +71,32 @@ const deleteEventFromDB = async (id: string) => {
     }
 }
 
+// update event in database
+const updateEventInDB = async (id: string, eventData: EventModel) => {
+    try {
+        const { category }: any = eventData;
+
+        if (!category || !Object.values(CATEGORY).includes(category)) {
+            throw new ApiError(StatusCodes.BAD_REQUEST, 'Category must be one of: Birthday, Anniversary, Wedding, Friendship Day, Graduation, or Others');
+        }
+
+        const updatedEvent = await Event.findByIdAndUpdate(id, eventData, { new: true });
+        if (!updatedEvent) {
+            throw new ApiError(StatusCodes.NOT_FOUND, "Event not found");
+        }
+
+        return updatedEvent;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 
 export const EventServices = {
     createEventIntoDB,
     getAllEventsFromDB,
     getSingleEventFromDB,
-    deleteEventFromDB
+    deleteEventFromDB,
+    updateEventInDB
 };
