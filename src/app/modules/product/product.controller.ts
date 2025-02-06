@@ -5,22 +5,7 @@ import { productService } from "./product.service";
 import ApiError from "../../../errors/ApiError";
 
 const createProduct = catchAsync(async (req, res) => {
-    console.log('Files:', req.files);
-    console.log('Body:', req.body);
-
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    if (files.featureImage) {
-        req.body.featureImage = files.featureImage[0].path;
-    }
-    if (files.additionalImages) {
-        req.body.additionalImages = files.additionalImages.map(file => file.path);
-    }
-    if (req.body.tag) {
-        req.body.tag = JSON.parse(req.body.tag);
-    }
-
-    const productData = req.body;
-    const result = await productService.createProductIntoDB(productData);
+    const result = await productService.createProductIntoDB(req.body);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,

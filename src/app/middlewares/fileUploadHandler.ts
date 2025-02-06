@@ -24,14 +24,14 @@ const fileUploadHandler = () => {
     destination: (req, file, cb) => {
       let uploadDir;
       switch (file.fieldname) {
-        case 'featureImage':
-          uploadDir = path.join(baseUploadDir, 'featureImage');
+        case 'feature':
+          uploadDir = path.join(baseUploadDir, 'feature');
           break;
         case 'image':
           uploadDir = path.join(baseUploadDir, 'image');
           break;
-        case 'additionalImages':
-          uploadDir = path.join(baseUploadDir, 'additionalImages');
+        case 'additional':
+          uploadDir = path.join(baseUploadDir, 'additional');
           break;
 
         case 'media':
@@ -41,9 +41,6 @@ const fileUploadHandler = () => {
           uploadDir = path.join(baseUploadDir, 'doc');
           break;
         default:
-          console.log("Feature Image Path:", req.body.featureImage);
-          console.log("Additional Image Paths:", req.body.additionalImages);
-
           throw new ApiError(StatusCodes.BAD_REQUEST, 'File is not supported');
       }
       createDir(uploadDir);
@@ -65,7 +62,7 @@ const fileUploadHandler = () => {
 
   //file filter
   const filterFilter = (req: Request, file: any, cb: FileFilterCallback) => {
-    if (file.fieldname === 'image' || file.fieldname === 'featureImage' || file.fieldname === "additionalImages") {
+    if (file.fieldname === 'image' || file.fieldname === 'feature' || file.fieldname === "additional") {
       if (
         file.mimetype === 'image/jpeg' ||
         file.mimetype === 'image/png' ||
@@ -110,8 +107,8 @@ const fileUploadHandler = () => {
     { name: 'image', maxCount: 3 },
     { name: 'media', maxCount: 3 },
     { name: 'doc', maxCount: 3 },
-    { name: 'featureImage', maxCount: 1 },
-    { name: 'additionalImages', maxCount: 5 },
+    { name: 'feature', maxCount: 1 },
+    { name: 'additional', maxCount: 5 }
   ]);
   return upload;
 };
