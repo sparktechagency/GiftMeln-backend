@@ -5,24 +5,31 @@ import { productService } from "./product.service";
 import ApiError from "../../../errors/ApiError";
 
 const createProduct = catchAsync(async (req, res) => {
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    console.log('Files:', req.files);
+    console.log('Body:', req.body);
 
-    if (!files || !files.featureImage || files.featureImage.length === 0) {
-        throw new ApiError(StatusCodes.BAD_REQUEST, "Feature image is required");
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    if (files.featureImage) {
+        req.body.featureImage = files.featureImage[0].path;
+    }
+    if (files.additionalImages) {
+        req.body.additionalImages = files.additionalImages.map(file => file.path);
+    }
+    if (req.body.tag) {
+        req.body.tag = JSON.parse(req.body.tag);
     }
 
-    // File paths assigned to req.body
-    req.body.featureImage = files.featureImage[0].path;
-    req.body.additionalImages = files.additionalImages ? files.additionalImages.map(file => file.path) : [];
     const productData = req.body;
     const result = await productService.createProductIntoDB(productData);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
-        message: "Product created successfully",
+        message: 'Product created successfully',
         data: result,
     });
-})
+});
+
+
 
 
 // get all products

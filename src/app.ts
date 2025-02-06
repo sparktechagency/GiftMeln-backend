@@ -21,6 +21,9 @@ app.use(express.static('uploads'));
 //router
 app.use('/api/v1', router);
 
+//file retrieve
+app.use(express.static('uploads'))
+
 //live response
 app.get('/', (req: Request, res: Response) => {
   const date = new Date(Date.now());
