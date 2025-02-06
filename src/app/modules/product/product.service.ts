@@ -32,8 +32,50 @@ const getSingleProduct = async (id: string) => {
     return product;
 }
 
+
+
+// update product
+const updateProductInDB = async (
+    productId: string,
+    updatedData: Partial<IProduct>,
+    files: { [fieldname: string]: Express.Multer.File[] }
+) => {
+    // Process files
+    if (files.featureImage && files.featureImage.length > 0) {
+        updatedData.featureImage = files.featureImage[0].path;
+    }
+    if (files.additionalImages && files.additionalImages.length > 0) {
+        updatedData.additionalImages = files.additionalImages.map(file => file.path);
+    }
+
+    // Parse JSON fields if needed
+    if (updatedData.tag) {
+        try {
+            updatedData.tag = JSON.parse(updatedData.tag as unknown as string);
+        } catch (error) {
+            throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid JSON format for tags');
+        }
+    }
+
+    // Update the product in the database
+    const product = await ProductModel.findByIdAndUpdate(productId, updatedData, {
+        new: true, // Return the updated product
+        runValidators: true, // Apply schema validators
+    });
+
+    if (!product) {
+        throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    return product;
+};
+
+
+
+
 export const productService = {
     createProductIntoDB,
     getAllProducts,
     getSingleProduct,
+    updateProductInDB
 }

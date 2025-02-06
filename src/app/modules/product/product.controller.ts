@@ -61,9 +61,29 @@ const getSingleProduct = catchAsync(async (req, res) => {
 })
 
 
+// update product
+const updateProduct = catchAsync(async (req, res) => {
+    const { id } = req.params; // Product ID
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const updatedData = req.body;
+
+    // Delegate advanced logic to the service layer
+    const updatedProduct = await productService.updateProductInDB(id, updatedData, files);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Product updated successfully',
+        data: updatedProduct,
+    });
+});
+
+
+
 
 export const productController = {
     createProduct,
     getAllProducts,
-    getSingleProduct
+    getSingleProduct,
+    updateProduct,
 }

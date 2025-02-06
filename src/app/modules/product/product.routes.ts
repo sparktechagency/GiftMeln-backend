@@ -20,4 +20,10 @@ router.post(
 router.get('/', productController.getAllProducts);
 router.get('/:id', productController.getSingleProduct);
 
+router.patch(
+    '/update/:id',
+    fileUploadHandler(),
+    productController.updateProduct
+);
+
 export const productRoute = router;
