@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { productController } from "./product.controller";
 import validateRequest from "../../middlewares/validateRequest";
-import { productValidation } from "./product.validation";
+// import { productValidation } from "./product.validation";
 import fileUploadHandler from "../../middlewares/fileUploadHandler";
 import { getMultipleFilesPath, getSingleFilePath } from "../../../shared/getFilePath";
 
