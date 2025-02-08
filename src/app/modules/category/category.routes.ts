@@ -56,6 +56,13 @@ router.patch("/:id",
 );
 
 
+// get all categories
+
+router.get("/", categoryController.getAllCategories);
+// get single category
+
+router.get("/:id", categoryController.getSingleCategory);
+
 
 // export category routes
 export const CategoryRoutes = router;

@@ -25,9 +25,31 @@ const updateCategory = async (id: string, categoryData: ICategory) => {
 }
 
 
+// get all categories
+const getAllCategories = async () => {
+    const categories = await Category.find();
+    if (!categories) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "No categories found");
+    }
+    return categories;
+}
+
+
+// get single category
+
+const getSingleCategory = async (id: string) => {
+    const category = await Category.findById(id);
+    if (!category) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "Category not found");
+    }
+    return category;
+}
+
 
 // export categories
 export const categoryService = {
     createCategories,
     updateCategory,
+    getAllCategories,
+    getSingleCategory
 }

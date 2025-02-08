@@ -40,9 +40,40 @@ const updateCategory = catchAsync(async (req, res) => {
     })
 })
 
+// get all categories 
+
+const getAllCategories = catchAsync(async (req, res) => {
+    const result = await categoryService.getAllCategories();
+    sendResponse(res, {
+        Total: result?.length,
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'All categories retrieved successfully',
+        data: result,
+    });
+})
+
+// single category 
+
+const getSingleCategory = catchAsync(async (req, res) => {
+    const categoryId = req.params.id;
+    const result = await categoryService.getSingleCategory(categoryId);
+    if (!result) {
+        throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
+    }
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Single category retrieved successfully',
+        data: result,
+    })
+})
+
 
 // export category controller
 export const categoryController = {
     createCategory,
-    updateCategory
+    updateCategory,
+    getAllCategories,
+    getSingleCategory,
 }
