@@ -5,7 +5,7 @@
 //     description: z.string().min(1, "Description is required"),
 //     additionalInfo: z.string().optional(),
 //     productCategory: z.enum(["Anniversary", "Birthday", "Wedding", "FriendshipDay", "Graduation", "Other"]),
-//   size: z.enum(["S", "M", "L"]),
+//     size: z.enum(["S", "M", "L"]),
 //     color: z.string().min(1, "Color is required"),
 //     tag: z.array(z.string()), // Ensures 'tag' is an array of strings
 //     featureImage: z.string().url("Feature image must be a valid URL"),

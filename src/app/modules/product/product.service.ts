@@ -8,8 +8,8 @@ const createProductIntoDB = async (productData: IProduct) => {
     if (!product) {
         throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create product");
     }
-    console.log(product);
-    // return product;
+    // console.log(product);
+    return product;
 }
 
 

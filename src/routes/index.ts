@@ -4,6 +4,7 @@ import { UserRoutes } from '../app/modules/user/user.routes';
 import { EventRoutes } from '../app/modules/event/event.routes';
 import { wishlistRoutes } from '../app/modules/wishlist/wishlist.routes';
 import { productRoute } from '../app/modules/product/product.routes';
+import { CategoryRoutes } from '../app/modules/category/category.routes';
 const router = express.Router();
 
 const apiRoutes = [
@@ -26,6 +27,10 @@ const apiRoutes = [
   {
     path: "/product",
     route: productRoute
+  },
+  {
+    path: "/category",
+    route: CategoryRoutes
   }
 ];
 
