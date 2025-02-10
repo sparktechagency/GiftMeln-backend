@@ -8,11 +8,6 @@ import { CATEGORY } from '../../../enums/category';
 // create event into database
 const createEventIntoDB = async (eventData: EventModel) => {
     try {
-        const { category }: any = eventData;
-
-        if (!category || !Object.values(CATEGORY).includes(category)) {
-            throw new ApiError(StatusCodes.BAD_REQUEST, 'Category must be one of: Birthday, Anniversary, Wedding, Friendship Day, Graduation, or Others');
-        }
 
         const event = await Event.create(eventData);
         if (!event) {

@@ -27,7 +27,7 @@ const updateCategory = async (id: string, categoryData: ICategory) => {
 
 // get all categories
 const getAllCategories = async () => {
-    const categories = await Category.find();
+    const categories = await Category.find().populate("Category");
     if (!categories) {
         throw new ApiError(StatusCodes.NOT_FOUND, "No categories found");
     }

@@ -8,7 +8,7 @@ const createEventValidation = z.object({
     sales: z.enum(["inStock", "soldOut"], { required_error: "Sales status is required" }),
     eventDate: z.date({ required_error: "Event date is required" }),
     RecipientName: z.string({ required_error: "Recipient name is required" }),
-    category: z.enum(Object.values(CATEGORY) as [CATEGORY, ...CATEGORY[]], { required_error: "Category is required" }),
+    // category: z.enum(Object.values(CATEGORY) as [CATEGORY, ...CATEGORY[]], { required_error: "Category is required" }),
     giftPreferences: z.array(z.enum(Object.values(giftPreferences) as [giftPreferences, ...giftPreferences[]]), {
         required_error: "At least one gift preference must be selected",
     }),

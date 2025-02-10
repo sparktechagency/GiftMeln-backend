@@ -8,7 +8,11 @@ const ProductSchema = new Schema<IProduct>(
         productName: { type: String, required: true },
         description: { type: String, required: true },
         additionalInfo: { type: String, required: false },
-        productCategory: { type: String, enum: Object.values(CATEGORY), required: true },
+        productCategory: {
+            type: Schema.Types.ObjectId,
+            ref: 'Category',
+            // required: true
+        },
         size: { type: String, enum: ["S", "M", "L"], required: true },
         color: { type: String, required: true },
         tag: { type: [String], required: false },

@@ -11,8 +11,8 @@ const eventSchema = new Schema<IEvent, EventModel>({
   eventDate: { type: Date, required: true },
   RecipientName: { type: String, required: true },
   category: {
-    type: String,
-    enum: Object.values(CATEGORY),
+    type: Schema.Types.ObjectId,
+    ref: 'Category',
     required: true,
   },
   giftPreferences: {
