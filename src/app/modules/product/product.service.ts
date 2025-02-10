@@ -18,21 +18,14 @@ const createProductIntoDB = async (productData: IProduct) => {
 const getAllProducts = async (filters: any) => {
     try {
         const query: any = {};
-
-        console.log("Received Filters:", filters);
-
-        // ✅ Ensure categoryName filtering works properly
         if (filters?.categoryName) {
-            console.log("Applying categoryName filter:", filters.categoryName);
             query["productCategory.categoryName"] = { $regex: new RegExp(filters.categoryName, "i") };
         }
 
-        // ✅ Filter by availability (inStock or outOfStock)
         if (filters.availability) {
             query.availability = filters.availability;
         }
 
-        // ✅ Filter by price range
         if (filters.minPrice || filters.maxPrice) {
             query.regularPrice = {};
             if (filters.minPrice) {
@@ -44,7 +37,6 @@ const getAllProducts = async (filters: any) => {
         }
 
 
-        // ✅ Optimized MongoDB Query using $lookup (Best Performance)
         const products = await ProductModel.aggregate([
             {
                 $lookup: {
@@ -55,7 +47,7 @@ const getAllProducts = async (filters: any) => {
                 }
             },
             { $unwind: "$productCategory" },
-            { $match: query } // Match after populating
+            { $match: query }
         ]);
 
         if (!products || products.length === 0) {
