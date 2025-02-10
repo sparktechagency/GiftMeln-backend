@@ -16,8 +16,7 @@ const createProductIntoDB = async (productData: IProduct) => {
 
 // get all products
 const getAllProducts = async () => {
-    const products = await ProductModel.find().populate("Category");
-    console.log("products=======>", products);
+    const products = await ProductModel.find();
     if (!products) {
         throw new ApiError(StatusCodes.NOT_FOUND, "No products found");
     }
@@ -26,7 +25,7 @@ const getAllProducts = async () => {
 
 // get single product
 const getSingleProduct = async (id: string) => {
-    const product = await ProductModel.findById(id).populate("Category");
+    const product = await ProductModel.findById(id);
     if (!product) {
         throw new ApiError(StatusCodes.NOT_FOUND, "Product not found");
     }

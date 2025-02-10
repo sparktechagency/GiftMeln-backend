@@ -25,7 +25,7 @@ const createEventIntoDB = async (eventData: EventModel) => {
 // get all events from database
 const getAllEventsFromDB = async () => {
     try {
-        const events = await Event.find({});
+        const events = await Event.find({}).populate("category");
         if (!events) {
             throw new ApiError(StatusCodes.NOT_FOUND, "No events found");
         }
@@ -40,7 +40,7 @@ const getAllEventsFromDB = async () => {
 // get single event from database
 const getSingleEventFromDB = async (id: string) => {
     try {
-        const event = await Event.findById(id);
+        const event = await Event.findById(id).populate("category");
         if (!event) {
             throw new ApiError(StatusCodes.NOT_FOUND, "Event not found");
         }

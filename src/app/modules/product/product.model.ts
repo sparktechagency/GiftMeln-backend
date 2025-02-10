@@ -11,7 +11,7 @@ const ProductSchema = new Schema<IProduct>(
         productCategory: {
             type: Schema.Types.ObjectId,
             ref: 'Category',
-            // required: true
+            required: true,
         },
         size: { type: String, enum: ["S", "M", "L"], required: true },
         color: { type: String, required: true },
