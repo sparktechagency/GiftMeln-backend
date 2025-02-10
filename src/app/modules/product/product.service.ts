@@ -15,17 +15,49 @@ const createProductIntoDB = async (productData: IProduct) => {
 
 
 // get all products
-const getAllProducts = async () => {
-    const products = await ProductModel.find();
-    if (!products) {
+const getAllProducts = async (filters: any) => {
+    const query: any = {};
+
+    // Filter by category name
+    if (filters.categoryName) {
+        query['productCategory.categoryName'] = filters.categoryName;
+    }
+
+    // Filter by Price Range (if provided)
+    if (filters.minPrice || filters.maxPrice) {
+        query.regularPrice = {};
+        if (filters.minPrice) {
+            query.regularPrice.$gte = parseFloat(filters.minPrice);
+        }
+        if (filters.maxPrice) {
+            query.regularPrice.$lte = parseFloat(filters.maxPrice);
+        }
+    }
+
+    // Sales Status Filter (on-sale, out-of-stock)
+    if (filters.salesStatus === "on-sale") {
+        query.discountedPrice = { $lt: query.regularPrice };
+    } else if (filters.salesStatus === "out-of-stock") {
+        query.availability = 'outOfStock';
+    }
+
+    if (filters.availability) {
+        // Filter based on availability ('inStock' or 'outOfStock')
+        query.availability = filters.availability;
+    }
+
+    // Fetch filtered products from the database
+    const products = await ProductModel.find(query).populate("productCategory");
+    if (!products || products.length === 0) {
         throw new ApiError(StatusCodes.NOT_FOUND, "No products found");
     }
+
     return products;
-}
+};
 
 // get single product
 const getSingleProduct = async (id: string) => {
-    const product = await ProductModel.findById(id);
+    const product = await ProductModel.findById(id).populate("productCategory");
     if (!product) {
         throw new ApiError(StatusCodes.NOT_FOUND, "Product not found");
     }
