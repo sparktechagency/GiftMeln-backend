@@ -19,7 +19,6 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const { ...loginData } = req.body;
   const result = await AuthService.loginUserFromDB(loginData);
-  console.log(result);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,

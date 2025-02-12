@@ -24,7 +24,7 @@ router
   );
 
 router
-  .route('/')
+  .route('/register')
   .post(
     validateRequest(UserValidation.createUserZodSchema),
     UserController.createUser

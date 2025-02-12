@@ -23,4 +23,11 @@ export default {
     email: process.env.SUPER_ADMIN_EMAIL,
     password: process.env.SUPER_ADMIN_PASSWORD,
   },
+  // for stripe payment gateway
+  stripe: {
+    stripeSecretKey: process.env.STRIPE_API_SECRET,
+    webhookSecret: process.env.WEBHOOK_SECRET,
+    paymentSuccess: process.env.STRIPE_PAYMENT_SUCCESS_LINK
+  }
+
 };
