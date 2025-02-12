@@ -4,6 +4,7 @@ import { IProduct } from "./product.interface";
 import { ProductModel } from "./product.model";
 import mongoose from "mongoose";
 import { Category } from "../category/category.model";
+import { any } from "zod";
 
 const createProductIntoDB = async (productData: IProduct) => {
     const product = await ProductModel.create(productData);
@@ -24,31 +25,29 @@ const getAllProducts = async (filters: any) => {
         }
 
         if (filters?.categoryId) {
-            const category = await Category.findById(filters.categoryId);
-
-            if (!category) {
-                throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid category ID");
+            if (Array.isArray(filters.categoryId)) {
+                query["productCategory._id"] = { $in: filters.categoryId.map((id: string) => new mongoose.Types.ObjectId(id)) };
+            } else {
+                query["productCategory._id"] = new mongoose.Types.ObjectId(filters.categoryId);
             }
-
-            // Ensure productCategory is stored as ObjectId
-            query["productCategory._id"] = new mongoose.Types.ObjectId(filters.categoryId);
         }
 
         if (filters.availability) {
             query.availability = filters.availability;
         }
 
+        // Handle price range filter based on discountedPrice
         if (filters.minPrice || filters.maxPrice) {
-            query.regularPrice = {};
+            query.discountedPrice = {};  // Apply the filter on discountedPrice instead of regularPrice
             if (filters.minPrice) {
-                query.regularPrice.$gte = parseFloat(filters.minPrice);
+                query.discountedPrice.$gte = parseFloat(filters.minPrice);
             }
             if (filters.maxPrice) {
-                query.regularPrice.$lte = parseFloat(filters.maxPrice);
+                query.discountedPrice.$lte = parseFloat(filters.maxPrice);
             }
         }
 
-
+        // Run the query with the price filter and other filters
         const products = await ProductModel.aggregate([
             {
                 $lookup: {
@@ -62,17 +61,20 @@ const getAllProducts = async (filters: any) => {
             { $match: query },
         ]);
 
-
+        // If no products found (including price not matching), return empty array
         if (!products || products.length === 0) {
-            throw new ApiError(StatusCodes.NOT_FOUND, "No products found");
+            return [];
         }
 
         return products;
     } catch (error) {
         console.error("Error occurred:", error);
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error from Filtering products");
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "No product found");
     }
 };
+
+
+
 
 // const getAllProducts = async (filters: any) => {
 //     try {
