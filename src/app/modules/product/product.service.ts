@@ -2,6 +2,8 @@ import { StatusCodes } from "http-status-codes";
 import ApiError from "../../../errors/ApiError";
 import { IProduct } from "./product.interface";
 import { ProductModel } from "./product.model";
+import mongoose from "mongoose";
+import { Category } from "../category/category.model";
 
 const createProductIntoDB = async (productData: IProduct) => {
     const product = await ProductModel.create(productData);
@@ -12,14 +14,26 @@ const createProductIntoDB = async (productData: IProduct) => {
     return product;
 }
 
-
-
 // get all products
+
 const getAllProducts = async (filters: any) => {
     try {
         const query: any = {};
+
         if (filters?.categoryName) {
             query["productCategory.categoryName"] = { $regex: new RegExp(filters.categoryName, "i") };
+        }
+
+        if (filters?.categoryId) {
+            const category = await Category.findById(filters.categoryId);
+            console.log("Category Found:", category);
+
+            if (!category) {
+                throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid category ID");
+            }
+
+            // Ensure productCategory is stored as ObjectId
+            query["productCategory._id"] = new mongoose.Types.ObjectId(filters.categoryId);
         }
 
         if (filters.availability) {
@@ -46,9 +60,10 @@ const getAllProducts = async (filters: any) => {
                     as: "productCategory"
                 }
             },
-            { $unwind: "$productCategory" },
-            { $match: query }
+            { $unwind: "$productCategory" }, // Convert array to object
+            { $match: query }, // Apply filters
         ]);
+
 
         if (!products || products.length === 0) {
             throw new ApiError(StatusCodes.NOT_FOUND, "No products found");
@@ -56,9 +71,11 @@ const getAllProducts = async (filters: any) => {
 
         return products;
     } catch (error) {
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "No Products found");
+        console.error("Error occurred:", error);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error from Filtering products");
     }
 };
+
 
 
 // get single product
