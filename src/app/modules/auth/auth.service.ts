@@ -18,46 +18,81 @@ import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
 
 //login
+// const loginUserFromDB = async (payload: ILoginData) => {
+//   const { email, password } = payload;
+//   const isExistUser = await User.findOne({ email }).select('+password');
+//   if (!isExistUser) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+//   }
+
+//   //check verified and status
+//   // if (!isExistUser.verified) {
+//   //   throw new ApiError(
+//   //     StatusCodes.BAD_REQUEST,
+//   //     'Please verify your account, then try to login again'
+//   //   );
+//   // }
+
+//   //check user status
+//   if (isExistUser.status === 'delete') {
+//     throw new ApiError(
+//       StatusCodes.BAD_REQUEST,
+//       'You don’t have permission to access this content.It looks like your account has been deactivated.'
+//     );
+//   }
+
+//   //check match password
+//   if (
+//     password &&
+//     !(await User.isMatchPassword(password, isExistUser.password))
+//   ) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect!');
+//   }
+
+//   //create token
+//   const createToken = jwtHelper.createToken(
+//     { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
+//     config.jwt.jwt_secret as Secret,
+//     config.jwt.jwt_expire_in as string
+//   );
+
+//   return { createToken };
+// };
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
+
+  // Find the user and include password for verification
   const isExistUser = await User.findOne({ email }).select('+password');
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
 
-  //check verified and status
-  // if (!isExistUser.verified) {
-  //   throw new ApiError(
-  //     StatusCodes.BAD_REQUEST,
-  //     'Please verify your account, then try to login again'
-  //   );
-  // }
-
-  //check user status
+  // Check if the account is active
   if (isExistUser.status === 'delete') {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'You don’t have permission to access this content.It looks like your account has been deactivated.'
+      'Your account has been deactivated.'
     );
   }
 
-  //check match password
-  if (
-    password &&
-    !(await User.isMatchPassword(password, isExistUser.password))
-  ) {
+  // Match password
+  if (!(await User.isMatchPassword(password, isExistUser.password))) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect!');
   }
 
-  //create token
+  // Create token
   const createToken = jwtHelper.createToken(
     { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
     config.jwt.jwt_secret as Secret,
     config.jwt.jwt_expire_in as string
   );
 
-  return { createToken };
+  // Exclude password before returning user data
+  const { password: _, ...userData } = isExistUser.toObject();
+
+  return { user: userData, token: createToken };
 };
+
 
 //forget password
 const forgetPasswordToDB = async (email: string) => {
