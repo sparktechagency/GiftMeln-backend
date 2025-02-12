@@ -10,7 +10,6 @@ const createProductIntoDB = async (productData: IProduct) => {
     if (!product) {
         throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create product");
     }
-    // console.log(product);
     return product;
 }
 
@@ -26,7 +25,6 @@ const getAllProducts = async (filters: any) => {
 
         if (filters?.categoryId) {
             const category = await Category.findById(filters.categoryId);
-            console.log("Category Found:", category);
 
             if (!category) {
                 throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid category ID");
