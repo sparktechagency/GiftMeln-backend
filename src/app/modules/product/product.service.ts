@@ -58,8 +58,8 @@ const getAllProducts = async (filters: any) => {
                     as: "productCategory"
                 }
             },
-            { $unwind: "$productCategory" }, // Convert array to object
-            { $match: query }, // Apply filters
+            { $unwind: "$productCategory" },
+            { $match: query },
         ]);
 
 
@@ -73,6 +73,93 @@ const getAllProducts = async (filters: any) => {
         throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error from Filtering products");
     }
 };
+
+// const getAllProducts = async (filters: any) => {
+//     try {
+//         const query: any = {};
+
+//         if (filters?.categoryName) {
+//             query["productCategory.categoryName"] = { $regex: new RegExp(filters.categoryName, "i") };
+//         }
+
+//         if (filters?.categoryId) {
+//             const category = await Category.findById(filters.categoryId);
+//             if (!category) {
+//                 throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid category ID");
+//             }
+//             query["productCategory._id"] = new mongoose.Types.ObjectId(filters.categoryId);
+//         }
+
+//         if (filters.availability) {
+//             query.availability = filters.availability;
+//         }
+
+//         if (filters.minPrice || filters.maxPrice) {
+//             query.regularPrice = {};
+//             if (filters.minPrice) query.regularPrice.$gte = parseFloat(filters.minPrice);
+//             if (filters.maxPrice) query.regularPrice.$lte = parseFloat(filters.maxPrice);
+//         }
+
+//         const products = await ProductModel.aggregate([
+//             {
+//                 $lookup: {
+//                     from: "categories",
+//                     localField: "productCategory",
+//                     foreignField: "_id",
+//                     as: "productCategory",
+//                 },
+//             },
+//             { $unwind: "$productCategory" },
+//             { $match: query },
+//             {
+//                 $addFields: {
+//                     categoryId: "$productCategory._id",
+//                 },
+//             },
+//         ]);
+
+//         if (!products || products.length === 0) {
+//             throw new ApiError(StatusCodes.NOT_FOUND, "No products found");
+//         }
+
+//         // Fetch total product count for each category
+//         const categoryCounts = await ProductModel.aggregate([
+//             {
+//                 $group: {
+//                     _id: "$productCategory",
+//                     totalProducts: { $sum: 1 },
+//                 },
+//             },
+//         ]);
+
+//         // Map category count to products
+//         const productsWithCounts = products.map((product) => {
+//             const categoryCount = categoryCounts.find(
+//                 (c) => String(c._id) === String(product.categoryId)
+//             );
+
+//             return {
+//                 ...product,
+//                 productCategory: {
+//                     ...product.productCategory,
+//                     totalProduct: categoryCount ? categoryCount.totalProducts : 0,
+//                 },
+//             };
+//         });
+
+//         return {
+//             success: true,
+//             message: "All products retrieved successfully",
+//             data: productsWithCounts,
+//         };
+//     } catch (error) {
+//         console.error("Error occurred:", error);
+//         throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error from filtering products");
+//     }
+// };
+
+
+
 
 
 

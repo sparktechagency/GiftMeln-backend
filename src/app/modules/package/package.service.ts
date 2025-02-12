@@ -4,11 +4,6 @@ import { IPackage } from './package.interface';
 import { Package } from './package.model';
 import { createSubscriptionProductHelper } from '../../../helpers/createSubscriptionProductHelper';
 
-
-
-
-
-
 const createPackageIntoDB = async (payload: IPackage) => {
 
     const productPayload = {

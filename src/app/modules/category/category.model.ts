@@ -4,7 +4,7 @@ import { ICategory } from "./category.interface";
 const ProductSchema = new Schema<ICategory>(
     {
         categoryName: { type: String, required: true },
-        image: { type: String, required: true }
+        image: { type: String, required: true },
     },
     { timestamps: true }
 );

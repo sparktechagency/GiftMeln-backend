@@ -1,6 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-import { IPackage } from "../app/modules/package/package.interface";
-import config from "../config";
 import ApiError from "../errors/ApiError";
 import { stripe } from "../config/stripe";
 
@@ -68,7 +66,7 @@ export const createSubscriptionProductHelper = async (payload: {
             throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create payment link in Stripe");
         }
     }
-    // console.log(" This is my payment link=====>", paymentLink);
+    console.log(" This is my payment link=====>", paymentLink);
     return {
         productId: product.id,
         paymentLink: paymentLink

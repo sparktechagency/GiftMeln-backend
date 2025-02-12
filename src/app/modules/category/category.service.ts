@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import ApiError from "../../../errors/ApiError";
 import { ICategory } from "./category.interface";
 import { Category } from "./category.model";
+import { ProductModel } from "../product/product.model";
 
 // create categories
 const createCategories = async (categoryData: ICategory) => {
@@ -27,12 +28,46 @@ const updateCategory = async (id: string, categoryData: ICategory) => {
 
 // get all categories
 const getAllCategories = async () => {
-    const categories = await Category.find();
-    if (!categories) {
-        throw new ApiError(StatusCodes.NOT_FOUND, "No categories found");
+    try {
+        const categories = await Category.find();
+
+        if (!categories || categories.length === 0) {
+            throw new ApiError(StatusCodes.NOT_FOUND, "No categories found");
+        }
+
+        // Fetch total product count for each category
+        const categoryCounts = await ProductModel.aggregate([
+            {
+                $group: {
+                    _id: "$productCategory",
+                    totalProducts: { $sum: 1 },
+                },
+            },
+        ]);
+
+        // Map product counts to categories
+        const categoriesWithCounts = categories?.map((category) => {
+            const categoryCount = categoryCounts.find(
+                (c) => String(c._id) === String(category._id)
+            );
+
+            return {
+                ...category.toObject(),
+                totalProducts: categoryCount ? categoryCount.totalProducts : 0,
+            };
+        });
+
+        return {
+            success: true,
+            message: "All categories retrieved successfully",
+            data: categoriesWithCounts,
+        };
+    } catch (error) {
+        console.error("Error occurred:", error);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error fetching categories");
     }
-    return categories;
-}
+};
+
 
 
 // get single category
