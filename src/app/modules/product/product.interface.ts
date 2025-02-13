@@ -5,6 +5,9 @@ export enum productSize {
     small = 'S',
     medium = 'M',
     large = 'L',
+    extraLarge = 'XL',
+    twoXL = '2XL',
+    threeXL = '3XL',
 }
 
 export type IProduct = {
