@@ -3,41 +3,58 @@ import { IPackage } from './package.interface';
 
 const packageSchema = new Schema<IPackage>(
   {
-
     name: {
       type: String,
-      required: [true, "Name is required"],
-    },
-    price: {
-      type: Number,
-      required: [true, "Price is required"],
+      required: [true, "Package name is required"],
+      trim: true,
     },
     description: {
       type: String,
       required: [true, "Description is required"],
+      trim: true,
+    },
+    price: {
+      type: Number,
+      required: function () {
+        return this.paymentType !== 'Free'; // Price required unless it's a free package
+      },
+      min: [0, "Price cannot be negative"],
     },
     duration: {
       type: String,
       required: [true, "Duration is required"],
-      enum: ["1 month", "3 months", "6 months", "1 year"],
-    },
-    features: {
-      type: [String],
-      required: [true, "Features is required"],
+      enum: ["7 days", "1 month", "1 year"],
     },
     paymentType: {
       type: String,
       required: [true, "Payment type is required"],
-      enum: ["Monthly", "Yearly"],
+      enum: ["Free", "Monthly", "Yearly"],
+    },
+    hasTrial: {
+      type: Boolean,
+      default: true, // Default: have trial by default
+    },
+    features: {
+      type: [String],
+      default: [],
+    },
+    category: {
+      type: String,
+      required: [true, "Category is required"],
+      enum: ["Free Trial", "Budget Friendly", "Premium Plan", "Spoiling Myself"],
     },
     productId: {
       type: String,
+      default: null,
     },
     paymentLink: {
       type: String,
+      default: null,
     },
   },
   { timestamps: true }
 );
 
 export const Package = model<IPackage>('package', packageSchema);
+
+

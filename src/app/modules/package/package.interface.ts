@@ -7,4 +7,6 @@ export interface IPackage {
   productId?: string;
   features?: string[];
   paymentLink?: string;
+  hasTrial?: boolean;
+  category: 'Free Trial' | 'Budget Friendly' | 'Premium Plan' | 'Spoiling Myself';
 }

@@ -1,6 +1,5 @@
 import { model, Schema } from "mongoose";
-import { IProduct } from "./product.interface";
-import { CATEGORY } from "../../../enums/category";
+import { IProduct, productSize } from "./product.interface";
 import { AVAILABILITY } from "../../../enums/availability";
 
 const ProductSchema = new Schema<IProduct>(
@@ -13,8 +12,8 @@ const ProductSchema = new Schema<IProduct>(
             ref: 'Category',
             required: true,
         },
-        size: { type: String, enum: ["S", "M", "L"], required: true },
-        color: { type: String, required: true },
+        size: { type: [String], enum: Object.values(productSize), required: true },
+        color: { type: [String], required: true },
         tag: { type: [String], required: false },
         featureImage: { type: String, required: true },
         additionalImages: { type: [String], required: false },
