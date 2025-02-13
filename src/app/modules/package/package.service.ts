@@ -12,7 +12,7 @@ const createPackageIntoDB = async (payload: IPackage) => {
         name: payload.name,
         description: payload.description,
         duration: payload.duration,
-        price: payload.price,
+        price: payload.price ?? 0,
     });
 
     if (!product) {

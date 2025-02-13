@@ -3,8 +3,6 @@ import ApiError from "../../../errors/ApiError";
 import { IProduct } from "./product.interface";
 import { ProductModel } from "./product.model";
 import mongoose from "mongoose";
-import { Category } from "../category/category.model";
-import { any } from "zod";
 
 const createProductIntoDB = async (productData: IProduct) => {
     const product = await ProductModel.create(productData);

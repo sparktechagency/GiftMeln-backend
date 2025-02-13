@@ -6,6 +6,7 @@ import { wishlistRoutes } from '../app/modules/wishlist/wishlist.routes';
 import { productRoute } from '../app/modules/product/product.routes';
 import { CategoryRoutes } from '../app/modules/category/category.routes';
 import { PackageRoutes } from '../app/modules/package/package.routes';
+import { PaymentRoutes } from '../app/modules/payment/payment.routes';
 const router = express.Router();
 
 const apiRoutes = [
@@ -36,6 +37,10 @@ const apiRoutes = [
   {
     path: "/package",
     route: PackageRoutes
+  },
+  {
+    path: "/payment",
+    route: PaymentRoutes
   }
 ];
 
