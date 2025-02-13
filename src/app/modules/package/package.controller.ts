@@ -17,7 +17,7 @@ const createPackage = catchAsync(
             success: true,
             statusCode: StatusCodes.OK,
             message: 'Package Create successfully.',
-            // data: result,
+            data: result,
         });
     }
 );

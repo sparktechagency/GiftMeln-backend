@@ -2,73 +2,54 @@ import { StatusCodes } from "http-status-codes";
 import ApiError from "../errors/ApiError";
 import { stripe } from "../config/stripe";
 
-export const createSubscriptionProductHelper = async (payload: {
+export const createSubscriptionProductHelper = async ({
+    name,
+    description,
+    price,
+    duration,
+}: {
     name: string;
     description: string;
-    duration: "7 days" | "1 month" | "1 year";
-    price?: number;
+    price: number;
+    duration: string;
 }) => {
-    // create product in stripe
-    const product = await stripe.products.create({
-        name: payload.name as string,
-        description: payload.description as string,
-    })
-    let interval: "day" | "month" | "year";
-    let intervalCount = 1;
+    try {
+        // Step 1: Create a product in Stripe
+        const product = await stripe.products.create({
+            name,
+            description,
+        });
 
-    switch (payload.duration) {
-        case "7 days":
-            interval = "day";
-            intervalCount = 7;
-            break;
-        case "1 month":
-            interval = "month";
-            intervalCount = 1;
-            break;
-        case "1 year":
-            interval = "year";
-            intervalCount = 1;
-            break;
-        default:
-            throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid duration");
-    }
-
-    // Create price (except for free trial)
-    let price = null;
-    let paymentLink = null;
-    if (payload.duration !== "7 days") {
-        price = await stripe.prices.create({
-            product: product.id,
-            unit_amount: (payload.price ?? 0) * 100, // Convert to cents
+        // Step 2: Create a price (this will be associated with the product)
+        const priceObject = await stripe.prices.create({
+            unit_amount: price * 100,  // Stripe expects amount in cents
             currency: "usd",
+            product: product.id,
             recurring: {
-                interval,
-                interval_count: intervalCount,
+                interval: duration === "7 days" ? "week" : "month",  // You can set this based on duration
             },
         });
 
-        if (!price) {
-            throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create price in stripe")
-        }
-
-        paymentLink = await stripe.paymentLinks.create({
-            line_items: [{ price: price.id, quantity: 1 }],
-            after_completion: {
-                type: "redirect",
-                redirect: {
-                    url: `${process.env.STRIPE_PAYMENT_SUCCESS_URL}`,
+        // Step 3: Create a payment link for this product
+        const paymentLink = await stripe.paymentLinks.create({
+            line_items: [
+                {
+                    price: priceObject.id,
+                    quantity: 1,
                 },
+            ],
+            after_completion: {
+                type: 'redirect',
+                redirect: { url: 'http://localhost:3000/payment/success' },
             },
-            metadata: { productId: product.id },
         });
 
-        if (!paymentLink) {
-            throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create payment link in Stripe");
-        }
+        return {
+            productId: product.id,
+            paymentLink: paymentLink.url,  // Provide the payment link URL
+        };
+    } catch (error: any) {
+        console.error("Error creating subscription product in Stripe:", error.message);
+        throw new ApiError(StatusCodes.BAD_REQUEST, `Failed to create subscription product in Stripe: ${error.message}`);
     }
-    console.log(" This is my payment link=====>", paymentLink);
-    return {
-        productId: product.id,
-        paymentLink: paymentLink
-    }
-}
+};

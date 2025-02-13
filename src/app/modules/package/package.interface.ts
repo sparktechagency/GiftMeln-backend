@@ -1,7 +1,7 @@
 export interface IPackage {
   name: string;
   description: string;
-  price?: number;
+  price?: number | undefined;
   duration: '7 days' | '1 month' | '1 year';
   paymentType: 'Free' | 'Monthly' | 'Yearly';
   trialEndsAt: Date
