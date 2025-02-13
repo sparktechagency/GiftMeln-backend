@@ -30,6 +30,9 @@ const packageSchema = new Schema<IPackage>(
       required: [true, "Payment type is required"],
       enum: ["Free", "Monthly", "Yearly"],
     },
+    trialEndsAt: {
+      type: Date, // Expiry Date for Trial
+    },
     hasTrial: {
       type: Boolean,
       default: true, // Default: have trial by default

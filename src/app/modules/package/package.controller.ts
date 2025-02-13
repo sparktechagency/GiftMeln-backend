@@ -12,20 +12,34 @@ const createPackage = catchAsync(
     async (req: Request, res: Response) => {
         const { ...productData } = req.body;
         const result = await PackageServices.createPackageIntoDB(productData);
+        console.log("My package result=???", result);
         sendResponse(res, {
             success: true,
             statusCode: StatusCodes.OK,
             message: 'Package Create successfully.',
-            data: result,
+            // data: result,
         });
     }
 );
 
 
-
+/*
+*checkUserTrial 
+*/
+const checkUserTrial = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.user.id;
+    const result = await PackageServices.checkTrialStatus(userId);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Trial status checked successfully.',
+        data: result,
+    });
+})
 
 
 
 export const PackageController = {
-    createPackage
+    createPackage,
+    checkUserTrial
 };

@@ -4,6 +4,7 @@ export interface IPackage {
   price?: number;
   duration: '7 days' | '1 month' | '1 year';
   paymentType: 'Free' | 'Monthly' | 'Yearly';
+  trialEndsAt: Date
   productId?: string;
   features: string[];
   paymentLink?: string;

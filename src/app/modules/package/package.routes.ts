@@ -3,6 +3,8 @@ import { PackageController } from './package.controller';
 
 const router = express.Router();
 
-router.post('/package', PackageController.createPackage);
+router.post('/create', PackageController.createPackage);
+router.get('/check-trial', PackageController.checkUserTrial);
+
 
 export const PackageRoutes = router;
