@@ -36,7 +36,7 @@ const getSingleProduct = catchAsync(async (req, res) => {
     const productId = req.params.id;
     const result = await productService.getSingleProduct(productId);
     if (!result) {
-        throw new ApiError(StatusCodes.NOT_FOUND, "Product not found");
+        throw new ApiError(StatusCodes.NOT_FOUND, "Product not found")
     }
     sendResponse(res, {
         success: true,
@@ -44,7 +44,8 @@ const getSingleProduct = catchAsync(async (req, res) => {
         message: "Single product retrieved successfully",
         data: result,
     });
-})
+});
+
 
 
 // update product
