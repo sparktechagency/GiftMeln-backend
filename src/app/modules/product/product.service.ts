@@ -84,7 +84,6 @@ const getSingleProduct = async (id: string) => {
         "_id": { $ne: id },
     }).limit(4);
 
-    console.log(relatedProducts?.length, relatedProducts);
     return { product, relatedProducts };
 }
 
