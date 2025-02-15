@@ -33,5 +33,4 @@ const getAllCart = async (userId: string) => {
 export const CartServices = {
     createCartServiceIntoDB,
     getAllCart,
-    // getSingleCart
 };
