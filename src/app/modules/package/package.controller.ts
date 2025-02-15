@@ -3,6 +3,7 @@ import catchAsync from '../../../shared/catchAsync';
 import { PackageServices } from './package.service';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
+import { createOneTimeProductHelper } from '../../../helpers/createOneTimeProductHelper';
 
 
 
@@ -38,8 +39,26 @@ const checkUserTrial = catchAsync(async (req: Request, res: Response) => {
 })
 
 
+// single product purchase request
+const createOneTimePackage = catchAsync(
+    async (req: Request, res: Response) => {
+        const { name, description, price } = req.body;
+
+        // Call helper function
+        const result = await createOneTimeProductHelper({ name, description, price });
+
+        sendResponse(res, {
+            success: true,
+            statusCode: StatusCodes.OK,
+            message: 'One-time purchase product created successfully.',
+            data: result,
+        });
+    }
+);
+
 
 export const PackageController = {
     createPackage,
-    checkUserTrial
+    checkUserTrial,
+    createOneTimePackage
 };

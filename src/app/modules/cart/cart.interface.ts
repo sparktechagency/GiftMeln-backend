@@ -8,7 +8,7 @@ export type ICart = {
     color: string;
     size: string;
     quantity: number;
-  }[];
+  };
 };
 
 export type CartModel = Model<ICart>;

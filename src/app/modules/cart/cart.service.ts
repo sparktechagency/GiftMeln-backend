@@ -28,9 +28,28 @@ const getAllCart = async (userId: string) => {
 };
 
 
+// update quantity 
+const updateCartQuantity = async (userId: string, quantity: number) => {
+    const cart = await Cart.findOneAndUpdate(
+        { user: userId },
+        { $set: { "variations.quantity": quantity } },
+        { new: true }
+    );
+
+    if (!cart) {
+        throw new ApiError(StatusCodes.NOT_FOUND, 'No cart found for this user');
+    }
+
+    return cart;
+};
+
+
+
+
 
 
 export const CartServices = {
     createCartServiceIntoDB,
     getAllCart,
+    updateCartQuantity
 };

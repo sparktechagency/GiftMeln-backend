@@ -48,10 +48,37 @@ const getAllCartItems = catchAsync(async (req: Request, res: Response, next: Nex
 });
 
 
+// update cart items quantity
+const updateCartItemsQuantity = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user.id; // User ID from auth middleware
+    const { quantity } = req.body;
+
+    // Validate request body
+    if (quantity === undefined) {
+        return sendResponse(res, {
+            success: false,
+            statusCode: StatusCodes.BAD_REQUEST,
+            message: 'Quantity is required',
+            data: {},
+        });
+    }
+    console.log("Quantity updated ======>>>>", quantity);
+    // Call service function to update the cart
+    const result = await CartServices.updateCartQuantity(userId, quantity);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Cart quantity updated successfully',
+        data: result,
+    });
+});
+
 
 
 
 export const CartController = {
     createCart,
     getAllCartItems,
+    updateCartItemsQuantity
 };

@@ -4,9 +4,10 @@ import { stripe } from "../../config/stripe";
 import ApiError from "../../errors/ApiError";
 import { StatusCodes } from "http-status-codes";
 import { handleSubscriptionCreated } from "../../helpers/handleSubscriptionCreated";
+import { handleOneTimePayment } from "../../helpers/handleOneTimePayment";
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
-    let event: Stripe.Event | undefined;
+    let event: Stripe.Event;
     try {
         event = stripe.webhooks.constructEvent(
             req.body,
@@ -35,6 +36,11 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
                 await handleSubscriptionCreated(event.data.object as Stripe.Subscription);
                 console.log("Webhook connected");
                 break;
+            case "checkout.session.completed":
+                const session = event.data.object as Stripe.Checkout.Session;
+                await handleOneTimePayment(session);
+                break;
+
             default:
                 console.log(`Unhandled event type ${eventType}`);
         }
