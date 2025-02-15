@@ -5,7 +5,7 @@ import { Cart } from './cart.model';
 
 // create cart service 
 const createCartServiceIntoDB = async (payload: ICart) => {
-    const cart = await Cart.create(payload)
+    const cart = await Cart.create(payload);
     if (!cart) {
         throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cart');
     }
@@ -15,26 +15,23 @@ const createCartServiceIntoDB = async (payload: ICart) => {
 
 
 // get all cart with product details
-const getAllCart = async () => { // Remove payload, it's not needed
-    const cart = await Cart.find().populate('product').populate('user');
+const getAllCart = async (userId: string) => {
+    const cart = await Cart.find({ user: userId })
+        .populate('variations.product')
+        .populate('user');
+
     if (!cart.length) {
-        throw new ApiError(StatusCodes.NOT_FOUND, 'No carts found');
+        throw new ApiError(StatusCodes.NOT_FOUND, 'No cart found for this user');
     }
+
     return cart;
 };
 
-// get single cart
-const getSingleCart = async (id: string) => {
-    const cart = await Cart.findById(id).populate('product').populate('user');
-    if (!cart) {
-        throw new ApiError(StatusCodes.NOT_FOUND, 'Cart not found');
-    }
-    return cart;
-};
+
 
 
 export const CartServices = {
     createCartServiceIntoDB,
     getAllCart,
-    getSingleCart
+    // getSingleCart
 };

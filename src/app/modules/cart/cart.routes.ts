@@ -1,10 +1,11 @@
 import express from 'express';
 import { CartController } from './cart.controller';
+import auth from '../../middlewares/auth';
+import { USER_ROLES } from '../../../enums/user';
 
 const router = express.Router();
 
 router.post('/create', CartController.createCart);
-router.get('/', CartController.getAllCartItems);
-router.get('/:id', CartController.getSingleCart);
+router.get('/', auth(USER_ROLES.USER), CartController.getAllCartItems);
 
 export const CartRoutes = router;

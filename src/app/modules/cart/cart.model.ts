@@ -8,11 +8,29 @@ const CartSchema = new Schema<ICart>(
       ref: "User",
       required: true,
     },
-    product: {
-      type: Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
+
+    variations: [
+      {
+        color: {
+          type: String,
+          required: true,
+        },
+        size: {
+          type: String,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        product: {
+          type: [Schema.Types.ObjectId],
+          ref: 'Product',
+          required: true,
+        },
+      },
+    ]
   },
   { timestamps: true }
 );

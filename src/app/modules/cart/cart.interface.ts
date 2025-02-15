@@ -3,7 +3,12 @@ import { Model, Types } from 'mongoose';
 export type ICart = {
   // Define the interface for Cart here
   user: Types.ObjectId | undefined
-  product: Types.ObjectId | undefined
+  variations: {
+    product: Types.ObjectId | Types.ObjectId[] | undefined;
+    color: string;
+    size: string;
+    quantity: number;
+  }[];
 };
 
 export type CartModel = Model<ICart>;

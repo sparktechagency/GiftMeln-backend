@@ -7,18 +7,20 @@ import { StatusCodes } from 'http-status-codes';
 
 //create cart constructor
 const createCart = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { user, product } = req.body;
+    const { user, variations } = req.body;
 
-    if (!user || !product) {
+    // Ensure that the user and variations are provided in the request body
+    if (!user || !variations || variations.length === 0) {
         return sendResponse(res, {
             success: false,
             statusCode: StatusCodes.BAD_REQUEST,
-            message: 'User and Product are required',
+            message: 'User and at least one product variation are required',
             data: {},
         });
     }
 
-    const result = await CartServices.createCartServiceIntoDB({ user, product });
+    // Call service to create cart
+    const result = await CartServices.createCartServiceIntoDB({ user, variations });
 
     sendResponse(res, {
         success: true,
@@ -29,35 +31,28 @@ const createCart = catchAsync(async (req: Request, res: Response, next: NextFunc
 });
 
 
+
 // get all cart items
 const getAllCartItems = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await CartServices.getAllCart();
+    const userId = req.user.id; // Logged-in user's ID
+
+    const result = await CartServices.getAllCart(userId); // Pass userId
 
     sendResponse(res, {
         success: true,
+        Total: result.length,
         statusCode: StatusCodes.OK,
-        message: 'Cart items retrieved successfully',
+        message: 'User cart items retrieved successfully',
         data: result,
     });
 });
 
-// get single cart
-const getSingleCart = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const cartId = req.params.id;
 
-    const result = await CartServices.getSingleCart(cartId);
 
-    sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: 'Single cart retrieved successfully',
-        data: result,
-    });
-});
 
 
 export const CartController = {
     createCart,
     getAllCartItems,
-    getSingleCart
+    // getSingleCart
 };
