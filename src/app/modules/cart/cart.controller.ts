@@ -3,6 +3,7 @@ import { CartServices } from './cart.service';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
+import ApiError from '../../../errors/ApiError';
 
 
 //create cart constructor
@@ -49,36 +50,57 @@ const getAllCartItems = catchAsync(async (req: Request, res: Response, next: Nex
 
 
 // update cart items quantity
-const updateCartItemsQuantity = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user.id; // User ID from auth middleware
-    const { quantity } = req.body;
+const updateCartQuantity = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { cartItemId, quantity } = req.body;
+    const userId = req.user.id;
 
-    // Validate request body
-    if (quantity === undefined) {
-        return sendResponse(res, {
-            success: false,
-            statusCode: StatusCodes.BAD_REQUEST,
-            message: 'Quantity is required',
-            data: {},
-        });
-    }
-    console.log("Quantity updated ======>>>>", quantity);
-    // Call service function to update the cart
-    const result = await CartServices.updateCartQuantity(userId, quantity);
+    const updatedCart = await CartServices.updateQuantity(userId, cartItemId, quantity);
 
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
-        message: 'Cart quantity updated successfully',
-        data: result,
+        message: 'Cart item quantity updated successfully',
+        data: updatedCart,
     });
 });
 
 
+// delete cart items
+const deleteCartItemController = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.id;
+    const { cartItemId } = req.params;
 
+    if (!cartItemId) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Cart item ID is required');
+    }
+
+    const result = await CartServices.deleteCartItem(userId, cartItemId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Cart item deleted successfully',
+        data: result,
+    });
+});
+const clearCartAfterPayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user.id;
+
+    // Call the service to clear the cart
+    const result = await CartServices.clearCart(userId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Cart cleared successfully after payment',
+        data: result,
+    });
+});
 
 export const CartController = {
     createCart,
     getAllCartItems,
-    updateCartItemsQuantity
+    updateCartQuantity,
+    deleteCartItemController,
+    clearCartAfterPayment
 };

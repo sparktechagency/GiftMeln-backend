@@ -10,7 +10,6 @@ const app = express();
 //morgan
 app.use(Morgan.successHandler);
 app.use(Morgan.errorHandler);
-
 // stripe webhook routes
 app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook)
 

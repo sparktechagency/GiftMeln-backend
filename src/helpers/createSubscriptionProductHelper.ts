@@ -7,11 +7,23 @@ export const createSubscriptionProductHelper = async ({
     description,
     price,
     duration,
+    email,
+    country,
+    city,
+    streetAddress,
+    postCode,
+    orderMessage,
 }: {
     name: string;
     description: string;
     price: number;
     duration: string;
+    email: string;
+    country: string;
+    city: string;
+    streetAddress: string;
+    postCode: string;
+    orderMessage: string;
 }) => {
     try {
         // Step 1: Create a product in Stripe
@@ -38,11 +50,22 @@ export const createSubscriptionProductHelper = async ({
                     quantity: 1,
                 },
             ],
-            after_completion: {
-                type: 'redirect',
-                redirect: { url: 'http://localhost:3000/payment/success' },
+            metadata: {
+                userName: name,
+                userEmail: email,
+                country: country,
+                city: city,
+                streetAddress: streetAddress,
+                postCode: postCode,
+                orderMessage: orderMessage,
+
             },
+            after_completion: {
+                type: "redirect",
+                redirect: { url: 'http://localhost:3000/payment/success' }
+            }
         });
+
 
         return {
             productId: product.id,

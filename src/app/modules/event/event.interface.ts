@@ -5,9 +5,9 @@ import { giftPreferences } from '../../../enums/giftPreferences';
 export type IEvent = {
   eventName: string;
   price: number;
-  sales: "inStock" | "soldOut";
+  // sales: "inStock" | "soldOut";
   eventDate: Date;
-  RecipientName: string
+  RecipientName: Types.ObjectId
   category: Types.ObjectId,
   giftPreferences: giftPreferences[]
 };

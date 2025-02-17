@@ -1,57 +1,78 @@
-import mongoose, { Schema, Types } from "mongoose";
-import { IPayment, PaymentModel } from "./payment.interface";
+import { model, Schema } from "mongoose";
+import { productSize } from "../product/product.interface";
 
+const orderDetailsSchema = new Schema({
+  userName: String,
+  userEmail: String,
+  country: String,
+  city: String,
+  streetAddress: String,
+  postCode: String,
+  orderMessage: String
+});
 
-
-const paymentSchema = new Schema<IPayment>(
-  {
-    customerId: {
-      type: String,
-      required: true
-    },
-    price: {
-      type: Number,
-      required: true
-    },
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true
-    },
-    package: {
-      type: Schema.Types.ObjectId,
-      ref: "package",
-      required: true
-    },
-    trxId: {
-      type: String,
-      required: true
-    },
-    subscriptionId: {
-      type: String,
-      required: true
-    },
-    currentPeriodStart: {
-      type: String,
-      required: true
-    },
-    currentPeriodEnd: {
-      type: String,
-      required: true
-    },
-    // remaining: {
-    //   type: Number,
-    //   required: true
-    // },
-    status: {
-      type: String,
-      enum: ["expired", "active", "cancel"],
-      default: "active",
-      required: true
-    },
-
+// Product Schema
+const productSchema = new Schema({
+  id: String,
+  name: String,
+  quantity: {
+    type: Number,
+    default: 1
   },
-  { timestamps: true }
-);
+  price: Number,
+  size: {
+    type: String,
+    enum: Object.values(productSize)
+  },
+  color: String
+});
 
-export const Payment = mongoose.model<IPayment, PaymentModel>("payment", paymentSchema);
+// Payment Schema
+const paymentSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  paymentType: {
+    type: String,
+    enum: ['one-time', 'subscription'],
+    required: true
+  },
+  amountPaid: {
+    type: Number,
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'completed', 'failed'],
+    default: 'pending'
+  },
+  trxId: String,
+  products: [productSchema],
+  orderDetails: orderDetailsSchema,
+  checkoutSessionId: String,
+  paymentUrl: String,
+  subscriptionId: String,
+  subscriptionStatus: {
+    type: String,
+    enum: ['active', 'canceled', 'expired', null],
+    default: null
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// Middleware to update `updatedAt` on save
+paymentSchema.pre('save', function (next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+export const Payment = model('Payment', paymentSchema);

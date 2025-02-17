@@ -6,7 +6,12 @@ import { USER_ROLES } from '../../../enums/user';
 const router = express.Router();
 
 router.post('/create', CartController.createCart);
-router.get('/', auth(USER_ROLES.USER), CartController.getAllCartItems);
-router.put("/:id", auth(USER_ROLES.USER), CartController.updateCartItemsQuantity)
+router.get('/',
+    auth(USER_ROLES.USER),
+    CartController.getAllCartItems);
+
+router.put("/:id", auth(USER_ROLES.USER), CartController.updateCartQuantity)
+
+router.delete("/:cartItemId", auth(USER_ROLES.USER), CartController.deleteCartItemController)
 
 export const CartRoutes = router;

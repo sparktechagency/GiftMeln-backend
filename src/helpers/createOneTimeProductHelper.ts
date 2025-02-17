@@ -1,34 +1,27 @@
-import { stripe } from "../config/stripe";
-import ApiError from "../errors/ApiError";
+import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { stripe } from "../config/stripe";
+import { User } from "../app/modules/user/user.model";
+import { Payment } from "../app/modules/payment/payment.model";
+import ApiError from "../errors/ApiError";
 
-export const createOneTimeProductHelper = async ({
-    name,
-    description,
-    price,
-}: {
+export const createOneTimeProductHelper = async (params: {
     name: string;
     description: string;
     price: number;
-
 }) => {
     try {
-
-        // creating product
         const product = await stripe.products.create({
-            name,
-            description,
-        })
+            name: params.name,
+            description: params.description,
+        });
 
-        // create one time price 
         const priceObject = await stripe.prices.create({
-            unit_amount: price * 100,
+            unit_amount: params.price * 100,
             currency: 'usd',
             product: product.id,
             active: true,
-        })
-
-        // create payment link
+        });
 
         const paymentLink = await stripe.paymentLinks.create({
             line_items: [
@@ -42,18 +35,16 @@ export const createOneTimeProductHelper = async ({
                 redirect: { url: 'http://localhost:3000/payment/success' }
             }
         });
+
         if (!paymentLink) {
-            throw new ApiError(StatusCodes.BAD_REQUEST, "Can't create payment link")
+            throw new ApiError(StatusCodes.BAD_REQUEST, "Can't create payment link");
         }
-        if (!product.id) {
-            throw new ApiError(StatusCodes.BAD_REQUEST, "Can't create payment")
-        }
+
         return {
             productId: product.id,
             paymentLink: paymentLink.url,
-        }
-
+        };
     } catch (error) {
-        throw new ApiError(StatusCodes.BAD_REQUEST, `Failed to create product ${error}`)
+        throw new ApiError(StatusCodes.BAD_REQUEST, `Failed to create product: ${error}`);
     }
-}
+};

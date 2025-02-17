@@ -21,28 +21,81 @@ const getAllCart = async (userId: string) => {
         .populate('user');
 
     if (!cart.length) {
-        throw new ApiError(StatusCodes.NOT_FOUND, 'No cart found for this user');
+        return []
     }
 
-    return cart;
+    // Calculate total price
+    const totalPrice = cart.reduce((sum, item) => {
+        const quantity = item.variations.quantity;
+        const price = item.variations.product[0].discountedPrice;
+        return sum + (quantity * price);
+    }, 0);
+
+    // Calculate total items
+    const totalItems = cart.reduce((sum, item) => sum + item.variations.quantity, 0);
+
+    return {
+        success: true,
+        Total: cart.length,
+        totalItems,
+        totalPrice,
+        message: "User cart items retrieved successfully",
+        data: cart
+    };
 };
 
 
+
 // update quantity 
-const updateCartQuantity = async (userId: string, quantity: number) => {
+const updateQuantity = async (userId: string, cartItemId: string, quantity: number) => {
     const cart = await Cart.findOneAndUpdate(
-        { user: userId },
+        { user: userId, _id: cartItemId },
         { $set: { "variations.quantity": quantity } },
         { new: true }
     );
 
     if (!cart) {
-        throw new ApiError(StatusCodes.NOT_FOUND, 'No cart found for this user');
+        throw new ApiError(StatusCodes.NOT_FOUND, 'Cart item not found');
     }
 
     return cart;
 };
 
+
+// delete cart item's
+const deleteCartItem = async (userId: any, cartItemId: any) => {
+    if (!cartItemId) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Cart item ID is required');
+    }
+
+    const cart = await Cart.findOneAndDelete({ user: userId, _id: cartItemId });
+
+    if (!cart) {
+        throw new ApiError(StatusCodes.NOT_FOUND, 'Cart item not found');
+    }
+
+    return { message: 'Cart item deleted successfully' };
+};
+
+const clearCart = async (userId: string) => {
+    try {
+        const cartItems = await Cart.find({ user: userId });
+
+        if (!cartItems.length) {
+            throw new ApiError(StatusCodes.NOT_FOUND, 'No cart items found for this user');
+        }
+
+        for (const item of cartItems) {
+            const deletedItem = await Cart.findOneAndDelete({ _id: item._id, user: userId });
+            console.log("Deleted Item:", deletedItem);
+        }
+
+        return { message: 'All cart items cleared successfully' };
+    } catch (error) {
+        console.error("Error clearing cart:", error);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to clear cart');
+    }
+};
 
 
 
@@ -51,5 +104,7 @@ const updateCartQuantity = async (userId: string, quantity: number) => {
 export const CartServices = {
     createCartServiceIntoDB,
     getAllCart,
-    updateCartQuantity
+    updateQuantity,
+    deleteCartItem,
+    clearCart
 };
