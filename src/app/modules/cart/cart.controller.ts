@@ -41,7 +41,6 @@ const getAllCartItems = catchAsync(async (req: Request, res: Response, next: Nex
 
     sendResponse(res, {
         success: true,
-        Total: result.length,
         statusCode: StatusCodes.OK,
         message: 'User cart items retrieved successfully',
         data: result,

@@ -4,12 +4,11 @@ import { giftPreferences } from '../../../enums/giftPreferences';
 
 const eventSchema = new Schema<IEvent, EventModel>({
   eventName: { type: String, required: true },
-  price: { type: Number, required: true },
+  // price: { type: Number, required: true },
   // sales: { type: String, enum: ['inStock', 'soldOut'], required: true },
   eventDate: { type: Date, required: true },
   RecipientName: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
+    type: String,
     required: true,
   },
   category: {

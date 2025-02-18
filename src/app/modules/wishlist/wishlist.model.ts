@@ -10,7 +10,7 @@ const wishlistSchema = new Schema<IwishlistItems>({
     },
     event: {
         type: Types.ObjectId,
-        ref: 'Event',
+        ref: 'Product',
         required: true
     }
 }, {

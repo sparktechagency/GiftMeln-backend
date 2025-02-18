@@ -1,13 +1,12 @@
 import { Model, Types } from 'mongoose';
-import { CATEGORY } from '../../../enums/category';
 import { giftPreferences } from '../../../enums/giftPreferences';
 
 export type IEvent = {
   eventName: string;
-  price: number;
+  price?: number;
   // sales: "inStock" | "soldOut";
   eventDate: Date;
-  RecipientName: Types.ObjectId
+  RecipientName: string
   category: Types.ObjectId,
   giftPreferences: giftPreferences[]
 };

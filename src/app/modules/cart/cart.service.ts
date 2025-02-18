@@ -14,7 +14,8 @@ const createCartServiceIntoDB = async (payload: ICart) => {
 
 
 
-// get all cart with product details
+// !get all cart with product details 
+///maybe next time change it if it's not work
 const getAllCart = async (userId: string) => {
     const cart = await Cart.find({ user: userId })
         .populate('variations.product')
@@ -27,7 +28,7 @@ const getAllCart = async (userId: string) => {
     // Calculate total price
     const totalPrice = cart.reduce((sum, item) => {
         const quantity = item.variations.quantity;
-        const price = item.variations.product[0].discountedPrice;
+        const price = item?.variations?.product[0]?.discountedPrice;
         return sum + (quantity * price);
     }, 0);
 
@@ -82,20 +83,27 @@ const clearCart = async (userId: string) => {
         const cartItems = await Cart.find({ user: userId });
 
         if (!cartItems.length) {
-            throw new ApiError(StatusCodes.NOT_FOUND, 'No cart items found for this user');
+            console.log(`🛒 No cart items found for user: ${userId}`);
+            return { success: false, message: "No cart items to delete" };
         }
 
-        for (const item of cartItems) {
-            const deletedItem = await Cart.findOneAndDelete({ _id: item._id, user: userId });
-            console.log("Deleted Item:", deletedItem);
-        }
+        const deletedItems = await Cart.deleteMany({ user: userId });
 
-        return { message: 'All cart items cleared successfully' };
+        console.log(`🗑️ Cleared ${deletedItems.deletedCount} items from cart`);
+
+        return {
+            success: true,
+            message: "All cart items cleared successfully",
+            deletedCount: deletedItems.deletedCount,
+            deletedItems: cartItems, // Return deleted items
+        };
     } catch (error) {
-        console.error("Error clearing cart:", error);
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to clear cart');
+        console.error("❌ Error clearing cart:", error);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to clear cart");
     }
 };
+
+
 
 
 

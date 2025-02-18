@@ -19,7 +19,7 @@ const createWishListService = async (payload: IwishlistItems) => {
 // get all wishlist items
 
 const getAllWishlistItemsService = async () => {
-    const wishlistItems = await Wishlist.find();
+    const wishlistItems = await Wishlist.find().populate("event");
     if (!wishlistItems) {
         throw new ApiError(StatusCodes.NOT_FOUND, "Wishlist items not found");
     }
