@@ -155,10 +155,31 @@ const createOneTimePackage = async (req: Request, res: Response) => {
 };
 
 
+const startTrial = catchAsync(async (req: Request, res: Response) => {
+    const { userId, packageId, paymentMethodId } = req.body;
+
+    if (!userId || !packageId || !paymentMethodId) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            success: false,
+            message: "Missing required fields: userId, packageId, paymentMethodId"
+        });
+    }
+
+    const result = await PackageServices.startTrialSubscription(userId, packageId, paymentMethodId);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Create Trail for 7 day.',
+        data: result,
+    });
+});
+
+
 
 
 export const PackageController = {
     createPackage,
     checkUserTrial,
-    createOneTimePackage
+    createOneTimePackage,
+    startTrial
 };

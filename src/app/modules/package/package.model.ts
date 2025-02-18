@@ -46,6 +46,11 @@ const packageSchema = new Schema<IPackage>(
       required: [true, "Category is required"],
       enum: ["Free Trial", "Budget Friendly", "Premium Plan", "Spoiling Myself"],
     },
+    priceId: {
+      type: String,
+      default: null,
+    },
+    // For subscriptions and other payment related fields, consider using a separate schema or a plugin.
     productId: {
       type: String,
       default: null,

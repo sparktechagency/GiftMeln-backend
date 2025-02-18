@@ -11,6 +11,10 @@ export type IUser = {
   // location: string;
   image?: string;
   status: 'active' | 'delete';
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  subscriptionStatus?: string;
+  trialEndsAt?: Date;
   // verified: boolean;
   authentication?: {
     isResetPassword: boolean;
