@@ -34,12 +34,13 @@ export const createSubscriptionProductHelper = async ({
 
         // Step 2: Create a price (this will be associated with the product)
         const priceObject = await stripe.prices.create({
-            unit_amount: price * 100,  // Stripe expects amount in cents
+            unit_amount: price * 100,
             currency: "usd",
-            product: product.id,
+            product: product?.id,
             recurring: {
-                interval: duration === "7 days" ? "week" : "month",  // You can set this based on duration
+                interval: duration === "yearly" ? "year" : "month",
             },
+            // trial_period_days: 7,
         });
 
         // Step 3: Create a payment link for this product
@@ -69,6 +70,7 @@ export const createSubscriptionProductHelper = async ({
 
         return {
             productId: product.id,
+            priceId: priceObject.id,
             paymentLink: paymentLink.url,  // Provide the payment link URL
         };
     } catch (error: any) {

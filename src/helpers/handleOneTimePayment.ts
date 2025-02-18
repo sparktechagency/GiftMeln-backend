@@ -59,7 +59,7 @@ export const handleOneTimePayment = async (session: Stripe.Checkout.Session) => 
 
         // Clear the cart after payment
         const cartClearResult = await CartServices.clearCart(user._id.toString());
-        console.log('✅ Cart cleared successfully:', cartClearResult);  // Log result of cart clear
+        console.log('✅ Cart cleared successfully:', cartClearResult);
 
         return {
             success: true,

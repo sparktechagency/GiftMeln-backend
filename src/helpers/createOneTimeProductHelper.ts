@@ -1,8 +1,6 @@
-import { Request, Response } from "express";
+
 import { StatusCodes } from "http-status-codes";
 import { stripe } from "../config/stripe";
-import { User } from "../app/modules/user/user.model";
-import { Payment } from "../app/modules/payment/payment.model";
 import ApiError from "../errors/ApiError";
 
 export const createOneTimeProductHelper = async (params: {

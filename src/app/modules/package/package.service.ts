@@ -22,6 +22,7 @@ const createPackageIntoDB = async (payload: IPackage) => {
     const createdPackage = await Package.create({
         ...payload,
         productId: product.productId,
+        stripePriceId: product.priceId,
         paymentLink: product.paymentLink,
         trialEndsAt,
     });

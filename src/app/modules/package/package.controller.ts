@@ -16,7 +16,6 @@ const createPackage = catchAsync(
     async (req: Request, res: Response) => {
         const { ...productData } = req.body;
         const result = await PackageServices.createPackageIntoDB(productData);
-        console.log("My package result=???", result);
         sendResponse(res, {
             success: true,
             statusCode: StatusCodes.OK,
