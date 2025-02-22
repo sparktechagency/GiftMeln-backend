@@ -282,6 +282,13 @@ const changePasswordToDB = async (
   await User.findOneAndUpdate({ _id: user.id }, updateData, { new: true });
 };
 
+// ban user from admin service page
+// const  banUserIntoDB = async (user:string): Promise<void> => {
+//   const result =  await User.findByIdAndUpdate(user)
+//   const
+// }
+
+
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,

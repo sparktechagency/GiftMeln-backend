@@ -68,6 +68,9 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// ban user from admin
+// const  banUser =
+
 export const AuthController = {
   verifyEmail,
   loginUser,
