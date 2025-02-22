@@ -37,4 +37,10 @@ router.post(
   AuthController.changePassword
 );
 
+router.post(
+  '/create-admin',
+  auth(USER_ROLES.ADMIN),
+  AuthController.addAdmin
+);
+
 export const AuthRoutes = router;

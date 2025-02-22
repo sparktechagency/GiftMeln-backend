@@ -284,9 +284,37 @@ const changePasswordToDB = async (
 
 // ban user from admin service page
 // const  banUserIntoDB = async (user:string): Promise<void> => {
-//   const result =  await User.findByIdAndUpdate(user)
-//   const
-// }
+
+const addAdminIntoDB = async (payload: {
+  name: string;
+  email: string;
+  password: string;
+}): Promise<{ message: string }> => {
+  const { email, password, name } = payload;
+
+  // Check if email already exists
+  const isExistUser = await User.findOne({ email });
+  if (isExistUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exists!');
+  }
+
+  // Hash password
+  const hashPassword = await bcrypt.hash(
+    password,
+    Number(config.bcrypt_salt_rounds)
+  );
+
+  // Create new admin user
+  const result = await User.create({
+    name,
+    email,
+    password: hashPassword,
+    role: 'ADMIN',
+    verified: true,
+  });
+
+  return { message: 'Admin user created successfully' };
+};
 
 
 export const AuthService = {
@@ -295,4 +323,5 @@ export const AuthService = {
   forgetPasswordToDB,
   resetPasswordToDB,
   changePasswordToDB,
+  addAdminIntoDB
 };

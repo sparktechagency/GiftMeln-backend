@@ -93,10 +93,9 @@ const clearCart = async (userId: string) => {
             success: true,
             message: "All cart items cleared successfully",
             deletedCount: deletedItems.deletedCount,
-            deletedItems: cartItems, // Return deleted items
+            deletedItems: cartItems,
         };
     } catch (error) {
-        console.error("❌ Error clearing cart:", error);
         throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to clear cart");
     }
 };

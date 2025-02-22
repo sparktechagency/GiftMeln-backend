@@ -119,7 +119,7 @@ const createOneTimePackage = async (req: Request, res: Response) => {
         });
 
         // Add the amountPaid calculation
-        const amountPaid = (session.amount_total ?? 0) / 100;  // amount_total is in cents, so divide by 100
+        const amountPaid = (session.amount_total ?? 0) / 100;
 
         const paymentData = {
             user: user._id,
@@ -160,7 +160,6 @@ const createOneTimePackage = async (req: Request, res: Response) => {
             },
         });
     } catch (error) {
-        console.error('❌ Error during the Stripe session creation:', error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: `Error during the payment process: ${error}`,

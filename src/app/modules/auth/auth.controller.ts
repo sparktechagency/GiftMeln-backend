@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { AuthService } from './auth.service';
+import { USER_ROLES } from '../../../enums/user';
 
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   const { ...verifyData } = req.body;
@@ -70,6 +71,18 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 
 // ban user from admin
 // const  banUser =
+// add admin from admin dashboard
+const addAdmin = catchAsync(async (req: Request, res: Response) => {
+  const { ...adminData } = req.body;
+  const result = await AuthService.addAdminIntoDB(adminData);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.CREATED,
+    message: result.message,
+    data: null,
+  });
+});
 
 export const AuthController = {
   verifyEmail,
@@ -77,4 +90,5 @@ export const AuthController = {
   forgetPassword,
   resetPassword,
   changePassword,
+  addAdmin
 };
