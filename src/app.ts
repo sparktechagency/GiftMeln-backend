@@ -5,12 +5,14 @@ import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import router from './routes';
 import { Morgan } from './shared/morgen';
 import { handleStripeWebhook } from './app/stripe/handleStripeWebhook';
+import config from './config';
 const app = express();
 
 //morgan
 app.use(Morgan.successHandler);
 app.use(Morgan.errorHandler);
 // stripe webhook routes
+console.log('Configuration:', config.stripe.webhookSecret);
 app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook)
 
 //body parser

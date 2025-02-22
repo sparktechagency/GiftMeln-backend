@@ -16,22 +16,23 @@ const packageSchema = new Schema<IPackage>(
     price: {
       type: Number,
       required: function () {
-        return this.paymentType !== 'Free'; // Price required unless it's a free package
+        return this.paymentType !== 'Free';
       },
       min: [0, "Price cannot be negative"],
     },
     duration: {
       type: String,
       required: [true, "Duration is required"],
-      enum: ["7 days", "1 month", "1 year"],
+      enum: ["7 days", "month", "year"],
     },
     paymentType: {
       type: String,
       required: [true, "Payment type is required"],
-      enum: ["Free", "Monthly", "Yearly"],
+      enum: ["Free", "Paid"],
     },
     trialEndsAt: {
-      type: Date, // Expiry Date for Trial
+      type: Date,
+
     },
     hasTrial: {
       type: Boolean,

@@ -2,8 +2,8 @@ export interface IPackage {
   name: string;
   description: string;
   price?: number | undefined;
-  duration: '7 days' | '1 month' | '1 year';
-  paymentType: 'Free' | 'Monthly' | 'Yearly';
+  duration: '7 days' | 'month' | 'year';
+  paymentType: 'Free' | 'Paid';
   trialEndsAt: Date
   productId?: string;
   priceId?: string;

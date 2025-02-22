@@ -12,38 +12,57 @@ import { stripe } from '../../../config/stripe';
 
 
 
-const createPackage = catchAsync(
-    async (req: Request, res: Response) => {
-        const { ...productData } = req.body;
-        const result = await PackageServices.createPackageIntoDB(productData);
-        sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: 'Package Create successfully.',
-            data: result,
-        });
-    }
-);
+const createPackage = catchAsync(async (req: Request, res: Response) => {
+    const result = await PackageServices.createPackageIntoDB(req.body);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Package created successfully.',
+        data: result,
+    });
+});
 
 
-/*
-*checkUserTrial 
-*/
+const getAllPackages = catchAsync(async (req: Request, res: Response) => {
+    const result = await PackageServices.getAllPackages();
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Packages retrieved successfully.',
+        data: result,
+    });
+});
+
+
+// Get package by ID
+const getPackageById = catchAsync(async (req: Request, res: Response) => {
+    const result = await PackageServices.getPackageById(req.params.id);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Package retrieved successfully.',
+        data: result,
+    });
+});
+
+
+// Check User Trial
 const checkUserTrial = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user.id;
-    const result = await PackageServices.checkTrialStatus(userId);
+    const result = await PackageServices.checkTrialStatus(req.user.id);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
         message: 'Trial status checked successfully.',
         data: result,
     });
-})
+});
+
+
+
 
 
 // single product purchase request
 const createOneTimePackage = async (req: Request, res: Response) => {
-    console.log('🚀 Starting payment process with request body:', JSON.stringify(req.body, null, 2));
 
     const {
         products,
@@ -58,20 +77,17 @@ const createOneTimePackage = async (req: Request, res: Response) => {
 
     const user = await User.findOne({ email: userEmail });
     if (!user) {
-        console.log('❌ User not found for email:', userEmail);
         return res.status(StatusCodes.BAD_REQUEST).json({
             success: false,
             message: 'User not found.'
         });
     }
 
-    console.log('✅ User found:', userEmail);
 
     try {
         const lineItems = await Promise.all(products.map(async (product: any) => {
             const { id, price, quantity, color, size } = product;
 
-            console.log(`🛒 Creating Stripe product for:`, product);
 
             const stripeProduct = await stripe.products.create({
                 name: `Product ${id}`,
@@ -84,7 +100,6 @@ const createOneTimePackage = async (req: Request, res: Response) => {
                 product: stripeProduct.id
             });
 
-            console.log(`💲 Created Stripe price for product ${id}: ${priceObject.id}`);
 
             return {
                 price: priceObject.id,
@@ -129,13 +144,12 @@ const createOneTimePackage = async (req: Request, res: Response) => {
             },
             checkoutSessionId: session.id,
             paymentUrl: session.url,
-            amountPaid,  // Assign calculated amountPaid here
+            amountPaid,
         };
 
         const payment = new Payment(paymentData);
         await payment.save();
 
-        console.log('💾 Payment record saved:', payment._id);
 
         return res.status(StatusCodes.OK).json({
             success: true,
@@ -174,6 +188,50 @@ const startTrial = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const subscribeToPackage = catchAsync(async (req: Request, res: Response) => {
+    const { userId, packageId, paymentMethodId } = req.body;
+    const result = await PackageServices.subscribeToPackage(userId, packageId, paymentMethodId);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Subscription created successfully.',
+        data: result,
+    });
+});
+
+const cancelSubscription = catchAsync(async (req: Request, res: Response) => {
+    const { userId } = req.body;
+    const result = await PackageServices.cancelSubscription(userId);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Subscription canceled successfully.',
+        data: result,
+    });
+});
+
+
+// Change Subscription (Upgrade/Downgrade)
+// const changeSubscription = catchAsync(async (req: Request, res: Response) => {
+//     const { userId, newPackageId } = req.body;
+//     const result = await PackageServices.changeSubscription(userId, newPackageId);
+//     sendResponse(res, {
+//         success: true,
+//         statusCode: StatusCodes.OK,
+//         message: 'Subscription updated successfully.',
+//         data: result,
+//     });
+// });
+
+const getUserSubscription = catchAsync(async (req: Request, res: Response) => {
+    const result = await PackageServices.getUserSubscription(req.params.userId);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'User subscription retrieved successfully.',
+        data: result,
+    });
+});
 
 
 
@@ -181,5 +239,12 @@ export const PackageController = {
     createPackage,
     checkUserTrial,
     createOneTimePackage,
-    startTrial
+    startTrial,
+    subscribeToPackage,
+    cancelSubscription,
+    // changeSubscription,
+    getUserSubscription,
+    getAllPackages,
+    getPackageById
+
 };

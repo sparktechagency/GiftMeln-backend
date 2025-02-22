@@ -8,7 +8,6 @@ import { User } from "../user/user.model";
 const subscriptionDetailsFromDB = async (user: JwtPayload): Promise<{ subscription: IPayment | {} }> => {
 
     const subscription = await Payment.findOne({ user: user?.id }).populate("package").lean()
-    console.log(subscription);
     // if not found any subscription for the user, return an empty object
     if (!subscription) {
         return { subscription: {} }

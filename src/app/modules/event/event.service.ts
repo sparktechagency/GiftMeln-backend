@@ -16,7 +16,6 @@ const createEventIntoDB = async (eventData: EventModel) => {
 
         return event;
     } catch (error) {
-        console.log(error);
         throw error;
     }
 };
@@ -32,7 +31,6 @@ const getAllEventsFromDB = async () => {
 
         return events;
     } catch (error) {
-        console.log(error);
         throw error;
     }
 };
@@ -47,7 +45,6 @@ const getSingleEventFromDB = async (id: string) => {
 
         return event;
     } catch (error) {
-        console.log(error);
         throw error;
     }
 }
@@ -61,7 +58,6 @@ const deleteEventFromDB = async (id: string) => {
 
         return deletedEvent;
     } catch (error) {
-        console.log(error);
         throw error;
     }
 }
@@ -82,7 +78,6 @@ const updateEventInDB = async (id: string, eventData: EventModel) => {
 
         return updatedEvent;
     } catch (error) {
-        console.log(error);
         throw error;
     }
 }

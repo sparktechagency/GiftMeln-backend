@@ -6,20 +6,16 @@ import { Payment } from "../app/modules/payment/payment.model";
 import { CartServices } from "../app/modules/cart/cart.service";
 
 export const handleOneTimePayment = async (session: Stripe.Checkout.Session) => {
-    console.log('🔄 Processing one-time payment for session:', session.id);
 
     try {
         // const userEmail = session.customer_email;
-        // console.log('👤 Looking up user with email:', userEmail);
 
         // const user = await User.findOne({ email: userEmail });
         // if (!user) {
         //     console.error('❌ User not found for email:', userEmail);
         //     throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
         // }
-        // console.log('✅ User found:', user._id);
         const userEmail = session.customer_email;
-        console.log("👤 Looking up user with email:", userEmail);
 
         const user = await User.findOne({ email: userEmail });
         if (!user) {
@@ -29,7 +25,6 @@ export const handleOneTimePayment = async (session: Stripe.Checkout.Session) => 
 
 
         const products = session.metadata?.products ? JSON.parse(session.metadata.products) : [];
-        console.log('📦 Products parsed:', products);
 
         const paymentData = {
             user: user._id,
@@ -52,14 +47,11 @@ export const handleOneTimePayment = async (session: Stripe.Checkout.Session) => 
         const payment = new Payment(paymentData);
         await payment.save();
 
-        console.log('✅ Payment record stored with ID:', payment._id);
 
         // Ensure this log is printed
-        console.log('🔄 Attempting to clear cart for user:', user._id);
 
         // Clear the cart after payment
         const cartClearResult = await CartServices.clearCart(user._id.toString());
-        console.log('✅ Cart cleared successfully:', cartClearResult);
 
         return {
             success: true,

@@ -71,7 +71,7 @@ export const createSubscriptionProductHelper = async ({
         return {
             productId: product.id,
             priceId: priceObject.id,
-            paymentLink: paymentLink.url,  // Provide the payment link URL
+            paymentLink: paymentLink.url,
         };
     } catch (error: any) {
         console.error("Error creating subscription product in Stripe:", error.message);

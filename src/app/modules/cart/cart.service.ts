@@ -83,13 +83,11 @@ const clearCart = async (userId: string) => {
         const cartItems = await Cart.find({ user: userId });
 
         if (!cartItems.length) {
-            console.log(`🛒 No cart items found for user: ${userId}`);
             return { success: false, message: "No cart items to delete" };
         }
 
         const deletedItems = await Cart.deleteMany({ user: userId });
 
-        console.log(`🗑️ Cleared ${deletedItems.deletedCount} items from cart`);
 
         return {
             success: true,

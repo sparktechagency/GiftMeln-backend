@@ -30,4 +30,5 @@ export default {
     paymentSuccess: process.env.STRIPE_PAYMENT_SUCCESS_LINK
   }
 
+
 };
