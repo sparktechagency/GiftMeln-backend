@@ -4,35 +4,24 @@ import { User } from "../app/modules/user/user.model";
 import Stripe from "stripe";
 import { Payment } from "../app/modules/payment/payment.model";
 import { CartServices } from "../app/modules/cart/cart.service";
+import { OneTimePayment } from "../app/modules/onetimepayment/onetimepayment.model";
 
 export const handleOneTimePayment = async (session: Stripe.Checkout.Session) => {
-
     try {
-        // const userEmail = session.customer_email;
-
-        // const user = await User.findOne({ email: userEmail });
-        // if (!user) {
-        //     console.error('❌ User not found for email:', userEmail);
-        //     throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
-        // }
         const userEmail = session.customer_email;
-
         const user = await User.findOne({ email: userEmail });
         if (!user) {
-            console.error("❌ User not found for email:", userEmail);
             throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
         }
 
-
+        // Assuming products are passed in metadata as a JSON string
         const products = session.metadata?.products ? JSON.parse(session.metadata.products) : [];
 
         const paymentData = {
             user: user._id,
             amountPaid: (session.amount_total ?? 0) / 100,
-            trxId: session.payment_intent,
+            trxId: session.payment_intent as string,
             status: "completed",
-            paymentType: session.metadata?.paymentType || 'one-time',
-            products: products,
             orderDetails: {
                 userName: session.metadata?.userName,
                 userEmail: session.metadata?.userEmail,
@@ -44,18 +33,15 @@ export const handleOneTimePayment = async (session: Stripe.Checkout.Session) => 
             },
         };
 
-        const payment = new Payment(paymentData);
+        const payment = new OneTimePayment(paymentData);
         await payment.save();
-
-
-        // Ensure this log is printed
 
         // Clear the cart after payment
         const cartClearResult = await CartServices.clearCart(user._id.toString());
 
         return {
             success: true,
-            message: 'Payment processed and stored successfully!',
+            message: "Payment processed and stored successfully!",
             data: {
                 paymentId: payment._id,
                 status: payment.status,

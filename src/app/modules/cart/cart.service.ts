@@ -28,7 +28,7 @@ const getAllCart = async (userId: string) => {
     // Calculate total price
     const totalPrice = cart.reduce((sum, item) => {
         const quantity = item.variations.quantity;
-        const price = item?.variations?.product[0]?.discountedPrice;
+        const price = item?.variations?.product && typeof item.variations.product === 'object' ? (item.variations.product as any).discountedPrice : 0;
         return sum + (quantity * price);
     }, 0);
 

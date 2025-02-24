@@ -7,6 +7,7 @@ import { createOneTimeProductHelper } from '../../../helpers/createOneTimeProduc
 import { Payment } from '../payment/payment.model';
 import { User } from '../user/user.model';
 import { stripe } from '../../../config/stripe';
+import { OneTimePayment } from '../onetimepayment/onetimepayment.model';
 
 
 
@@ -62,8 +63,7 @@ const checkUserTrial = catchAsync(async (req: Request, res: Response) => {
 
 
 // single product purchase request
-const createOneTimePackage = async (req: Request, res: Response) => {
-
+export const createOneTimePackage = async (req: Request, res: Response) => {
     const {
         products,
         userName,
@@ -75,6 +75,8 @@ const createOneTimePackage = async (req: Request, res: Response) => {
         orderMessage
     } = req.body;
 
+    // Debug: Log incoming products
+
     const user = await User.findOne({ email: userEmail });
     if (!user) {
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -83,23 +85,40 @@ const createOneTimePackage = async (req: Request, res: Response) => {
         });
     }
 
-
     try {
-        const lineItems = await Promise.all(products.map(async (product: any) => {
+        // Merge duplicate products (if any)
+        const mergedProducts = products.reduce((acc: any[], product: any) => {
+            const existing = acc.find(item => item.id === product.id);
+            if (existing) {
+                existing.quantity += product.quantity;
+            } else {
+                acc.push({ ...product });
+            }
+            return acc;
+        }, []);
+
+        console.log("Merged products:", mergedProducts);
+
+        const lineItems = await Promise.all(mergedProducts.map(async (product: any) => {
             const { id, price, quantity, color, size } = product;
 
+            // Log incoming price for each product
+            console.log(`Product ${id}: received price = ${price}, quantity = ${quantity}`);
 
             const stripeProduct = await stripe.products.create({
-                name: `Product ${id}`,
+                name: product?.name || `Product ${id}`,
                 metadata: { productId: id, color, size }
             });
 
+
+            // If the price is already in cents (e.g., 450), use it directly
+            const unitAmount = price * 100;
+
             const priceObject = await stripe.prices.create({
-                unit_amount: Math.round(price * 100),
+                unit_amount: unitAmount,
                 currency: 'usd',
                 product: stripeProduct.id
             });
-
 
             return {
                 price: priceObject.id,
@@ -118,38 +137,38 @@ const createOneTimePackage = async (req: Request, res: Response) => {
             cancel_url: 'http://localhost:3000/payment/cancel',
         });
 
-        // Add the amountPaid calculation
-        const amountPaid = (session.amount_total ?? 0) / 100;
+        // Stripe returns amount_total in cents
+
+        // If you want to store the amount in dollars, divide by 100
+        // For now, we'll assume you want to store dollars
+        const amountPaid = session.amount_total ?? 0;
 
         const paymentData = {
             user: user._id,
-            status: 'pending',
-            paymentType: 'one-time',
-            products: products.map((p: any) => ({
+            status: 'completed',
+            products: mergedProducts.map((p: any) => ({
                 id: p.id,
-                name: p.name,
+                name: p.name || `Product ${p.id}`,
                 quantity: p.quantity || 1,
                 price: p.price,
                 color: p.color,
                 size: p.size
             })),
-            orderDetails: {
-                userName,
-                userEmail,
-                country,
-                city,
-                streetAddress,
-                postCode,
-                orderMessage,
-            },
+            userName,
+            userEmail,
+            country,
+            city,
+            streetAddress,
+            postCode,
+            orderMessage,
             checkoutSessionId: session.id,
             paymentUrl: session.url,
             amountPaid,
         };
 
-        const payment = new Payment(paymentData);
-        await payment.save();
 
+        const oneTimePayment = new OneTimePayment(paymentData);
+        await oneTimePayment.save();
 
         return res.status(StatusCodes.OK).json({
             success: true,
@@ -160,12 +179,15 @@ const createOneTimePackage = async (req: Request, res: Response) => {
             },
         });
     } catch (error) {
+        console.error("Error during payment process:", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: `Error during the payment process: ${error}`,
         });
     }
 };
+
+
 
 
 const startTrial = catchAsync(async (req: Request, res: Response) => {

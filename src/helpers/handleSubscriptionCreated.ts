@@ -12,6 +12,7 @@ import { Payment } from "../app/modules/payment/payment.model";
  * Helper to find a user by email.
  * Throws an error if the user is not found.
  */
+
 const getUserByEmail = async (email: string) => {
     const user = await User.findOne({ email });
     if (!user) {
@@ -48,13 +49,13 @@ const createNewSubscription = async (
     // Create the payload using the field names expected by your schema
     const payload = {
         customerId,
-        amountPaid,             // use "amountPaid" instead of "price"
+        amountPaid,
         user,
         package: packageId,
         trxId,
         subscriptionId,
-        paymentType: "subscription", // provide a valid payment type
-        status: "pending",      // set a status that is valid per your enum (adjust as needed)
+        paymentType: "subscription",
+        status: "success",
         currentPeriodStart,
         currentPeriodEnd,
     };
@@ -62,10 +63,12 @@ const createNewSubscription = async (
     // Check if a subscription for the user already exists.
     const isExistSubscription = await Payment.findOne({ user: user });
     if (isExistSubscription) {
+        console.log(isExistSubscription);
         await Payment.findByIdAndUpdate({ _id: isExistSubscription._id }, payload, { new: true });
     } else {
         const newSubscription = new Payment(payload);
-        await newSubscription.save();
+        const data = await newSubscription.save();
+        console.log(data);
     }
 };
 
@@ -76,54 +79,44 @@ const createNewSubscription = async (
  */
 export const handleSubscriptionCreated = async (data: Stripe.Subscription) => {
     try {
-        // Fetch the latest subscription details from Stripe.
         const subscription = await stripe.subscriptions.retrieve(data.id);
-
-        // Retrieve customer details.
-        const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-
-        // Extract product ID from the subscription items.
+        const customer = (await stripe.customers.retrieve(subscription.customer as string)) as Stripe.Customer;
         const productId = subscription.items.data[0]?.price?.product as string;
-
-        // Retrieve invoice details to determine payment info.
         const invoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
-
-        // Extract transaction and payment details.
         const trxId = invoice.payment_intent as string;
-        const amountPaid = (invoice.total || 0) / 100; // Convert cents to USD
+        const amountPaid = (invoice.total || 0) / 100;
 
-        // Validate and retrieve the user from your database.
-        const user: any = await getUserByEmail(customer.email as string);
+        const user = await getUserByEmail(customer.email as string);
+        const plan = await getPackageByProductId(productId);
 
-        // Validate and retrieve the package/plan for the product.
-        const packageID: any = await getPackageByProductId(productId);
+        const currentPeriodStart = new Date(subscription.current_period_start * 1000);
+        const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
 
-        // Convert subscription period timestamps to ISO string format.
-        const currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
-        const currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
-
-        // Create or update the subscription record in the Payment model.
-        await createNewSubscription(
-            user?._id,
-            customer?.id,
-            packageID?._id,
-            amountPaid,
+        const subscriptionData = {
+            user: user._id,
+            customerId: customer.id,
+            package: plan._id,
             trxId,
-            subscription?.id,
+            subscriptionId: subscription.id,
             currentPeriodStart,
-            currentPeriodEnd
-        );
+            currentPeriodEnd,
+            amountPaid,
+            status: "active" as "active",
+            paymentType: "subscription" as "subscription",
+        };
 
-        // Update the user's record to indicate an active subscription.
-        await User.findByIdAndUpdate(
-            { _id: user._id },
-            { isSubscribed: true },
-            { new: true }
-        );
+        // Check if a subscription already exists for the user and update or create accordingly.
+        const existingSubscription = await Payment.findOne({ user: user._id });
+        if (existingSubscription) {
+            await Payment.findByIdAndUpdate(existingSubscription._id, subscriptionData, { new: true });
+        } else {
+            const newSubscription = new Payment(subscriptionData);
+            await newSubscription.save();
+        }
 
-        // Optionally, send notifications to the user here.
+        await User.findByIdAndUpdate(user._id, { isSubscribed: true }, { new: true });
     } catch (error) {
-        console.error("❌ Error handling subscription creation:", error);
+        console.error("Error handling subscription creation:", error);
         throw error;
     }
 };
