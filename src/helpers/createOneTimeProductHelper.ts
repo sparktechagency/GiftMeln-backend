@@ -38,6 +38,7 @@ export const createOneTimeProductHelper = async (params: {
             throw new ApiError(StatusCodes.BAD_REQUEST, "Can't create payment link");
         }
 
+
         return {
             productId: product.id,
             paymentLink: paymentLink.url,

@@ -18,32 +18,54 @@ const createCartServiceIntoDB = async (payload: ICart) => {
 ///maybe next time change it if it's not work
 const getAllCart = async (userId: string) => {
     const cart = await Cart.find({ user: userId })
-        .populate('variations.product')
-        .populate('user');
+        .populate({
+            path: "variations.product",
+            select: "discountedPrice productName featureImage",
+        })
+        .populate("user");
 
     if (!cart.length) {
-        return []
+        return {
+            success: true,
+            message: "No cart items found",
+            data: [],
+            totalCarts: 0,
+            totalItems: 0,
+            totalPrice: 0,
+        };
     }
 
-    // Calculate total price
-    const totalPrice = cart.reduce((sum, item) => {
-        const quantity = item.variations.quantity;
-        const price = item?.variations?.product && typeof item.variations.product === 'object' ? (item.variations.product as any).discountedPrice : 0;
-        return sum + (quantity * price);
-    }, 0);
+    let totalPrice = 0;
+    let totalItems = 0;
 
-    // Calculate total items
-    const totalItems = cart.reduce((sum, item) => sum + item.variations.quantity, 0);
+    cart.forEach((item) => {
+        const variations = Array.isArray(item.variations) ? item.variations : [item.variations];
+
+        variations.forEach((variation) => {
+            if (variation.product && Array.isArray(variation.product) && variation.product.length > 0) {
+                const product = variation.product[0];
+
+
+
+                if (product.discountedPrice && variation.quantity) {
+                    totalPrice += product.discountedPrice * variation.quantity;
+                    totalItems += variation.quantity;
+                }
+            }
+        });
+    });
 
     return {
         success: true,
-        Total: cart.length,
+        message: "User cart items retrieved successfully",
+        totalCarts: cart.length,
         totalItems,
         totalPrice,
-        message: "User cart items retrieved successfully",
-        data: cart
+        data: cart,
     };
 };
+
+
 
 
 

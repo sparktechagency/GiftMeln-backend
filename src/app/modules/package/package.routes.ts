@@ -21,6 +21,7 @@ router.post('/start-trial', PackageController.startTrial);
 // !Checkout for a one-time package purchase
 router.post('/checkout', PackageController.createOneTimePackage);
 
+
 //! Subscribe to a Monthly or Yearly Package
 router.post('/subscribe', PackageController.subscribeToPackage);
 

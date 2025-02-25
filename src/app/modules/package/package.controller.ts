@@ -8,6 +8,7 @@ import { Payment } from '../payment/payment.model';
 import { User } from '../user/user.model';
 import { stripe } from '../../../config/stripe';
 import { OneTimePayment } from '../onetimepayment/onetimepayment.model';
+import { Cart } from '../cart/cart.model';
 
 
 
@@ -74,7 +75,7 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
         postCode,
         orderMessage
     } = req.body;
-
+    console.log("products: " + products.productName);
     // Debug: Log incoming products
 
     const user = await User.findOne({ email: userEmail });
@@ -100,15 +101,15 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
         console.log("Merged products:", mergedProducts);
 
         const lineItems = await Promise.all(mergedProducts.map(async (product: any) => {
-            const { id, price, quantity, color, size } = product;
+            const { id, price, quantity, color, size, productName } = product;
 
             // Log incoming price for each product
-            console.log(`Product ${id}: received price = ${price}, quantity = ${quantity}`);
-
             const stripeProduct = await stripe.products.create({
-                name: product?.name || `Product ${id}`,
-                metadata: { productId: id, color, size }
+                name: product.productName || `Product ${product.id}`, // Make sure product.name exists
+                metadata: { productId: product.id, color, size }
             });
+
+
 
 
             // If the price is already in cents (e.g., 450), use it directly
@@ -148,7 +149,7 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
             status: 'completed',
             products: mergedProducts.map((p: any) => ({
                 id: p.id,
-                name: p.name || `Product ${p.id}`,
+                name: p.productName || `Product ${p.id}`,
                 quantity: p.quantity || 1,
                 price: p.price,
                 color: p.color,
@@ -167,8 +168,12 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
         };
 
 
+
         const oneTimePayment = new OneTimePayment(paymentData);
-        await oneTimePayment.save();
+        const confirmPayment = await oneTimePayment.save();
+        if (confirmPayment.status === 'completed') {
+            await Cart.deleteMany({ user: user._id });
+        }
 
         return res.status(StatusCodes.OK).json({
             success: true,

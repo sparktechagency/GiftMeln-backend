@@ -36,9 +36,7 @@ const createCart = catchAsync(async (req: Request, res: Response, next: NextFunc
 // get all cart items
 const getAllCartItems = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user.id;
-
     const result = await CartServices.getAllCart(userId);
-
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,

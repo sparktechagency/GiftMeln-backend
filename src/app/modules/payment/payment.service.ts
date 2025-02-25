@@ -3,6 +3,8 @@ import { IPayment } from "./payment.interface";
 import { Payment } from "./payment.model";
 import { stripe } from "../../../config/stripe";
 import { User } from "../user/user.model";
+import ApiError from "../../../errors/ApiError";
+import { StatusCodes } from "http-status-codes";
 
 
 const subscriptionDetailsFromDB = async (user: JwtPayload): Promise<{ subscription: IPayment | {} }> => {
@@ -23,8 +25,21 @@ const subscriptionDetailsFromDB = async (user: JwtPayload): Promise<{ subscripti
     }
     return { subscription }
 }
+// 
+const getAllSubscriptionIntoDB = async () => {
+    const subscription = await Payment.find().limit(20).populate({
+        path: "package",
+        model: "package",// Ensure it matches the actual model name
+    });
+    if (!subscription.length) {
+        throw new ApiError(StatusCodes.BAD_GATEWAY, "Can't Find any Subscription");
+    }
+    return subscription;
+};
+
 
 
 export const PaymentServices = {
-    subscriptionDetailsFromDB
+    subscriptionDetailsFromDB,
+    getAllSubscriptionIntoDB
 };
