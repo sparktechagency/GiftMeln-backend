@@ -33,7 +33,20 @@ const allSubscription = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+// get all subscription history base this user
+const getSubscriptionHistory = catchAsync(async (req: Request, res: Response) => {
+    const result = await PaymentServices.getSubscriptionHistory(req.user);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Subscription history retrieved successfully.',
+        data: result,
+    });
+})
+
+
 export const PaymentController = {
     subscriptionDetails,
-    allSubscription
+    allSubscription,
+    getSubscriptionHistory
 };

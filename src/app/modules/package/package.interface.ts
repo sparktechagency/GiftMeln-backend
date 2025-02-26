@@ -1,10 +1,10 @@
 export interface IPackage {
   name: string;
   description: string;
-  price?: number | undefined;
-  duration: '7 days' | 'month' | 'year';
-  paymentType: 'Free' | 'Paid';
-  trialEndsAt: Date
+  price?: number;
+  duration: "7 days" | "month" | "year";
+  paymentType: "Free" | "Paid";
+  trialEndsAt: Date;
   productId?: string;
   priceId?: string;
   features: string[];
@@ -12,5 +12,5 @@ export interface IPackage {
   hasTrial?: boolean;
   stripePriceId?: string;
   stripeSubscriptionId?: string;
-  category: 'Free Trial' | 'Budget Friendly' | 'Premium Plan' | 'Spoiling Myself';
+  category: "Free Trial" | "Budget Friendly" | "Premium Plan" | "Spoiling Myself";
 }

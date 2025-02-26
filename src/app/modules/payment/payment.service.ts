@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { IPayment } from "./payment.interface";
-import { Payment } from "./payment.model";
+import { Subscription } from "./payment.model";
 import { stripe } from "../../../config/stripe";
 import { User } from "../user/user.model";
 import ApiError from "../../../errors/ApiError";
@@ -17,19 +17,20 @@ const subscriptionDetailsFromDB = async (user: JwtPayload): Promise<{ subscripti
     const subscriptionFromStripe = await stripe.subscriptions.retrieve(subscription?.subscriptionId);
     if (subscriptionFromStripe?.status !== 'active') {
         await Promise.all([
-            User.findByIdAndUpdate(user.id), { isSubscribed: false }, { new: true },
+            User.findByIdAndUpdate(user.id, { isSubscribed: false }, { new: true }),
             Payment.findOneAndUpdate({
                 user: user.id
             }, { status: "expired" }, { new: true })
-        ])
+        ]);
     }
+
     return { subscription }
 }
 // 
 const getAllSubscriptionIntoDB = async () => {
-    const subscription = await Payment.find().limit(20).populate({
+    const subscription = await Subscription.find().limit(20).populate({
         path: "package",
-        model: "package",// Ensure it matches the actual model name
+        model: "package",
     });
     if (!subscription.length) {
         throw new ApiError(StatusCodes.BAD_GATEWAY, "Can't Find any Subscription");
@@ -37,9 +38,23 @@ const getAllSubscriptionIntoDB = async () => {
     return subscription;
 };
 
+// get all subscription history base this user 
+const getSubscriptionHistory = async (user: JwtPayload) => {
+    const subscription = await Payment.find({ user: user.id }).populate({
+        path: "package",
+        model: "package",
+    });
+    if (!subscription.length) {
+        throw new ApiError(StatusCodes.BAD_GATEWAY, "Can't Find any Subscription");
+    }
+    return subscription;
+
+}
+
 
 
 export const PaymentServices = {
     subscriptionDetailsFromDB,
-    getAllSubscriptionIntoDB
+    getAllSubscriptionIntoDB,
+    getSubscriptionHistory
 };

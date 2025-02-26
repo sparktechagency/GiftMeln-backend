@@ -4,7 +4,6 @@ import { PackageServices } from './package.service';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import { createOneTimeProductHelper } from '../../../helpers/createOneTimeProductHelper';
-import { Payment } from '../payment/payment.model';
 import { User } from '../user/user.model';
 import { stripe } from '../../../config/stripe';
 import { OneTimePayment } from '../onetimepayment/onetimepayment.model';

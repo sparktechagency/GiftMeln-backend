@@ -7,4 +7,6 @@ const router = express.Router();
 
 router.get('/', auth(USER_ROLES.USER), OnetimepaymentController.purchaseData);
 
+
+
 export const OnetimepaymentRoutes = router;

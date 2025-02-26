@@ -6,7 +6,7 @@ import { Package } from "../app/modules/package/package.model";
 import { ObjectId } from "mongoose";
 import Stripe from "stripe";
 import { stripe } from "../config/stripe";
-import { Payment } from "../app/modules/payment/payment.model";
+import { Payment, Subscription } from "../app/modules/payment/payment.model";
 
 /**
  * Helper to find a user by email.
@@ -77,46 +77,88 @@ const createNewSubscription = async (
  * Retrieves all necessary details from Stripe, validates the user and plan,
  * then creates or updates a subscription record and marks the user as subscribed.
  */
-export const handleSubscriptionCreated = async (data: Stripe.Subscription) => {
-    try {
-        const subscription = await stripe.subscriptions.retrieve(data.id);
-        const customer = (await stripe.customers.retrieve(subscription.customer as string)) as Stripe.Customer;
-        const productId = subscription.items.data[0]?.price?.product as string;
-        const invoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
-        const trxId = invoice.payment_intent as string;
-        const amountPaid = (invoice.total || 0) / 100;
+// export const handleSubscriptionCreated = async (data: Stripe.Subscription) => {
+//     try {
+//         const subscription = await stripe.subscriptions.retrieve(data.id);
+//         const customer = (await stripe.customers.retrieve(subscription.customer as string)) as Stripe.Customer;
+//         const productId = subscription.items.data[0]?.price?.product as string;
+//         const invoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
+//         const trxId = invoice.payment_intent as string;
+//         const amountPaid = (invoice.total || 0) / 100;
 
-        const user = await getUserByEmail(customer.email as string);
-        const plan = await getPackageByProductId(productId);
+//         const user = await getUserByEmail(customer.email as string);
+//         const plan = await getPackageByProductId(productId);
 
-        const currentPeriodStart = new Date(subscription.current_period_start * 1000);
-        const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+//         const currentPeriodStart = new Date(subscription.current_period_start * 1000);
+//         const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
 
-        const subscriptionData = {
-            user: user._id,
-            customerId: customer.id,
-            package: plan._id,
-            trxId,
+//         const subscriptionData = {
+//             user: user._id,
+//             customerId: customer.id,
+//             package: plan._id,
+//             trxId,
+//             subscriptionId: subscription.id,
+//             currentPeriodStart,
+//             currentPeriodEnd,
+//             amountPaid,
+//             status: "active" as "active",
+//             paymentType: "subscription" as "subscription",
+//         };
+
+//         // Check if a subscription already exists for the user and update or create accordingly.
+//         const existingSubscription = await Subscription.findOne({ user: user._id });
+//         if (existingSubscription) {
+//             await Subscription.findByIdAndUpdate(existingSubscription._id, subscriptionData, { new: true });
+//         } else {
+//             const newSubscription = new Subscription(subscriptionData);
+//             await newSubscription.save();
+//         }
+
+//         await User.findByIdAndUpdate(user._id, { isSubscribed: true }, { new: true });
+//     } catch (error) {
+//         console.error("Error handling subscription creation:", error);
+//         throw error;
+//     }
+// };
+export const handleSubscriptionCreated = async (subscription: Stripe.Subscription, userId: string) => {
+    console.log('🔍 Debug: Subscription:', subscription);
+    console.log('🔍 Debug: User ID:', userId);
+
+    // Check if the user already has a subscription record
+    let userSubscription = await Subscription.findOne({ user: userId });
+
+    if (!userSubscription) {
+        console.log('📦 Debug: No existing subscription. Creating new...');
+        // Create a new subscription record for the user
+        userSubscription = await Subscription.create({
+            user: userId,
+            subscriptions: [
+                {
+                    package: subscription.items.data[0].price.product,
+                    subscriptionId: subscription.id,
+                    currentPeriodStart: new Date(subscription.current_period_start * 1000),
+                    currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+                    status: subscription.status,
+                    paymentType: "subscription",
+                },
+            ],
+        });
+    } else {
+        console.log('🔄 Debug: Updating existing subscription...');
+        // Update the existing subscription
+        userSubscription.subscriptions.push({
+            package: subscription.items.data[0].price.product,
             subscriptionId: subscription.id,
-            currentPeriodStart,
-            currentPeriodEnd,
-            amountPaid,
-            status: "active" as "active",
-            paymentType: "subscription" as "subscription",
-        };
+            currentPeriodStart: new Date(subscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+            status: subscription.status,
+            paymentType: "subscription",
+        });
 
-        // Check if a subscription already exists for the user and update or create accordingly.
-        const existingSubscription = await Payment.findOne({ user: user._id });
-        if (existingSubscription) {
-            await Payment.findByIdAndUpdate(existingSubscription._id, subscriptionData, { new: true });
-        } else {
-            const newSubscription = new Payment(subscriptionData);
-            await newSubscription.save();
-        }
-
-        await User.findByIdAndUpdate(user._id, { isSubscribed: true }, { new: true });
-    } catch (error) {
-        console.error("Error handling subscription creation:", error);
-        throw error;
+        // Mark subscriptions as modified and save
+        userSubscription.markModified('subscriptions');
+        await userSubscription.save();
     }
+
+    console.log('✅ Debug: Subscription saved successfully:', userSubscription);
 };

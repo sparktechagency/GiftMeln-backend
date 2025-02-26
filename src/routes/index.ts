@@ -9,7 +9,7 @@ import { PackageRoutes } from '../app/modules/package/package.routes';
 import { PaymentRoutes } from '../app/modules/payment/payment.routes';
 import { CartRoutes } from '../app/modules/cart/cart.routes';
 import { ContactRoutes } from '../app/modules/contact/contact.route';
-import { OnetimepaymentRoutes } from '../app/modules/onetimepayment/onetimepayment.route';
+import { OnetimepaymentRoutes } from '../app/modules/onetimepayment/onetimepayment.routes';
 const router = express.Router();
 
 const apiRoutes = [

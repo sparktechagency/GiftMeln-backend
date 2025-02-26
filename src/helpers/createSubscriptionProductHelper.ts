@@ -1,80 +1,92 @@
 import { StatusCodes } from "http-status-codes";
+import { IPackage } from "../app/modules/package/package.interface";
 import ApiError from "../errors/ApiError";
 import { stripe } from "../config/stripe";
+import config from "../config";
 
-export const createSubscriptionProductHelper = async ({
-    name,
-    description,
-    price,
-    duration,
-    email,
-    country,
-    city,
-    streetAddress,
-    postCode,
-    orderMessage,
-}: {
-    name: string;
-    description: string;
-    price: number;
-    duration: string;
-    email: string;
-    country: string;
-    city: string;
-    streetAddress: string;
-    postCode: string;
-    orderMessage: string;
-}) => {
+export const createSubscriptionProductHelper = async (
+    payload: Partial<IPackage>
+): Promise<{ productId: string; paymentLink: string } | null> => {
     try {
+        console.log("Received Payload:", payload); // ✅ Check input data
+
+        // if (!payload.name || !payload.description || !payload.price) {
+        //     console.error("❌ Missing required fields", payload);
+        //     throw new ApiError(StatusCodes.BAD_REQUEST, "Missing required package details");
+        // }
+
         // Step 1: Create a product in Stripe
         const product = await stripe.products.create({
-            name,
-            description,
+            name: payload.name as string,
+            description: payload.description,
         });
 
-        // Step 2: Create a price (this will be associated with the product)
-        const priceObject = await stripe.prices.create({
-            unit_amount: price * 100,
+        if (!product?.id) {
+            throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create product in Stripe");
+        }
+
+        let interval: "month" | "year" = "month";
+        let intervalCount = 1;
+
+        switch (payload.duration) {
+            case "month":
+                interval = "month";
+                intervalCount = 1;
+                break;
+            case "year":
+                interval = "year";
+                intervalCount = 1;
+                break;
+            case "7 days":
+                interval = "month"; // Stripe does not support 'days'
+                intervalCount = 1;
+                break;
+            default:
+                throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid duration");
+        }
+
+        console.log("✅ Interval:", interval, "Count:", intervalCount);
+
+        // Step 2: Create Price for the Product
+        const price = await stripe.prices.create({
+            product: product.id,
+            unit_amount: Math.round(Number(payload.price) * 100),
             currency: "usd",
-            product: product?.id,
-            recurring: {
-                interval: duration === "yearly" ? "year" : "month",
-            },
-            // trial_period_days: 7,
+            recurring: { interval, interval_count: intervalCount },
         });
 
-        // Step 3: Create a payment link for this product
+
+        if (!price?.id) {
+            throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create price in Stripe");
+        }
+
+        // Step 3: Create a Payment Link
         const paymentLink = await stripe.paymentLinks.create({
             line_items: [
                 {
-                    price: priceObject.id,
+                    price: price.id,
                     quantity: 1,
                 },
             ],
-            metadata: {
-                userName: name,
-                userEmail: email,
-                country: country,
-                city: city,
-                streetAddress: streetAddress,
-                postCode: postCode,
-                orderMessage: orderMessage,
-
-            },
             after_completion: {
                 type: "redirect",
-                redirect: { url: 'http://localhost:3000/payment/success' }
-            }
+                redirect: {
+                    url: config.stripe.paymentSuccess || "http://localhost:3000/payment/success",
+                },
+            },
+            metadata: {
+                productId: String(product.id), // ✅ Convert to string
+            },
         });
 
 
-        return {
-            productId: product.id,
-            priceId: priceObject.id,
-            paymentLink: paymentLink.url,
-        };
-    } catch (error: any) {
-        console.error("Error creating subscription product in Stripe:", error.message);
-        throw new ApiError(StatusCodes.BAD_REQUEST, `Failed to create subscription product in Stripe: ${error.message}`);
+        if (!paymentLink?.url) {
+            throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create payment link");
+        }
+
+        return { productId: product.id, paymentLink: paymentLink.url };
+    } catch (error) {
+        console.error("Stripe Error:", error); // ✅ Log actual error
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Subscription creation failed: ${error.message}`);
     }
 };

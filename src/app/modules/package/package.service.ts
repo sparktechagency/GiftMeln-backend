@@ -5,48 +5,47 @@ import { Package } from './package.model';
 import { createSubscriptionProductHelper } from '../../../helpers/createSubscriptionProductHelper';
 import { User } from '../user/user.model';
 import { stripe } from '../../../config/stripe';
+import { Subscription } from '../payment/payment.model';
+import { Types } from 'mongoose';
 
 
 const createPackageIntoDB = async (payload: IPackage) => {
-    // Dynamically set the trialEndsAt based on the duration
-    let trialEndsAt: Date | null = null;
-
-    if (payload.duration === "7 days") {
-        trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    } else if (payload.duration === "month") {
-        trialEndsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    } else if (payload.duration === "year") {
-        trialEndsAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-    } else {
-        throw new Error("No trial period set for duration");
+    // ✅ Ensure required field is present
+    if (!payload.trialEndsAt) {
+        payload.trialEndsAt = new Date();
     }
 
-    // Create the product on Stripe
-    const product = await createSubscriptionProductHelper({
+    const productPayload = {
         name: payload.name,
         description: payload.description,
         duration: payload.duration,
-        price: payload.price ?? 0,
-    });
+        price: Number(payload.price),
+        paymentType: payload.paymentType,
+        features: payload.features,
+        category: payload.category
+    };
+
+
+
+    const product = await createSubscriptionProductHelper(productPayload);
 
     if (!product) {
         throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create subscription product");
     }
 
-    // Create the package record in the database with dynamic trialEndsAt value
-    const createdPackage = await Package.create({
-        ...payload,
-        productId: product.productId,
-        stripePriceId: product.priceId,
-        paymentLink: product.paymentLink,
-        trialEndsAt,
-    });
 
-    if (!createdPackage) {
-        throw new ApiError(StatusCodes.BAD_REQUEST, "Package creation failed");
+    // ✅ Add Stripe details to the payload
+    payload.paymentLink = product.paymentLink;
+    payload.productId = product.productId;
+
+    const result = await Package.create(payload);
+    if (!result) {
+        await stripe.products.del(product.productId);
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to created Package")
     }
 
-    return createdPackage;
+    return result;
+
 };
 /**
  * Check if a user's trial has expired
@@ -160,84 +159,148 @@ const getPackageById = async (packageId: string) => {
     }
     return packageData;
 }
-const subscribeToPackage = async (userId: string, packageId: string, paymentMethodId: string) => {
+const subscribeToPackage = async (userId, packageId, paymentMethodId) => {
+    console.log('🔍 Debug: Entered subscribeToPackage Function');
+
     const user = await User.findById(userId);
-    if (!user) throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+    if (!user) {
 
-    const packageData = await Package.findById(packageId);
-    if (!packageData) throw new ApiError(StatusCodes.NOT_FOUND, "Package not found");
-
-    let customerId = user.stripeCustomerId;
-
-    // Check if the user is already a Stripe customer
-    if (!customerId) {
-        const existingCustomers = await stripe.customers.list({ email: user.email });
-
-        if (existingCustomers.data.length > 0) {
-            customerId = existingCustomers.data[0].id;
-        } else {
-            const customer = await stripe.customers.create({ email: user.email });
-            customerId = customer.id;
-        }
-
-        user.stripeCustomerId = customerId;
-        await user.save();
+        throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
     }
 
-    // Attach payment method to Stripe customer
-    await stripe.paymentMethods.attach(paymentMethodId, { customer: customerId });
+    const selectedPackage = await Package.findById(packageId);
+    if (!selectedPackage) {
+        console.log('❌ Debug: Package not found');
+        throw new ApiError(StatusCodes.NOT_FOUND, "Package not found");
+    }
+    console.log('✅ Debug: Selected Package:', selectedPackage);
 
-    await stripe.customers.update(customerId, {
-        invoice_settings: { default_payment_method: paymentMethodId }
+    let userSubscription = await Subscription.findOne({ user: userId });
+    console.log('🔍 Debug: User Subscription:', userSubscription);
+
+    if (!userSubscription) {
+        console.log('📦 Debug: No existing subscription. Creating new...');
+        userSubscription = await Subscription.create({
+            user: userId,
+            subscriptions: [
+                {
+                    package: packageId,
+                    subscriptionId: `sub_${Date.now()}`,
+                    currentPeriodStart: new Date(),
+                    currentPeriodEnd: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+                    amountPaid: selectedPackage.price,
+                    status: "active",
+                    paymentType: "subscription",
+                },
+            ],
+        });
+        console.log('✅ Debug: New Subscription Created:', userSubscription);
+        return {
+            message: "New subscription created successfully",
+        };
+    }
+
+    console.log('🔄 Debug: Checking existing subscriptions...');
+    const existingSubscription = userSubscription.subscriptions.find(
+        (sub) => sub.package.toString() === packageId
+    );
+    if (existingSubscription) {
+        if (existingSubscription.status === "expired") {
+            console.log('🔄 Debug: Reactivating expired subscription...');
+            existingSubscription.currentPeriodStart = new Date();
+            existingSubscription.currentPeriodEnd = new Date(
+                new Date().setMonth(new Date().getMonth() + 1)
+            );
+            existingSubscription.status = "active";
+            existingSubscription.amountPaid += selectedPackage.price;
+
+            userSubscription.markModified('subscriptions');
+            await userSubscription.save();
+            console.log('✅ Debug: Reactivated Expired Subscription:', userSubscription);
+
+            return {
+                message: "Expired subscription reactivated successfully",
+            };
+        } else {
+            console.log('⚠️ Debug: Already subscribed to this package');
+            throw new ApiError(StatusCodes.BAD_REQUEST, "Already subscribed to this package");
+        }
+    }
+
+    userSubscription.subscriptions.push({
+        package: packageId,
+        subscriptionId: `sub_${Date.now()}`,
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+        amountPaid: selectedPackage.price,
+        status: "active",
+        paymentType: "subscription",
     });
 
-    // Create the subscription
-    const subscription = await stripe.subscriptions.create({
-        customer: customerId,
-        items: [{ price: packageData.stripePriceId }],
-        expand: ["latest_invoice.payment_intent"],
-    });
+    console.log('🔍 Debug: Before Saving:', userSubscription);
 
-    user.stripeSubscriptionId = subscription.id;
-    user.subscriptionStatus = "active";
-    await user.save();
+    // Mark the array as modified
+    userSubscription.markModified('subscriptions');
+
+    // Save the updated subscription
+    await userSubscription.save();
+    console.log('✅ Debug: Saved Subscription:', userSubscription);
 
     return {
-        message: "Subscription started successfully",
-        subscriptionId: subscription.id,
+        message: "New subscription created successfully",
     };
 };
-const cancelSubscription = async (userId: string) => {
+
+
+
+const cancelSubscription = async (userId, subscriptionId) => {
     const user = await User.findById(userId);
     if (!user) throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
 
-    if (!user.stripeSubscriptionId) throw new ApiError(StatusCodes.BAD_REQUEST, "No active subscription found");
+    const userSubscription = await Subscription.findOne({ user: userId });
+
+    if (!userSubscription) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "User subscription not found");
+    }
+
+    const subscriptionToCancel = userSubscription.subscriptions.find(
+        (sub) => sub.subscriptionId === subscriptionId
+    );
+
+    if (!subscriptionToCancel) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "Subscription not found");
+    }
 
     // Cancel the subscription in Stripe
-    await stripe.subscriptions.del(user.stripeSubscriptionId);
+    await stripe.subscriptions.del(subscriptionId);
 
-    user.subscriptionStatus = "canceled";
-    user.stripeSubscriptionId = null;
-    await user.save();
+    subscriptionToCancel.status = "canceled";
+    await userSubscription.save();
 
     return { message: "Subscription canceled successfully" };
 };
 
-const getUserSubscription = async (userId: string) => {
+
+const getUserSubscription = async (userId) => {
     const user = await User.findById(userId);
     if (!user) throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
 
-    if (!user.stripeSubscriptionId) {
-        return { message: "No active subscription" };
+    const userSubscription = await Subscription.findOne({ user: userId }).populate('subscriptions.package');
+
+    if (!userSubscription) {
+        return { message: "No active subscriptions" };
     }
 
-    const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
     return {
-        status: subscription.status,
-        package: subscription.items.data[0].price.product,
-        nextBillingDate: new Date(subscription.current_period_end * 1000),
+        subscriptions: userSubscription.subscriptions.map((sub) => ({
+            package: sub.package.name,
+            price: sub.package.price,
+            status: sub.status,
+            nextBillingDate: sub.currentPeriodEnd,
+        })),
     };
 };
+
 
 export const PackageServices = {
     createPackageIntoDB,

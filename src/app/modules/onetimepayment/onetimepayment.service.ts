@@ -12,6 +12,8 @@ const getAllProductPurchaseDataIntoDB = async () => {
 };
 
 
+
+
 export const OnetimepaymentServices = {
     getAllProductPurchaseDataIntoDB
 };

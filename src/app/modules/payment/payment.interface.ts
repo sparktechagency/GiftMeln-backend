@@ -1,19 +1,8 @@
-import { Model, Schema, Types } from "mongoose";
+import { Model, Types } from "mongoose";
 
 export type IPayment = {
-  // customerId: string;
-  // price: number;
-  // user: Types.ObjectId;
-  // package: Types.ObjectId;
-  // trxId: string;
-  // // remaining: number;
-  // subscriptionId: string;
-  // status: 'expired' | 'active' | 'cancel';
-  // currentPeriodStart: string;
-  // currentPeriodEnd: string;
-  user: Types.ObjectId;
   customerId: string;
-  package: Types.ObjectId;
+  package: Types.ObjectId | undefined;
   trxId?: string;
   subscriptionId: string;
   currentPeriodStart: Date;
@@ -23,5 +12,11 @@ export type IPayment = {
   paymentType: "subscription";
   createdAt: Date;
   updatedAt: Date;
-}
-export type PaymentModel = Model<IPayment, Record<string, never>>;
+};
+
+export type IUserSubscription = {
+  user: Types.ObjectId;
+  subscriptions: IPayment[];
+};
+
+export type Payment = Model<IUserSubscription>;

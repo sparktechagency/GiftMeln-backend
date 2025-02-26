@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import { stripe } from "../../config/stripe";
-import { Payment } from "../modules/payment/payment.model";
+import { Subscription } from "../modules/payment/payment.model";
 import { handleOneTimePayment } from "../../helpers/handleOneTimePayment";
 import ApiError from "../../errors/ApiError";
 import { StatusCodes } from "http-status-codes";
 import Stripe from "stripe";
 import { handleSubscriptionCreated } from "../../helpers/handleSubscriptionCreated";
+import { User } from "../modules/user/user.model";
 
 /**
  * Express handler to process incoming Stripe webhook events.
@@ -15,11 +16,7 @@ import { handleSubscriptionCreated } from "../../helpers/handleSubscriptionCreat
 export const handleStripeWebhook = async (req: Request, res: Response) => {
     let event: Stripe.Event;
 
-    // Debug: Log the webhook secret to confirm it's loaded (remove in production)
-
     try {
-        // Verify and construct the Stripe event using the raw request body,
-        // the Stripe signature from the headers, and your webhook secret.
         event = stripe.webhooks.constructEvent(
             req.body,
             req.headers["stripe-signature"] as string,
@@ -30,39 +27,66 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
         return res.status(400).send({ error: `Webhook Error: ${error}` });
     }
 
+    console.log('✅ Webhook Event Received:', event.type);
+
     try {
         switch (event.type) {
-
             case "checkout.session.completed": {
                 const session = event.data.object as Stripe.Checkout.Session;
-                // Process one-time payment using the session details.
-                await handleOneTimePayment(session);
+                const customerId = session.customer as string;
+                console.log('🔍 Debug: Customer ID from Event:', customerId);
+
+                // Get the corresponding user from the database
+                const user = await User.findOne({ stripeCustomerId: customerId });
+                console.log('🔍 Debug: Searching for User with stripeCustomerId:', customerId);
+
+                if (!user) {
+                    console.error("❌ User not found for Customer ID:", customerId);
+                    throw new ApiError(StatusCodes.NOT_FOUND, "User not found for this customer ID");
+                }
+
+                const userId = user._id;
+                await handleOneTimePayment(session, userId);
                 break;
             }
+
             case "customer.subscription.created": {
                 const subscription = event.data.object as Stripe.Subscription;
-                // Process subscription creation.
-                await handleSubscriptionCreated(subscription);
+                const customerId = subscription.customer as string;
+
+                // Get the corresponding user from the database
+                const user = await User.findOne({ stripeCustomerId: customerId });
+
+                if (!user) {
+                    throw new ApiError(StatusCodes.NOT_FOUND, "User not found for this customer ID");
+                }
+
+                const userId = user._id;
+                console.log('🔍 Debug: User ID:', userId);
+
+                // Pass userId to handleSubscriptionCreated
+                await handleSubscriptionCreated(subscription, userId);
                 break;
             }
+
             case "payment_intent.succeeded": {
                 const paymentIntent = event.data.object as Stripe.PaymentIntent;
-                // Update the payment record status to 'completed'.
-                await Payment.findOneAndUpdate(
+                await Subscription.findOneAndUpdate(
                     { trxId: paymentIntent.id },
                     { status: 'completed', updatedAt: new Date() }
                 );
                 break;
             }
+
             case "payment_intent.payment_failed": {
                 const failedPayment = event.data.object as Stripe.PaymentIntent;
-                // Update the payment record status to 'failed'.
-                await Payment.findOneAndUpdate(
+                await Subscription.findOneAndUpdate(
                     { trxId: failedPayment.id },
                     { status: 'failed', updatedAt: new Date() }
                 );
                 break;
             }
+
             default:
                 console.log(`⚠️ DEBUG: Unhandled event type: ${event.type}`);
         }
@@ -72,6 +96,5 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
         return res.status(500).send({ error: `Error processing webhook event: ${error}` });
     }
 
-    // Respond with 200 OK to acknowledge receipt of the event.
     return res.sendStatus(200);
 };
