@@ -8,7 +8,6 @@ export const createSubscriptionProductHelper = async (
     payload: Partial<IPackage>
 ): Promise<{ productId: string; paymentLink: string } | null> => {
     try {
-        console.log("Received Payload:", payload); // ✅ Check input data
 
         if (!payload.name || !payload.description || !payload.price) {
             throw new ApiError(StatusCodes.BAD_REQUEST, "Missing required package details");

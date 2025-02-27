@@ -26,7 +26,7 @@ router.post('/checkout', PackageController.createOneTimePackage);
 router.post('/subscribe', PackageController.subscribeToPackage);
 
 //! Cancel a Subscription
-router.post('/cancel-subscription', PackageController.cancelSubscription);
+// router.post('/cancel-subscription', PackageController.cancelSubscription);
 
 //! Upgrade/Downgrade Subscription
 // router.post('/change-subscription', PackageController.changeSubscription);

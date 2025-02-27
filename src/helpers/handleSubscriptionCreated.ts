@@ -1,18 +1,16 @@
-// src/helpers/handleSubscriptionCreated.ts
 import { StatusCodes } from "http-status-codes";
 import { User } from "../app/modules/user/user.model";
 import ApiError from "../errors/ApiError";
 import { Package } from "../app/modules/package/package.model";
-import { ObjectId } from "mongoose";
 import Stripe from "stripe";
+import { Subscription } from "../app/modules/payment/payment.model";
 import { stripe } from "../config/stripe";
-import { Payment, Subscription } from "../app/modules/payment/payment.model";
+import { IPayment } from "../app/modules/payment/payment.interface";
 
 /**
  * Helper to find a user by email.
  * Throws an error if the user is not found.
  */
-
 const getUserByEmail = async (email: string) => {
     const user = await User.findOne({ email });
     if (!user) {
@@ -22,143 +20,79 @@ const getUserByEmail = async (email: string) => {
 };
 
 /**
- * Helper to find a package (pricing plan) by productId.
- * Throws an error if no matching package is found.
- */
-const getPackageByProductId = async (productId: string) => {
-    const plan = await Package.findOne({ productId });
-    if (!plan) {
-        throw new ApiError(StatusCodes.NOT_FOUND, `Plan not found for productId: ${productId}`);
-    }
-    return plan;
-};
-
-/**
- * Creates or updates a subscription record in the Payment collection.
- */
-const createNewSubscription = async (
-    user: ObjectId,
-    customerId: string,
-    packageId: ObjectId,
-    amountPaid: number,
-    trxId: string,
-    subscriptionId: string,
-    currentPeriodStart: string,
-    currentPeriodEnd: string
-) => {
-    // Create the payload using the field names expected by your schema
-    const payload = {
-        customerId,
-        amountPaid,
-        user,
-        package: packageId,
-        trxId,
-        subscriptionId,
-        paymentType: "subscription",
-        status: "success",
-        currentPeriodStart,
-        currentPeriodEnd,
-    };
-
-    // Check if a subscription for the user already exists.
-    const isExistSubscription = await Payment.findOne({ user: user });
-    if (isExistSubscription) {
-        console.log(isExistSubscription);
-        await Payment.findByIdAndUpdate({ _id: isExistSubscription._id }, payload, { new: true });
-    } else {
-        const newSubscription = new Payment(payload);
-        const data = await newSubscription.save();
-        console.log(data);
-    }
-};
-
-/**
  * Handles the Stripe subscription creation event.
- * Retrieves all necessary details from Stripe, validates the user and plan,
- * then creates or updates a subscription record and marks the user as subscribed.
  */
-// export const handleSubscriptionCreated = async (data: Stripe.Subscription) => {
-//     try {
-//         const subscription = await stripe.subscriptions.retrieve(data.id);
-//         const customer = (await stripe.customers.retrieve(subscription.customer as string)) as Stripe.Customer;
-//         const productId = subscription.items.data[0]?.price?.product as string;
-//         const invoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
-//         const trxId = invoice.payment_intent as string;
-//         const amountPaid = (invoice.total || 0) / 100;
+export const handleSubscriptionCreated = async (subscription: Stripe.Subscription) => {
+    try {
 
-//         const user = await getUserByEmail(customer.email as string);
-//         const plan = await getPackageByProductId(productId);
+        // Retrieve full subscription data
+        const fullSubscription = await stripe.subscriptions.retrieve(subscription.id);
 
-//         const currentPeriodStart = new Date(subscription.current_period_start * 1000);
-//         const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+        // Get productId from subscription
+        const productId = fullSubscription.items.data[0]?.price?.product as string;
+        if (!productId) {
+            throw new ApiError(StatusCodes.BAD_REQUEST, "Product ID not found in subscription");
+        }
 
-//         const subscriptionData = {
-//             user: user._id,
-//             customerId: customer.id,
-//             package: plan._id,
-//             trxId,
-//             subscriptionId: subscription.id,
-//             currentPeriodStart,
-//             currentPeriodEnd,
-//             amountPaid,
-//             status: "active" as "active",
-//             paymentType: "subscription" as "subscription",
-//         };
+        // Get the invoice to retrieve payment details
+        const invoice = await stripe.invoices.retrieve(fullSubscription.latest_invoice as string);
+        const trxId = invoice.payment_intent as string;
+        const amountPaid = (invoice.total || 0) / 100;
 
-//         // Check if a subscription already exists for the user and update or create accordingly.
-//         const existingSubscription = await Subscription.findOne({ user: user._id });
-//         if (existingSubscription) {
-//             await Subscription.findByIdAndUpdate(existingSubscription._id, subscriptionData, { new: true });
-//         } else {
-//             const newSubscription = new Subscription(subscriptionData);
-//             await newSubscription.save();
-//         }
+        // Get email from the subscription or customer
+        let email = fullSubscription.customer_email;
+        if (!email) {
+            const customer = await stripe.customers.retrieve(fullSubscription.customer as string);
+            email = customer.email;
+        }
 
-//         await User.findByIdAndUpdate(user._id, { isSubscribed: true }, { new: true });
-//     } catch (error) {
-//         console.error("Error handling subscription creation:", error);
-//         throw error;
-//     }
-// };
-export const handleSubscriptionCreated = async (subscription: Stripe.Subscription, userId: string) => {
-    console.log('🔍 Debug: Subscription:', subscription);
-    console.log('🔍 Debug: User ID:', userId);
+        if (!email) {
+            throw new ApiError(StatusCodes.BAD_REQUEST, "Email not found in subscription data");
+        }
 
-    // Check if the user already has a subscription record
-    let userSubscription = await Subscription.findOne({ user: userId });
+        // Retrieve user by email
+        const user = await getUserByEmail(email);
 
-    if (!userSubscription) {
-        console.log('📦 Debug: No existing subscription. Creating new...');
-        // Create a new subscription record for the user
-        userSubscription = await Subscription.create({
-            user: userId,
-            subscriptions: [
-                {
-                    package: subscription.items.data[0].price.product,
-                    subscriptionId: subscription.id,
-                    currentPeriodStart: new Date(subscription.current_period_start * 1000),
-                    currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-                    status: subscription.status,
-                    paymentType: "subscription",
-                },
-            ],
-        });
-    } else {
-        console.log('🔄 Debug: Updating existing subscription...');
-        // Update the existing subscription
-        userSubscription.subscriptions.push({
-            package: subscription.items.data[0].price.product,
-            subscriptionId: subscription.id,
-            currentPeriodStart: new Date(subscription.current_period_start * 1000),
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            status: subscription.status,
+        // Find the plan (package) associated with the productId
+        const plan = await Package.findOne({ productId });
+        if (!plan) {
+            throw new ApiError(StatusCodes.NOT_FOUND, `Plan not found for productId: ${productId}`);
+        }
+
+        // Format the current period start and end dates
+        const currentPeriodStart = new Date(fullSubscription.current_period_start * 1000);
+        const currentPeriodEnd = new Date(fullSubscription.current_period_end * 1000);
+
+        // Prepare subscription data according to IPayment interface
+        const subscriptionData: IPayment = {
+            user: user._id,
+            customerId: fullSubscription.customer as string,
+            package: plan._id,
+            trxId,
+            subscriptionId: fullSubscription.id,
+            currentPeriodStart,
+            currentPeriodEnd,
+            amountPaid,
+            status: "active",
             paymentType: "subscription",
-        });
+        };
 
-        // Mark subscriptions as modified and save
-        userSubscription.markModified('subscriptions');
-        await userSubscription.save();
+        // Check if subscription already exists for this user
+        const existingSubscription = await Subscription.findOne({ user: user._id });
+        let result;
+
+        if (existingSubscription) {
+            result = await Subscription.findByIdAndUpdate(existingSubscription._id, subscriptionData, { new: true });
+        } else {
+            result = await Subscription.create(subscriptionData);
+        }
+
+        // Update the user's subscription status
+        await User.findOneAndUpdate({ email }, { isSubscribed: true }, { new: true });
+
+        return true;
+    } catch (error) {
+        console.error("Error in handleSubscriptionCreated:", error);
+        throw error;
     }
-
-    console.log('✅ Debug: Subscription saved successfully:', userSubscription);
 };

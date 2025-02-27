@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { USER_ROLES } from '../../../enums/user';
 
 export type IUser = {
@@ -22,6 +22,13 @@ export type IUser = {
     oneTimeCode: number;
     expireAt: Date;
   };
+  subscription: {
+    id: String,
+    user: { type: Types.ObjectId | undefined, ref: 'User' },
+    status: String,
+    start_date: Date,
+    current_period_end: Date,
+  },
 };
 
 export type UserModal = {

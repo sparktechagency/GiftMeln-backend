@@ -74,7 +74,6 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
         postCode,
         orderMessage
     } = req.body;
-    console.log("products: " + products.productName);
     // Debug: Log incoming products
 
     const user = await User.findOne({ email: userEmail });
@@ -97,7 +96,6 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
             return acc;
         }, []);
 
-        console.log("Merged products:", mergedProducts);
 
         const lineItems = await Promise.all(mergedProducts.map(async (product: any) => {
             const { id, price, quantity, color, size, productName } = product;
@@ -224,16 +222,16 @@ const subscribeToPackage = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const cancelSubscription = catchAsync(async (req: Request, res: Response) => {
-    const { userId } = req.body;
-    const result = await PackageServices.cancelSubscription(userId);
-    sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: 'Subscription canceled successfully.',
-        data: result,
-    });
-});
+// const cancelSubscription = catchAsync(async (req: Request, res: Response) => {
+//     const { userId } = req.body;
+//     const result = await PackageServices.cancelSubscription(userId);
+//     sendResponse(res, {
+//         success: true,
+//         statusCode: StatusCodes.OK,
+//         message: 'Subscription canceled successfully.',
+//         data: result,
+//     });
+// });
 
 
 // Change Subscription (Upgrade/Downgrade)
@@ -266,7 +264,7 @@ export const PackageController = {
     createOneTimePackage,
     startTrial,
     subscribeToPackage,
-    cancelSubscription,
+    // cancelSubscription,
     // changeSubscription,
     getUserSubscription,
     getAllPackages,
