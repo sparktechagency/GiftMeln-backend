@@ -10,10 +10,9 @@ export const createSubscriptionProductHelper = async (
     try {
         console.log("Received Payload:", payload); // ✅ Check input data
 
-        // if (!payload.name || !payload.description || !payload.price) {
-        //     console.error("❌ Missing required fields", payload);
-        //     throw new ApiError(StatusCodes.BAD_REQUEST, "Missing required package details");
-        // }
+        if (!payload.name || !payload.description || !payload.price) {
+            throw new ApiError(StatusCodes.BAD_REQUEST, "Missing required package details");
+        }
 
         // Step 1: Create a product in Stripe
         const product = await stripe.products.create({
@@ -45,7 +44,6 @@ export const createSubscriptionProductHelper = async (
                 throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid duration");
         }
 
-        console.log("✅ Interval:", interval, "Count:", intervalCount);
 
         // Step 2: Create Price for the Product
         const price = await stripe.prices.create({
@@ -75,7 +73,7 @@ export const createSubscriptionProductHelper = async (
                 },
             },
             metadata: {
-                productId: String(product.id), // ✅ Convert to string
+                productId: String(product.id),
             },
         });
 
@@ -86,7 +84,6 @@ export const createSubscriptionProductHelper = async (
 
         return { productId: product.id, paymentLink: paymentLink.url };
     } catch (error) {
-        console.error("Stripe Error:", error); // ✅ Log actual error
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Subscription creation failed: ${error.message}`);
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Subscription creation failed: ${error}`);
     }
 };

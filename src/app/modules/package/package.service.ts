@@ -10,7 +10,6 @@ import { Types } from 'mongoose';
 
 
 const createPackageIntoDB = async (payload: IPackage) => {
-    // ✅ Ensure required field is present
     if (!payload.trialEndsAt) {
         payload.trialEndsAt = new Date();
     }
