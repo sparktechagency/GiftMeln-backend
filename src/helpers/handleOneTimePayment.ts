@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import ApiError from "../errors/ApiError";
 import { User } from "../app/modules/user/user.model";
 import Stripe from "stripe";
-import { Payment } from "../app/modules/payment/payment.model";
 import { CartServices } from "../app/modules/cart/cart.service";
 import { OneTimePayment } from "../app/modules/onetimepayment/onetimepayment.model";
 

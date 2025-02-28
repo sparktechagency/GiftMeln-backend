@@ -9,7 +9,7 @@ import { StatusCodes } from "http-status-codes";
 
 const subscriptionDetailsFromDB = async (user: JwtPayload): Promise<{ subscription: IPayment | {} }> => {
 
-    const subscription = await Payment.findOne({ user: user?.id }).populate("package").lean()
+    const subscription = await Subscription.findOne({ user: user?.id }).populate("package").lean()
     // if not found any subscription for the user, return an empty object
     if (!subscription) {
         return { subscription: {} }
@@ -18,7 +18,7 @@ const subscriptionDetailsFromDB = async (user: JwtPayload): Promise<{ subscripti
     if (subscriptionFromStripe?.status !== 'active') {
         await Promise.all([
             User.findByIdAndUpdate(user.id, { isSubscribed: false }, { new: true }),
-            Payment.findOneAndUpdate({
+            Subscription.findOneAndUpdate({
                 user: user.id
             }, { status: "expired" }, { new: true })
         ]);
@@ -40,7 +40,7 @@ const getAllSubscriptionIntoDB = async () => {
 
 // get all subscription history base this user 
 const getSubscriptionHistory = async (user: JwtPayload) => {
-    const subscription = await Payment.find({ user: user.id }).populate({
+    const subscription = await Subscription.find({ user: user.id }).populate({
         path: "package",
         model: "package",
     });

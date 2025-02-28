@@ -181,7 +181,6 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
             },
         });
     } catch (error) {
-        console.error("Error during payment process:", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: `Error during the payment process: ${error}`,

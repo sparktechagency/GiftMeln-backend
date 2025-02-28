@@ -13,7 +13,13 @@ app.use(Morgan.errorHandler);
 app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook)
 
 //body parser
-app.use(cors());
+app.use(cors(
+  // {
+  //   origin: "https://mahmud.binarybards.online",
+  //   credentials: true
+
+  // }
+));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
