@@ -2,6 +2,8 @@ import express from 'express';
 import { EventController } from './event.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import { eventValidation } from './event.validation';
+import auth from '../../middlewares/auth';
+import { USER_ROLES } from '../../../enums/user';
 
 const router = express.Router();
 

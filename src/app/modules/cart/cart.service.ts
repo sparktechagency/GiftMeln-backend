@@ -6,10 +6,34 @@ import { Cart } from './cart.model';
 // create cart service 
 const createCartServiceIntoDB = async (payload: ICart) => {
     const cart = await Cart.create(payload);
+
     if (!cart) {
         throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cart');
     }
-    return cart;
+
+    // Populate product details
+    const populatedCart = await cart.populate({
+        path: "variations.product",
+        select: "productName",
+    });
+
+    // Extract product names only
+    // @@ts-ignore
+    const productNames = Array.isArray(populatedCart?.variations?.product)
+        ? populatedCart.variations.product.map((p: any) => p.productName)
+        : [];
+    // Return final structured data
+    const formattedCart = {
+        _id: populatedCart._id,
+        user: populatedCart.user,
+        variations: {
+            color: populatedCart.variations.color,
+            size: populatedCart.variations.size,
+            quantity: populatedCart.variations.quantity,
+            product: productNames,
+        },
+    };
+    return formattedCart;
 };
 
 
@@ -20,7 +44,7 @@ const getAllCart = async (userId: string) => {
     const cart = await Cart.find({ user: userId })
         .populate({
             path: "variations.product",
-            select: "discountedPrice productName featureImage",
+            select: "discountedPrice productName feature",
         })
         .populate("user");
 

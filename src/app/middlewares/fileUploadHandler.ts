@@ -63,11 +63,8 @@ const fileUploadHandler = () => {
   //file filter
   const filterFilter = (req: Request, file: any, cb: FileFilterCallback) => {
     if (file.fieldname === 'image' || file.fieldname === 'feature' || file.fieldname === "additional") {
-      if (
-        file.mimetype === 'image/jpeg' ||
-        file.mimetype === 'image/png' ||
-        file.mimetype === 'image/jpg'
-      ) {
+      if (file.mimetype.startsWith('image/')) {
+
         cb(null, true);
       } else {
         cb(
@@ -102,6 +99,7 @@ const fileUploadHandler = () => {
 
   const upload = multer({
     storage: storage,
+    // @ts-ignore
     fileFilter: filterFilter,
   }).fields([
     { name: 'image', maxCount: 3 },

@@ -273,6 +273,14 @@ const getUserSubscription = async (userId) => {
 };
 
 
+// user subscription from all user
+const getAllUserSubscriptions = async () => {
+    const subscriptions = await Subscription.find().populate('package').populate('user');
+    return subscriptions;
+};
+
+
+
 export const PackageServices = {
     createPackageIntoDB,
     checkTrialStatus,
@@ -281,5 +289,6 @@ export const PackageServices = {
     getPackageById,
     subscribeToPackage,
     cancelSubscription,
-    getUserSubscription
+    getUserSubscription,
+    getAllUserSubscriptions
 };

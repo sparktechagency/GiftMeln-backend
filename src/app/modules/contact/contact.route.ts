@@ -5,7 +5,7 @@ import { USER_ROLES } from '../../../enums/user';
 
 const router = express.Router();
 
-router.post('/send', auth(USER_ROLES.ADMIN), ContactController.emailController);
+router.post('/send', ContactController.emailController);
 router.get("/", auth(USER_ROLES.ADMIN), ContactController.getAllContacts);
 
 export const ContactRoutes = router;

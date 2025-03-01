@@ -44,7 +44,7 @@ const getSubscriptionHistory = async (user: JwtPayload) => {
         path: "package",
         model: "package",
     });
-    if (!subscription.length) {
+    if (!subscription) {
         throw new ApiError(StatusCodes.BAD_GATEWAY, "Can't Find any Subscription");
     }
     return subscription;

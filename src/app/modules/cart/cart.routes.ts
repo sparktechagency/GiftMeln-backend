@@ -7,7 +7,8 @@ const router = express.Router();
 
 router.post('/create', CartController.createCart);
 router.get('/',
-    auth(USER_ROLES.USER),
+    auth(USER_ROLES.USER, USER_ROLES.SUPER_ADMIN),
+
     CartController.getAllCartItems);
 
 router.put("/:id", auth(USER_ROLES.USER), CartController.updateCartQuantity)

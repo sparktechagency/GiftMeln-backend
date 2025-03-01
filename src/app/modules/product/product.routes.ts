@@ -6,7 +6,6 @@ import { getMultipleFilesPath, getSingleFilePath } from "../../../shared/getFile
 import { any } from "zod";
 
 const router = Router();
-
 router.post(
     '/create',
     fileUploadHandler(),
@@ -16,9 +15,13 @@ router.post(
             const featureImage = getSingleFilePath(req.files, 'feature');
             const additionalImages = getMultipleFilesPath(req.files, 'additional');
 
+            if (!featureImage) {
+                return res.status(400).json({ message: "Feature image is required." });
+            }
+
             req.body = {
-                featureImage,
-                additionalImages,
+                feature: featureImage, // Change from 'featureImage' to 'feature'
+                additional: additionalImages,
                 ...payload,
                 color: parseArray(payload.color),
                 tag: parseTag(payload.tag),
@@ -32,7 +35,6 @@ router.post(
     productController.createProduct
 );
 
-// Parsing arrays like ["Blue", "Red"], or "Blue, Red"
 const parseArray = (value: any) => {
     if (!value) return [];
     if (Array.isArray(value)) return value;
@@ -60,6 +62,7 @@ router.get('/:id', productController.getSingleProduct);
 
 router.patch(
     '/update/:id',
+    // @ts-ignore
     fileUploadHandler(),
     productController.updateProduct
 );

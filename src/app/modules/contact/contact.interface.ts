@@ -3,7 +3,9 @@ import { Model } from 'mongoose';
 export type IContact = {
   name: string;
   email: string;
-  subject: string;
+  // subject: string;
+  phone: string;
+  country: string;
   message: string;
 };
 

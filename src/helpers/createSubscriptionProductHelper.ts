@@ -68,8 +68,9 @@ export const createSubscriptionProductHelper = async (
             after_completion: {
                 type: "redirect",
                 redirect: {
-                    // url: config.stripe.paymentSuccess || "http://localhost:3000/surveyQuestions",
+                    // url: config.stripe.paymentSuccess || "http://localhost:3000/payment/success",
                     url: "http://localhost:3000/surveyQuestions",
+
                 },
             },
             metadata: {

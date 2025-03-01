@@ -2,9 +2,9 @@ import { Schema, model, Types } from "mongoose";
 import { IPayment } from "./payment.interface";
 
 const PaymentSchema = new Schema<IPayment>({
-  user: { type: Types.ObjectId, ref: "User", required: true },
+  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   customerId: { type: String, required: true },
-  package: { type: Types.ObjectId, ref: "Package", required: true },
+  package: { type: Schema.Types.ObjectId, ref: "Package", required: true },
   trxId: { type: String },
   subscriptionId: { type: String, required: true },
   currentPeriodStart: { type: Date, required: true },

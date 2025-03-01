@@ -80,10 +80,19 @@ const getSingleCategory = async (id: string) => {
 }
 
 
+// delete category
+const deleteCategoryIntoDB = async (id: string) => {
+    const category = await Category.findByIdAndDelete(id);
+    if (!category) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "Category not found");
+    }
+    return category;
+}
 // export categories
 export const categoryService = {
     createCategories,
     updateCategory,
     getAllCategories,
-    getSingleCategory
+    getSingleCategory,
+    deleteCategoryIntoDB
 }

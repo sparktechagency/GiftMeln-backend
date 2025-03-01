@@ -36,7 +36,7 @@ app.use(express.static('uploads'))
 app.get('/', (req: Request, res: Response) => {
   const date = new Date(Date.now());
   res.send(
-    `<h1 style="text-align:center; color:#173616; font-family:Verdana;">Beep-beep! The server is alive and kicking.</h1>
+    `<h1 style="text-align:center; color:#173616; font-family:Verdana;">Beep-beep! This is Gift Mlen. The server is alive and kicking.</h1>
     <p style="text-align:center; color:#173616; font-family:Verdana;">${date}</p>
     `
   );

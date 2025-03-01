@@ -9,7 +9,8 @@ import { PackageRoutes } from '../app/modules/package/package.routes';
 import { PaymentRoutes } from '../app/modules/payment/payment.routes';
 import { CartRoutes } from '../app/modules/cart/cart.routes';
 import { ContactRoutes } from '../app/modules/contact/contact.route';
-import { OnetimepaymentRoutes } from '../app/modules/onetimepayment/onetimepayment.routes';
+import { OneTimePaymentRoutes } from '../app/modules/onetimepayment/onetimepayment.routes';
+import { SurveyRoute } from '../app/modules/servey/servey.routes';
 const router = express.Router();
 
 const apiRoutes = [
@@ -55,7 +56,11 @@ const apiRoutes = [
   },
   {
     path: "/product-history",
-    route: OnetimepaymentRoutes
+    route: OneTimePaymentRoutes
+  },
+  {
+    path: '/survey',
+    route: SurveyRoute
   }
 ];
 

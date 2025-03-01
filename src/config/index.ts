@@ -20,7 +20,7 @@ export default {
     pass: process.env.EMAIL_PASS,
   },
   super_admin: {
-    email: process.env.SUPER_ADMIN_EMAIL,
+    email: process.env.SUPER_ADMIN,
     password: process.env.SUPER_ADMIN_PASSWORD,
   },
   // for stripe payment gateway

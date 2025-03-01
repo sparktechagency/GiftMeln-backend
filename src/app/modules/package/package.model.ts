@@ -64,6 +64,6 @@ const packageSchema = new Schema<IPackage>(
   { timestamps: true }
 );
 
-export const Package = model<IPackage>('package', packageSchema);
+export const Package = model<IPackage>('Package', packageSchema);
 
 

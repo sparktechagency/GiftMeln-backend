@@ -4,6 +4,8 @@ import validateRequest from "../../middlewares/validateRequest";
 import { CategoryValidation } from "./category.validation";
 import fileUploadHandler from "../../middlewares/fileUploadHandler";
 import { getSingleFilePath } from "../../../shared/getFilePath";
+import auth from "../../middlewares/auth";
+import { USER_ROLES } from "../../../enums/user";
 
 const router = Router()
 
@@ -11,6 +13,7 @@ const router = Router()
 
 // create category route
 router.post("/create",
+    // @ts-ignore
     fileUploadHandler(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -35,6 +38,7 @@ router.post("/create",
 // update category 
 
 router.patch("/:id",
+    // @ts-ignore
     fileUploadHandler(),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -63,6 +67,8 @@ router.get("/", categoryController.getAllCategories);
 
 router.get("/:id", categoryController.getSingleCategory);
 
+// delete category 
+router.delete("/:id", auth(USER_ROLES.SUPER_ADMIN), categoryController.deleteCategory);
 
 // export category routes
 export const CategoryRoutes = router;

@@ -45,7 +45,7 @@ const updateCategory = catchAsync(async (req, res) => {
 const getAllCategories = catchAsync(async (req, res) => {
     const result = await categoryService.getAllCategories();
     sendResponse(res, {
-        Total: result?.length,
+        // Total: result.length,
         success: true,
         statusCode: StatusCodes.OK,
         message: 'All categories retrieved successfully',
@@ -68,7 +68,20 @@ const getSingleCategory = catchAsync(async (req, res) => {
         data: result,
     })
 })
-
+//delete category
+const deleteCategory = catchAsync(async (req, res) => {
+    const categoryId = req.params.id;
+    const result = await categoryService.deleteCategoryIntoDB(categoryId);
+    if (!result) {
+        throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
+    }
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Category deleted successfully',
+        data: result,
+    })
+})
 
 // export category controller
 export const categoryController = {
@@ -76,4 +89,5 @@ export const categoryController = {
     updateCategory,
     getAllCategories,
     getSingleCategory,
+    deleteCategory
 }

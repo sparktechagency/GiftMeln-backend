@@ -1,5 +1,7 @@
 import express from 'express';
 import { PackageController } from './package.controller';
+import auth from '../../middlewares/auth';
+import { USER_ROLES } from '../../../enums/user';
 
 const router = express.Router();
 
@@ -9,8 +11,7 @@ router.post('/create', PackageController.createPackage);
 // Get all available packages
 router.get('/', PackageController.getAllPackages);
 
-// Get details of a specific package by ID
-router.get('/:id', PackageController.getPackageById);
+
 
 // !Check if a user is eligible for a trial
 router.get('/check-trial', PackageController.checkUserTrial);
@@ -32,6 +33,12 @@ router.post('/subscribe', PackageController.subscribeToPackage);
 // router.post('/change-subscription', PackageController.changeSubscription);
 
 //! Get User's Active Subscription
+// get all subscriptions from user
+router.get("/all-subscriptions", auth(USER_ROLES.SUPER_ADMIN), PackageController.getAllSubscription);
 router.get('/user-subscription/:userId', PackageController.getUserSubscription);
+// Get details of a specific package by ID
+router.get('/:id', PackageController.getPackageById);
+
+
 
 export const PackageRoutes = router;
