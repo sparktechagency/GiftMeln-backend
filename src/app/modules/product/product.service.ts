@@ -97,9 +97,11 @@ const updateProductInDB = async (
 ) => {
     // Process files
     if (files.featureImage && files.featureImage.length > 0) {
+        // @ts-ignore
         updatedData.featureImage = files.featureImage[0].path;
     }
     if (files.additionalImages && files.additionalImages.length > 0) {
+        // @ts-ignore
         updatedData.additionalImages = files.additionalImages.map(file => file.path);
     }
 
@@ -126,11 +128,19 @@ const updateProductInDB = async (
 };
 
 
-
+// delete product
+const deleteProductFromDB = async (id: string) => {
+    const result = await ProductModel.findByIdAndDelete(id)
+    if (!result) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "No Data Found")
+    }
+    return result
+}
 
 export const productService = {
     createProductIntoDB,
     getAllProducts,
     getSingleProduct,
-    updateProductInDB
+    updateProductInDB,
+    deleteProductFromDB
 }

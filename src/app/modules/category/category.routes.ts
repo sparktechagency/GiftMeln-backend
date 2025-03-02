@@ -62,13 +62,13 @@ router.patch("/:id",
 
 // get all categories
 
-router.get("/", categoryController.getAllCategories);
+router.get("/", auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), categoryController.getAllCategories);
 // get single category
 
-router.get("/:id", categoryController.getSingleCategory);
+router.get("/:id", auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), categoryController.getSingleCategory);
 
 // delete category 
-router.delete("/:id", auth(USER_ROLES.SUPER_ADMIN), categoryController.deleteCategory);
+router.delete("/:id", auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), categoryController.deleteCategory);
 
 // export category routes
 export const CategoryRoutes = router;

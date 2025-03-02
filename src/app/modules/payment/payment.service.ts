@@ -30,7 +30,7 @@ const subscriptionDetailsFromDB = async (user: JwtPayload): Promise<{ subscripti
 const getAllSubscriptionIntoDB = async () => {
     const subscription = await Subscription.find().limit(20).populate({
         path: "package",
-        model: "package",
+        model: "Package",
     });
     if (!subscription.length) {
         throw new ApiError(StatusCodes.BAD_GATEWAY, "Can't Find any Subscription");

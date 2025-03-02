@@ -14,11 +14,11 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handl
 
 //body parser
 app.use(cors(
-  // {
-  //   origin: "https://mahmud.binarybards.online",
-  //   credentials: true
+  {
+    origin: "http://10.0.70.111:3001",
+    credentials: true
 
-  // }
+  }
 ));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

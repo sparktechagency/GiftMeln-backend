@@ -71,7 +71,17 @@ const updateProduct = catchAsync(async (req, res) => {
     });
 });
 
-
+// delete
+const deleteProduct = catchAsync(async (req, res) => {
+    const productData = req.params.id;
+    const result = await productService.deleteProductFromDB(productData);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Product deleted successfully',
+        data: result
+    });
+})
 
 
 export const productController = {
@@ -79,4 +89,5 @@ export const productController = {
     getAllProducts,
     getSingleProduct,
     updateProduct,
+    deleteProduct
 }

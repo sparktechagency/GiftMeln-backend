@@ -3,11 +3,14 @@ import { productController } from "./product.controller";
 import validateRequest from "../../middlewares/validateRequest";
 import fileUploadHandler from "../../middlewares/fileUploadHandler";
 import { getMultipleFilesPath, getSingleFilePath } from "../../../shared/getFilePath";
-import { any } from "zod";
+import auth from "../../middlewares/auth";
+import { USER_ROLES } from "../../../enums/user";
 
 const router = Router();
 router.post(
     '/create',
+    auth(USER_ROLES.SUPER_ADMIN),
+    // @ts-ignore
     fileUploadHandler(),
     async (req, res, next) => {
         try {
@@ -20,7 +23,7 @@ router.post(
             }
 
             req.body = {
-                feature: featureImage, // Change from 'featureImage' to 'feature'
+                feature: featureImage,
                 additional: additionalImages,
                 ...payload,
                 color: parseArray(payload.color),
@@ -57,14 +60,18 @@ const parseTag = (value: any) => {
     }
 };
 
-router.get('/', productController.getAllProducts);
-router.get('/:id', productController.getSingleProduct);
+router.get('/', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), productController.getAllProducts);
+router.get('/:id', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), productController.getSingleProduct);
 
 router.patch(
     '/update/:id',
+    auth(USER_ROLES.SUPER_ADMIN),
     // @ts-ignore
     fileUploadHandler(),
     productController.updateProduct
 );
+
+// delete product
+router.delete("/:id", auth(USER_ROLES.SUPER_ADMIN), productController.deleteProduct)
 
 export const productRoute = router;
