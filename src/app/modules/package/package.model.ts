@@ -60,6 +60,10 @@ const packageSchema = new Schema<IPackage>(
       type: String,
       default: null,
     },
+    isRecommended: {
+      type: String,
+      required: true
+    }
   },
   { timestamps: true }
 );
