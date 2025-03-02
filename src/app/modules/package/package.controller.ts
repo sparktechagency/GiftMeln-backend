@@ -250,8 +250,8 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
                 quantity: item.quantity
             })),
             mode: 'payment',
-            success_url: 'http://localhost:3000/payment/success',
-            cancel_url: 'http://localhost:3000/payment/cancel',
+            success_url: 'http://139.59.0.25:6009/payment/success',
+            cancel_url: 'http://139.59.0.25:6009/payment/cancel',
         });
 
         // Stripe returns amount_total in cents
