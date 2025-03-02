@@ -13,13 +13,14 @@ app.use(Morgan.errorHandler);
 app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook)
 
 //body parser
-app.use(cors(
-  {
-    origin: "http://10.0.70.111:3001",
-    credentials: true
+app.use(cors({
+  origin: [
+    "http://10.0.70.111:6009",
+    "http://10.0.70.111:3001"
+  ],
+  credentials: true
+}));
 
-  }
-));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
