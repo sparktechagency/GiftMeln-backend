@@ -74,8 +74,18 @@ const updateProfileToDB = async (
   return updateDoc;
 };
 
+const getAllAdminsFromDB = async (): Promise<Partial<IUser[]> | null> => {
+  const admins = await User.find({ role: USER_ROLES.ADMIN }).select("-password");
+  if (!admins || admins.length === 0) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "No admin users found!");
+  }
+  return admins;
+};
+
+
 export const UserService = {
   createUserToDB,
   getUserProfileFromDB,
   updateProfileToDB,
+  getAllAdminsFromDB
 };

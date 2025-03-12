@@ -52,4 +52,15 @@ const updateProfile = catchAsync(
   }
 );
 
-export const UserController = { createUser, getUserProfile, updateProfile };
+const getAllAdmins = catchAsync(async (req: Request, res: Response) => {
+  const result = await UserService.getAllAdminsFromDB();
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Admin users retrieved successfully',
+    data: result,
+  });
+});
+
+export const UserController = { createUser, getUserProfile, updateProfile, getAllAdmins };

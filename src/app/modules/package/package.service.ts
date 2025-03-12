@@ -9,43 +9,102 @@ import { Types } from 'mongoose';
 import { Subscription } from '../payment/payment.model';
 
 
+// const createPackageIntoDB = async (payload: IPackage) => {
+//     if (!payload.trialEndsAt) {
+//         payload.trialEndsAt = new Date();
+//     }
+//     const productPayload = {
+//         name: payload.name,
+//         description: payload.description,
+//         duration: payload.duration,
+//         price: payload.paymentType === "Free" ? 0 : Number(payload.price),
+//         paymentType: payload.paymentType,
+//         features: payload.features,
+//         category: payload.category
+//     };
+//     console.log("Product payload", productPayload);
+//     const product = await createSubscriptionProductHelper(productPayload);
+//     if (!product) {
+//         throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create subscription product");
+//     }
+//     // ✅ Add Stripe details to the payload
+//     payload.paymentLink = product.paymentLink;
+//     payload.productId = product.productId;
+
+//     const result = await Package.create(payload);
+//     if (!result) {
+//         await stripe.products.del(product.productId);
+//         throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to created Package")
+//     }
+//     return result;
+// };
 const createPackageIntoDB = async (payload: IPackage) => {
     if (!payload.trialEndsAt) {
         payload.trialEndsAt = new Date();
     }
 
-    const productPayload = {
-        name: payload.name,
-        description: payload.description,
-        duration: payload.duration,
-        price: Number(payload.price),
-        paymentType: payload.paymentType,
-        features: payload.features,
-        category: payload.category
-    };
+    let product;
 
+    if (payload.paymentType === "Free") {
+        // ✅ Generate a Stripe Checkout session for Free Trial
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            mode: "subscription",
+            line_items: [
+                {
+                    price_data: {
+                        currency: "usd",
+                        product_data: { name: "Free Trial Plan" },
+                        unit_amount: 0, // Free Plan
+                        recurring: { interval: "month" }, // Set your trial duration
+                    },
+                    quantity: 1,
+                },
+            ],
+            success_url: "https://yourdomain.com/success",
+            cancel_url: "https://yourdomain.com/cancel",
+        });
 
+        // ✅ Assign Stripe details for Free Plan
+        product = {
+            paymentLink: session.url,
+            productId: session.id, // Store session ID as reference
+        };
+    } else {
+        const productPayload = {
+            name: payload.name,
+            description: payload.description,
+            duration: payload.duration,
+            price: Number(payload.price),
+            paymentType: payload.paymentType,
+            features: payload.features,
+            category: payload.category
+        };
 
-    const product = await createSubscriptionProductHelper(productPayload);
+        console.log("🟢 Sending productPayload to createSubscriptionProductHelper:", productPayload);
 
-    if (!product) {
-        throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create subscription product");
+        product = await createSubscriptionProductHelper(productPayload);
+        if (!product) {
+            throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create subscription product");
+        }
     }
-
-
-    // ✅ Add Stripe details to the payload
+    // @ts-ignore
     payload.paymentLink = product.paymentLink;
     payload.productId = product.productId;
 
+    // ✅ Create Package in MongoDB
     const result = await Package.create(payload);
     if (!result) {
-        await stripe.products.del(product.productId);
-        throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to created Package")
+        if (payload.paymentType !== "Free") {
+            await stripe.products.del(payload.productId!);
+        }
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create Package");
     }
 
     return result;
-
 };
+
+
 /**
  * Check if a user's trial has expired
  */
@@ -130,6 +189,7 @@ const startTrialSubscription = async (userId: string, packageId: string, payment
     // ✅ Save subscription details in database
     user.stripeSubscriptionId = subscription.id;
     user.subscriptionStatus = "trialing";
+    // @ts-ignore
     user.trialEndsAt = new Date(subscription.trial_end * 1000);
     await user.save();
 

@@ -15,8 +15,10 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handl
 //body parser
 app.use(cors({
   origin: [
-    "http://139.59.0.25:6009",
-    "http://139.59.0.25:6007"
+    // "http://139.59.0.25:6009",
+    // "http://139.59.0.25:6007"
+    "http://localhost:3001",
+    "http://localhost:3002"
   ],
   credentials: true
 }));

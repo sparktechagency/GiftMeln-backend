@@ -13,7 +13,7 @@ router
   .patch(
     auth(USER_ROLES.ADMIN, USER_ROLES.USER),
     // @@ts-ignore
-    fileUploadHandler(),
+    fileUploadHandler() as any,
     (req: Request, res: Response, next: NextFunction) => {
       if (req.body.data) {
         req.body = UserValidation.updateUserZodSchema.parse(
@@ -30,5 +30,5 @@ router
     validateRequest(UserValidation.createUserZodSchema),
     UserController.createUser
   );
-
+router.get('/admins', auth(USER_ROLES.SUPER_ADMIN), UserController.getAllAdmins);
 export const UserRoutes = router;
