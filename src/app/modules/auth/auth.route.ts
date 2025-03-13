@@ -39,8 +39,13 @@ router.post(
 
 router.post(
   '/create-admin',
-  auth(USER_ROLES.ADMIN),
+  auth(USER_ROLES.SUPER_ADMIN),
   AuthController.addAdmin
 );
+
+router.delete('/delete-admin/:id',
+  auth(USER_ROLES.SUPER_ADMIN),
+  AuthController.deleteAdmin
+)
 
 export const AuthRoutes = router;

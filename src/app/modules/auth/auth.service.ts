@@ -16,6 +16,7 @@ import cryptoToken from '../../../util/cryptoToken';
 import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
+import mongoose from 'mongoose';
 
 //login
 // const loginUserFromDB = async (payload: ILoginData) => {
@@ -317,11 +318,25 @@ const addAdminIntoDB = async (payload: {
 };
 
 
+const deleteAdminFromDB = async (adminId: string) => {
+  const admin = await User.findByIdAndDelete(adminId);
+
+  if (!admin) {
+    throw new Error('Admin not found');
+  }
+
+  return admin;
+};
+
+
+
+
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
   forgetPasswordToDB,
   resetPasswordToDB,
   changePasswordToDB,
-  addAdminIntoDB
+  addAdminIntoDB,
+  deleteAdminFromDB
 };

@@ -84,11 +84,31 @@ const addAdmin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+
+
+
+const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const deletedAdmin = await AuthService.deleteAdminFromDB(id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Successfully Delete Admin",
+    data: deletedAdmin
+  })
+});
+
+
+
+
 export const AuthController = {
   verifyEmail,
   loginUser,
   forgetPassword,
   resetPassword,
   changePassword,
-  addAdmin
+  addAdmin,
+  deleteAdmin
 };
