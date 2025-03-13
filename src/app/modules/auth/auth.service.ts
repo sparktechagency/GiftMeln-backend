@@ -322,7 +322,7 @@ const deleteAdminFromDB = async (adminId: string) => {
   const admin = await User.findByIdAndDelete(adminId);
 
   if (!admin) {
-    throw new Error('Admin not found');
+    return []
   }
 
   return admin;
