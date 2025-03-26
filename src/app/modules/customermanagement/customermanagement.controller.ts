@@ -19,6 +19,7 @@ const getAllUser = catchAsync(async (req: Request, res: Response) => {
 const editUser = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const payload = req.body;
+    console.log("user details", payload);
     const result = await CustomermanagementServices.editUserFromDB(id, payload);
     sendResponse(res, {
         success: true,

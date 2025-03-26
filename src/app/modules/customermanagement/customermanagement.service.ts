@@ -2,6 +2,8 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { User } from '../user/user.model';
 import { CustomermanagementModel, ICustomermanagement } from './customermanagement.interface';
+import { IUser } from '../user/user.interface';
+import { Types } from 'mongoose';
 
 
 // gat all customer
@@ -15,9 +17,14 @@ const getAllUserFromDB = async () => {
 
 
 // edit user details
-const editUserFromDB = async (id: string, payload: Partial<ICustomermanagement>) => {
-    const result = await User.findOneAndUpdate({ id }, payload, { new: true });
+const editUserFromDB = async (id: string, payload: Partial<IUser>) => {
+    const objectId = new Types.ObjectId(id);
+    const result = await User.findById(objectId)
     if (!result) {
+        throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
+    }
+    const updatedUser = await User.findByIdAndUpdate(objectId, payload, { new: true });
+    if (!updatedUser) {
         throw new ApiError(StatusCodes.NOT_FOUND, 'Failed to update user');
     }
     return result;
