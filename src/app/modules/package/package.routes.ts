@@ -6,10 +6,10 @@ import { USER_ROLES } from '../../../enums/user';
 const router = express.Router();
 
 // Create a Package
-router.post('/create', PackageController.createPackage);
+router.post('/create', auth(USER_ROLES.SUPER_ADMIN), PackageController.createPackage);
 
 // Get all available packages
-router.get('/', PackageController.getAllPackages);
+router.get('/', auth(USER_ROLES.SUPER_ADMIN), PackageController.getAllPackages);
 
 
 

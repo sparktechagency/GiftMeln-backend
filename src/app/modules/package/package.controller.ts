@@ -3,14 +3,11 @@ import catchAsync from '../../../shared/catchAsync';
 import { PackageServices } from './package.service';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
-import { createOneTimeProductHelper } from '../../../helpers/createOneTimeProductHelper';
 import { User } from '../user/user.model';
 import { stripe } from '../../../config/stripe';
 import { OneTimePayment } from '../onetimepayment/onetimepayment.model';
 import { Cart } from '../cart/cart.model';
-import ApiError from '../../../errors/ApiError';
-import { ProductModel } from '../product/product.model';
-import { Types } from 'mongoose';
+
 
 
 
@@ -255,6 +252,18 @@ const getAllSubscription = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+// update package
+const updatePackage = catchAsync(async (req: Request, res: Response) => {
+    const result = await PackageServices.updatePackageIntoDB(req.params.id, req.body);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Package updated successfully.',
+        data: result,
+    });
+});
+
+
 export const PackageController = {
     createPackage,
     checkUserTrial,
@@ -266,6 +275,7 @@ export const PackageController = {
     getUserSubscription,
     getAllPackages,
     getPackageById,
-    getAllSubscription
+    getAllSubscription,
+    updatePackage
 
 };

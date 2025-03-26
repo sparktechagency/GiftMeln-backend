@@ -61,9 +61,22 @@ const packageSchema = new Schema<IPackage>(
       default: null,
     },
     isRecommended: {
-      type: String,
+      type: Boolean,
       required: true
-    }
+    },
+    updatePrice: {
+      type: Number,
+      default: null,
+    },
+    stripePriceId: {
+      type: String,
+      default: null,
+    },
+    stripeSubscriptionId: {
+      type: String,
+      default: null,
+    },
+
   },
   { timestamps: true }
 );

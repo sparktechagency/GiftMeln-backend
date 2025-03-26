@@ -13,5 +13,6 @@ export interface IPackage {
   stripePriceId?: string;
   stripeSubscriptionId?: string;
   category: "Free Trial" | "Budget Friendly" | "Premium Plan" | "Spoiling Myself";
-  isRecommended: string
+  isRecommended: boolean;
+  updatePrice?: number;
 }

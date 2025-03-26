@@ -68,7 +68,7 @@ const createPackageIntoDB = async (payload: IPackage) => {
         // ✅ Assign Stripe details for Free Plan
         product = {
             paymentLink: session.url,
-            productId: session.id, // Store session ID as reference
+            productId: session.id,
         };
     } else {
         const productPayload = {
@@ -78,7 +78,9 @@ const createPackageIntoDB = async (payload: IPackage) => {
             price: Number(payload.price),
             paymentType: payload.paymentType,
             features: payload.features,
-            category: payload.category
+            category: payload.category,
+            isRecommended: payload.isRecommended,
+            updatePrice: payload.updatePrice,
         };
 
         console.log("🟢 Sending productPayload to createSubscriptionProductHelper:", productPayload);
@@ -336,9 +338,47 @@ const getUserSubscription = async (userId) => {
 // user subscription from all user
 const getAllUserSubscriptions = async () => {
     const subscriptions = await Subscription.find().populate('package').populate('user');
+    if (subscriptions.length === 0) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "No subscriptions found");
+    }
     return subscriptions;
 };
 
+
+// update package 
+const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
+    const packageData = await Package.findById(id)
+    if (!packageData) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "Package not found");
+    }
+    let updatedProduct;
+    let updatedPriceMonthly;
+    let updatedPriceYearly;
+    if (payload.updatePrice || payload.price) {
+        if (payload.duration === "month" || payload.duration === "year") {
+            const priceData = {
+                unit_amount: (payload.updatePrice || payload.price!) * 100,
+                currency: 'usd',
+            }
+            if (payload.duration === "month") {
+                updatedPriceMonthly = await stripe.prices.update(packageData?.stripePriceId!, {
+                    ...priceData,
+                    recurring: { interval: "month" }
+                })
+            }
+            if (payload.duration === "year") {
+                updatedPriceYearly = await stripe.prices.update(packageData?.stripePriceId!, {
+                    ...priceData,
+                    recurring: { interval: "year" }
+                })
+                packageData.stripePriceId = updatedPriceYearly.id;
+            }
+        }
+    }
+
+    const updatedPackage = await Package.findByIdAndUpdate(id, payload, { new: true })
+    return updatedPackage;
+}
 
 
 export const PackageServices = {
@@ -350,5 +390,6 @@ export const PackageServices = {
     subscribeToPackage,
     cancelSubscription,
     getUserSubscription,
-    getAllUserSubscriptions
+    getAllUserSubscriptions,
+    updatePackageIntoDB
 };
