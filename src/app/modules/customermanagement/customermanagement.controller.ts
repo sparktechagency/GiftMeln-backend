@@ -15,19 +15,7 @@ const getAllUser = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
-// edit user details
-const editUser = catchAsync(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const payload = req.body;
-    console.log("user details", payload);
-    const result = await CustomermanagementServices.editUserFromDB(id, payload);
-    sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: 'User updated successfully',
-        data: result
-    })
-})
+
 
 // delete customer
 
@@ -57,7 +45,6 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
 
 export const CustomermanagementController = {
     getAllUser,
-    editUser,
     deleteCustomer,
     getSingleUser
 };

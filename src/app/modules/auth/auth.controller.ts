@@ -1,9 +1,8 @@
-import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { AuthService } from './auth.service';
-import { USER_ROLES } from '../../../enums/user';
+import { Request, Response } from 'express';
 
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   const { ...verifyData } = req.body;
@@ -84,10 +83,6 @@ const addAdmin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-
-
-
 const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const deletedAdmin = await AuthService.deleteAdminFromDB(id);
@@ -100,8 +95,16 @@ const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
   })
 });
 
-
-
+const banUserIntoDB = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await AuthService.banUser(id)
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "User has been successfully banned",
+    data: result
+  })
+})
 
 export const AuthController = {
   verifyEmail,
@@ -110,5 +113,6 @@ export const AuthController = {
   resetPassword,
   changePassword,
   addAdmin,
-  deleteAdmin
+  deleteAdmin,
+  banUserIntoDB
 };

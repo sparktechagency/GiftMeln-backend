@@ -38,7 +38,7 @@ import mongoose from 'mongoose';
 //   if (isExistUser.status === 'delete') {
 //     throw new ApiError(
 //       StatusCodes.BAD_REQUEST,
-//       'You don’t have permission to access this content.It looks like your account has been deactivated.'
+//       'You don't have permission to access this content.It looks like your account has been deactivated.'
 //     );
 //   }
 
@@ -72,7 +72,7 @@ const loginUserFromDB = async (payload: ILoginData) => {
   if (isExistUser.status === 'delete') {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Your account has been deactivated.'
+      'Your account has been banned. Please contact the administrator for more information.'
     );
   }
 
@@ -330,6 +330,23 @@ const deleteAdminFromDB = async (adminId: string) => {
 
 
 
+const banUser = async (id: string) => {
+  if (!id) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User not found")
+  }
+  const result = await User.findByIdAndUpdate(
+    id,
+    { status: 'delete' },
+    { new: true }
+  )
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Can't find this user")
+  }
+  return result
+}
+
+
+
 
 export const AuthService = {
   verifyEmailToDB,
@@ -338,5 +355,6 @@ export const AuthService = {
   resetPasswordToDB,
   changePasswordToDB,
   addAdminIntoDB,
-  deleteAdminFromDB
+  deleteAdminFromDB,
+  banUser
 };

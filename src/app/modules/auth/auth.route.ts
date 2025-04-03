@@ -48,4 +48,10 @@ router.delete('/delete-admin/:id',
   AuthController.deleteAdmin
 )
 
+router.patch('/ban-user/:id',
+  auth(USER_ROLES.SUPER_ADMIN),
+  AuthController.banUserIntoDB
+)
+
+
 export const AuthRoutes = router;
