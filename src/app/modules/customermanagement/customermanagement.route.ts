@@ -9,4 +9,8 @@ router.get('/', auth(USER_ROLES.SUPER_ADMIN), CustomerManagementController.getAl
 router.get('/:id', auth(USER_ROLES.SUPER_ADMIN), CustomerManagementController.getSingleUser);
 router.delete('/:id', auth(USER_ROLES.SUPER_ADMIN), CustomerManagementController.deleteCustomer);
 
+
+// subscription amount how much have in his account
+router.get('/subscription/:id', auth(USER_ROLES.SUPER_ADMIN), CustomerManagementController.getSubscriptionPlan);
+
 export const CustomerManagementRoutes = router;

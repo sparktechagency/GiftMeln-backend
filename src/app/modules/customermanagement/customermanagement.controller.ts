@@ -41,10 +41,21 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
         data: result
     })
 })
-// get 
+// get user subscription plan how much have amount in his account
+const getSubscriptionPlan = catchAsync(async(req:Request, res:Response)=>{
+    const {id} = req.params;
+    const result = await CustomerManagementServices.getSubscriptionPlanFromDB(id);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'User fetched successfully',
+        data: result
+    })
+})
 
 export const CustomerManagementController = {
     getAllUser,
     deleteCustomer,
-    getSingleUser
+    getSingleUser,
+    getSubscriptionPlan
 };

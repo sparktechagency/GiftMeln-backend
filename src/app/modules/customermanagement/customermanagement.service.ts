@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { User } from '../user/user.model';
+import { Package } from '../package/package.model';
 
 
 // gat all customer
@@ -35,9 +36,12 @@ const getSingleUserFromDB = async (id: string) => {
 
 
 // track customer subscription
-const trackCustomerSubscription = async () => {
-
-
+const getSubscriptionPlanFromDB = async (id:string) => {
+const result = await Package.find({user:id});
+if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
+}
+return result;
 }
 
 
@@ -45,5 +49,6 @@ const trackCustomerSubscription = async () => {
 export const CustomerManagementServices = {
     getAllUserFromDB,
     deleteCustomerFromDB,
-    getSingleUserFromDB
+    getSingleUserFromDB,
+    getSubscriptionPlanFromDB
 };
