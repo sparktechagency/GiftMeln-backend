@@ -11,7 +11,7 @@ import { CartRoutes } from '../app/modules/cart/cart.routes';
 import { ContactRoutes } from '../app/modules/contact/contact.route';
 import { OneTimePaymentRoutes } from '../app/modules/onetimepayment/onetimepayment.routes';
 import { SurveyRoute } from '../app/modules/servey/servey.routes';
-import { CustomermanagementRoutes } from '../app/modules/customermanagement/customermanagement.route';
+import { CustomerManagementRoutes } from '../app/modules/customermanagement/customermanagement.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -65,7 +65,7 @@ const apiRoutes = [
   },
   {
     path: '/customer',
-    route: CustomermanagementRoutes
+    route: CustomerManagementRoutes
   }
 ];
 

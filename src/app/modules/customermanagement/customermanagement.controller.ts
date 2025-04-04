@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { CustomermanagementServices } from './customermanagement.service';
+import { CustomerManagementServices } from './customermanagement.service';
 import catchAsync from '../../../shared/catchAsync';
 import { StatusCodes } from 'http-status-codes';
 import sendResponse from '../../../shared/sendResponse';
 
 // view all customer
 const getAllUser = catchAsync(async (req: Request, res: Response) => {
-    const result = await CustomermanagementServices.getAllUserFromDB();
+    const result = await CustomerManagementServices.getAllUserFromDB();
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -21,7 +21,7 @@ const getAllUser = catchAsync(async (req: Request, res: Response) => {
 
 const deleteCustomer = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await CustomermanagementServices.deleteCustomerFromDB(id);
+    const result = await CustomerManagementServices.deleteCustomerFromDB(id);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -33,7 +33,7 @@ const deleteCustomer = catchAsync(async (req: Request, res: Response) => {
 // get single one
 const getSingleUser = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await CustomermanagementServices.getSingleUserFromDB(id);
+    const result = await CustomerManagementServices.getSingleUserFromDB(id);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -41,9 +41,9 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
         data: result
     })
 })
+// get 
 
-
-export const CustomermanagementController = {
+export const CustomerManagementController = {
     getAllUser,
     deleteCustomer,
     getSingleUser

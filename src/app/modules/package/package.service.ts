@@ -312,8 +312,7 @@ const cancelSubscription = async (userId, subscriptionId) => {
     return { message: "Subscription canceled successfully" };
 };
 
-// @ts-ignore
-const getUserSubscription = async (userId) => {
+const getUserSubscription = async (userId: string) => {
     const user = await User.findById(userId);
     if (!user) throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
 

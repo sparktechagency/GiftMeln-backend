@@ -34,7 +34,15 @@ const getSingleUserFromDB = async (id: string) => {
 
 
 
-export const CustomermanagementServices = {
+// track customer subscription
+const trackCustomerSubscription = async () => {
+
+
+}
+
+
+
+export const CustomerManagementServices = {
     getAllUserFromDB,
     deleteCustomerFromDB,
     getSingleUserFromDB
