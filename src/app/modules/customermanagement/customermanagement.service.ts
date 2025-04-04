@@ -36,6 +36,7 @@ const getSingleUserFromDB = async (id: string) => {
 
 
 // track customer subscription
+//! todo: get all subscriptions from user is not work properly
 const getSubscriptionPlanFromDB = async (id:string) => {
 const result = await Package.find({user:id});
 if (!result) {
