@@ -27,8 +27,13 @@ export default {
   stripe: {
     stripeSecretKey: process.env.STRIPE_API_SECRET,
     webhookSecret: process.env.WEBHOOK_SECRET,
-    paymentSuccess: process.env.STRIPE_PAYMENT_SUCCESS_LINK
-  }
-
-
+    paymentSuccess: process.env.STRIPE_PAYMENT_SUCCESS_LINK,
+  },
+  shopify: {
+    apiKey: process.env.SHOPIFY_API_KEY!,
+    apiSecret: process.env.SHOPIFY_API_SECRET!,
+    storeDomain: process.env.SHOPIFY_STORE_DOMAIN!,
+    accessToken: process.env.SHOPIFY_ACCESS_TOKEN!,
+    apiVersion: '2024-04',
+  },
 };
