@@ -24,49 +24,49 @@ const apiRoutes = [
     route: AuthRoutes,
   },
   {
-    path: "/event",
-    route: EventRoutes
+    path: '/event',
+    route: EventRoutes,
   },
   {
-    path: "/wishlist",
-    route: wishlistRoutes
+    path: '/wishlist',
+    route: wishlistRoutes,
   },
   {
-    path: "/product",
-    route: productRoute
+    path: '/product',
+    route: productRoute,
   },
   {
-    path: "/category",
-    route: CategoryRoutes
+    path: '/category',
+    route: CategoryRoutes,
   },
   {
-    path: "/package",
-    route: PackageRoutes
+    path: '/package',
+    route: PackageRoutes,
   },
   {
-    path: "/payment",
-    route: PaymentRoutes
+    path: '/payment',
+    route: PaymentRoutes,
   },
   {
-    path: "/cart",
-    route: CartRoutes
+    path: '/cart',
+    route: CartRoutes,
   },
   {
-    path: "/contact",
-    route: ContactRoutes
+    path: '/contact',
+    route: ContactRoutes,
   },
   {
-    path: "/product-history",
-    route: OneTimePaymentRoutes
+    path: '/product-history',
+    route: OneTimePaymentRoutes,
   },
   {
     path: '/survey',
-    route: SurveyRoute
+    route: SurveyRoute,
   },
   {
     path: '/customer',
-    route: CustomerManagementRoutes
-  }
+    route: CustomerManagementRoutes,
+  },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));

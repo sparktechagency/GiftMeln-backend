@@ -83,13 +83,12 @@ const deleteProduct = catchAsync(async (req, res) => {
 // shopify
 
 const shopifyProduct = catchAsync(async (req, res) => {
-  console.log('This is controller');
   const result = await productService.shopifyProductFromDB();
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Shopify product retrieved successfully',
-    data: result,
+    data: result.products,
   });
 });
 

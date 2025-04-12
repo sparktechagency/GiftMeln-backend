@@ -148,7 +148,6 @@ const deleteProductFromDB = async (id: string) => {
 };
 // shopify all service
 const shopifyProductFromDB = async () => {
-  console.log('Yes bro this service is called');
 
   // 👇 Check if accessToken exists
   if (!config.shopify.accessToken) {

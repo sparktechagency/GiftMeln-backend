@@ -4,7 +4,7 @@ export type ICart = {
   // Define the interface for Cart here
   user: Types.ObjectId | undefined
   variations: {
-    product: Types.ObjectId | Types.ObjectId[] | undefined;
+    product: string;
     color: string;
     size: string;
     quantity: number;
