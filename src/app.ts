@@ -10,18 +10,25 @@ const app = express();
 //morgan
 app.use(Morgan.successHandler);
 app.use(Morgan.errorHandler);
-app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook)
+app.post(
+  '/api/stripe/webhook',
+  express.raw({ type: 'application/json' }),
+  handleStripeWebhook
+);
 
 //body parser
-app.use(cors({
-  origin: [
-    // "http://139.59.0.25:6009",
-    // "http://139.59.0.25:6007"
-    // "http://localhost:3001",
-    "http://localhost:3002"
-  ],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      // "http://139.59.0.25:6009",
+      // "http://139.59.0.25:6007"
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002'
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -33,7 +40,7 @@ app.use(express.static('uploads'));
 app.use('/api/v1', router);
 
 //file retrieve
-app.use(express.static('uploads'))
+app.use(express.static('uploads'));
 
 //live response
 app.get('/', (req: Request, res: Response) => {

@@ -82,9 +82,6 @@ const createPackageIntoDB = async (payload: IPackage) => {
             isRecommended: payload.isRecommended,
             updatePrice: payload.updatePrice,
         };
-
-        console.log("🟢 Sending productPayload to createSubscriptionProductHelper:", productPayload);
-
         product = await createSubscriptionProductHelper(productPayload);
         if (!product) {
             throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create subscription product");
@@ -207,7 +204,7 @@ const startTrialSubscription = async (userId: string, packageId: string, payment
 const getAllPackages = async () => {
     const packages = await Package.find({});
     if (!packages) {
-        throw new ApiError(StatusCodes.NOT_FOUND, "No packages found");
+       return [];
     }
     return packages;
 };

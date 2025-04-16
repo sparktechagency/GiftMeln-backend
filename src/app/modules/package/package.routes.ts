@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/create', auth(USER_ROLES.SUPER_ADMIN), PackageController.createPackage);
 
 // Get all available packages
-router.get('/', auth(USER_ROLES.SUPER_ADMIN), PackageController.getAllPackages);
+router.get("/",PackageController.getAllPackages);
 
 
 
