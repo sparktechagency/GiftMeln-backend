@@ -40,5 +40,8 @@ router.get('/user-subscription/:userId', PackageController.getUserSubscription);
 router.get('/:id', PackageController.getPackageById);
 
 
+// * Update a Package
+router.patch("/:id", auth(USER_ROLES.SUPER_ADMIN), PackageController.updatePackage)
+
 
 export const PackageRoutes = router;
