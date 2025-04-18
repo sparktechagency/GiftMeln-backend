@@ -8,35 +8,7 @@ import { stripe } from '../../../config/stripe';
 import { Types } from 'mongoose';
 import { Subscription } from '../payment/payment.model';
 
-// const createPackageIntoDB = async (payload: IPackage) => {
-//     if (!payload.trialEndsAt) {
-//         payload.trialEndsAt = new Date();
-//     }
-//     const productPayload = {
-//         name: payload.name,
-//         description: payload.description,
-//         duration: payload.duration,
-//         price: payload.paymentType === "Free" ? 0 : Number(payload.price),
-//         paymentType: payload.paymentType,
-//         features: payload.features,
-//         category: payload.category
-//     };
-//     console.log("Product payload", productPayload);
-//     const product = await createSubscriptionProductHelper(productPayload);
-//     if (!product) {
-//         throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create subscription product");
-//     }
-//     // ✅ Add Stripe details to the payload
-//     payload.paymentLink = product.paymentLink;
-//     payload.productId = product.productId;
-
-//     const result = await Package.create(payload);
-//     if (!result) {
-//         await stripe.products.del(product.productId);
-//         throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to created Package")
-//     }
-//     return result;
-// };
+// Create a new package
 const createPackageIntoDB = async (payload: IPackage) => {
   if (!payload.trialEndsAt) {
     payload.trialEndsAt = new Date();

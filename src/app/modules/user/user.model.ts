@@ -40,12 +40,11 @@ const userSchema = new Schema<IUser, UserModal>(
     status: {
       type: String,
       enum: ['active', 'delete'],
-      default: 'active',
     },
-    // verified: {
-    //   type: Boolean,
-    //   default: false,
-    // },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
     authentication: {
       type: {
         isResetPassword: {

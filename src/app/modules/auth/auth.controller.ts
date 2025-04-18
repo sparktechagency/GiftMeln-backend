@@ -78,8 +78,8 @@ const addAdmin = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.CREATED,
-    message: result.message,
-    data: null,
+    message: 'Admin added successfully',
+    data: result,
   });
 });
 

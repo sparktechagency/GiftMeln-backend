@@ -5,7 +5,6 @@ import config from '../../../config';
 import ApiError from '../../../errors/ApiError';
 import { emailHelper } from '../../../helpers/emailHelper';
 import { jwtHelper } from '../../../helpers/jwtHelper';
-import { emailTemplate } from '../../../shared/emailTemplate';
 import {
   IAuthResetPassword,
   IChangePassword,
@@ -16,49 +15,8 @@ import cryptoToken from '../../../util/cryptoToken';
 import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
-import mongoose from 'mongoose';
+import { emailTemplate } from '../../../shared/emailTemplate';
 
-//login
-// const loginUserFromDB = async (payload: ILoginData) => {
-//   const { email, password } = payload;
-//   const isExistUser = await User.findOne({ email }).select('+password');
-//   if (!isExistUser) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
-//   }
-
-//   //check verified and status
-//   // if (!isExistUser.verified) {
-//   //   throw new ApiError(
-//   //     StatusCodes.BAD_REQUEST,
-//   //     'Please verify your account, then try to login again'
-//   //   );
-//   // }
-
-//   //check user status
-//   if (isExistUser.status === 'delete') {
-//     throw new ApiError(
-//       StatusCodes.BAD_REQUEST,
-//       'You don't have permission to access this content.It looks like your account has been deactivated.'
-//     );
-//   }
-
-//   //check match password
-//   if (
-//     password &&
-//     !(await User.isMatchPassword(password, isExistUser.password))
-//   ) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect!');
-//   }
-
-//   //create token
-//   const createToken = jwtHelper.createToken(
-//     { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
-//     config.jwt.jwt_secret as Secret,
-//     config.jwt.jwt_expire_in as string
-//   );
-
-//   return { createToken };
-// };
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
 
@@ -93,7 +51,6 @@ const loginUserFromDB = async (payload: ILoginData) => {
 
   return { user: userData, token: createToken };
 };
-
 
 //forget password
 const forgetPasswordToDB = async (email: string) => {
@@ -291,62 +248,63 @@ const addAdminIntoDB = async (payload: {
   email: string;
   password: string;
 }): Promise<{ message: string }> => {
-  const { email, password, name } = payload;
-
-  // Check if email already exists
-  const isExistUser = await User.findOne({ email });
+  const isExistUser = await User.findOne({ email: payload.email });
   if (isExistUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exists!');
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'User already exists');
   }
 
-  // Hash password
-  const hashPassword = await bcrypt.hash(
-    password,
-    Number(config.bcrypt_salt_rounds)
+  const createUser = await User.create(payload);
+  if (!createUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
+  }
+  const otp = generateOTP();
+  const values = {
+    name: createUser.name,
+    otp: otp,
+    email: createUser.email!,
+  };
+
+  const createAccountTemplate = emailTemplate.createAccount(values);
+  emailHelper.sendEmail(createAccountTemplate);
+
+  // Save OTP in authentication field
+  const authentication = {
+    oneTimeCode: otp,
+    expireAt: new Date(Date.now() + 3 * 60000),
+  };
+
+  await User.findByIdAndUpdate(
+    createUser._id,
+    { $set: { authentication } },
+    { new: true }
   );
-
-  // Create new admin user
-  const result = await User.create({
-    name,
-    email,
-    password: hashPassword,
-    role: 'ADMIN',
-    verified: true,
-  });
-
-  return { message: 'Admin user created successfully' };
+  return { message: 'Admin created successfully' };
 };
-
 
 const deleteAdminFromDB = async (adminId: string) => {
   const admin = await User.findByIdAndDelete(adminId);
 
   if (!admin) {
-    return []
+    return [];
   }
 
   return admin;
 };
 
-
-
 const banUser = async (id: string) => {
   if (!id) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "User not found")
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'User not found');
   }
   const result = await User.findByIdAndUpdate(
     id,
     { status: 'delete' },
     { new: true }
-  )
+  );
   if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Can't find this user")
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Can't find this user");
   }
-  return result
-}
-
-
-
+  return result;
+};
 
 export const AuthService = {
   verifyEmailToDB,
@@ -356,5 +314,5 @@ export const AuthService = {
   changePasswordToDB,
   addAdminIntoDB,
   deleteAdminFromDB,
-  banUser
+  banUser,
 };

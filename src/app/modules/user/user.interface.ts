@@ -15,8 +15,7 @@ export type IUser = {
   stripeSubscriptionId?: string;
   subscriptionStatus?: string;
   trialEndsAt?: Date;
-
-  // verified: boolean;
+  verified: boolean;
   authentication?: {
     isResetPassword: boolean;
     oneTimeCode: number;

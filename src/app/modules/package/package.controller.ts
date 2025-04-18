@@ -71,8 +71,6 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
         orderMessage
     } = req.body;
 
-    // Debug: Log incoming products
-    console.log(products);
 
     // Find the user by email
     const user = await User.findOne({ email: userEmail });
@@ -238,10 +236,7 @@ const getUserSubscription = catchAsync(async (req: Request, res: Response) => {
 // get all user subscription
 const getAllSubscription = catchAsync(async (req: Request, res: Response) => {
     const result = await PackageServices.getAllUserSubscriptions();
-    // console.log("result", result);
-    // if (!result || result.length === 0) {
-    //     throw new ApiError(StatusCodes.NOT_FOUND, "No subscriptions found");
-    // }
+
 
     sendResponse(res, {
         success: true,
