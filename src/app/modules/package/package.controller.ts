@@ -236,8 +236,6 @@ const getUserSubscription = catchAsync(async (req: Request, res: Response) => {
 // get all user subscription
 const getAllSubscription = catchAsync(async (req: Request, res: Response) => {
     const result = await PackageServices.getAllUserSubscriptions();
-
-
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,

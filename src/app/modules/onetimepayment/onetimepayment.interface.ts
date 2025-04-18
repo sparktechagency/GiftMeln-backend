@@ -5,7 +5,6 @@ export interface IOnetimePayment extends Document {
   amountPaid?: number;
   trxId?: string;
   status: "pending" | "completed" | "failed";
-
   userName: string;
   userEmail: string;
   country: string;
