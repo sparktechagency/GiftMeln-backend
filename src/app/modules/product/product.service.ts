@@ -188,29 +188,29 @@ const getSingleProductFromShopify = async (id: string) => {
   const data = await res.json();
   const shopifyProduct = data.product;
   // filter image (only one main image)
-  const productData = {
-    id: shopifyProduct.id,
-    title: shopifyProduct.title,
-    description: shopifyProduct.body_html,
-    vendor: shopifyProduct.vendor,
-    product_type: shopifyProduct.product_type,
-    created_at: shopifyProduct.created_at,
-    handle: shopifyProduct.handle,
-    updated_at: shopifyProduct.updated_at,
-    published_at: shopifyProduct.published_at,
-    template_suffix: shopifyProduct.template_suffix,
-    published_scope: shopifyProduct.published_scope,
-    tags: shopifyProduct.tags,
-    status: shopifyProduct.status,
-    image: shopifyProduct.images?.[0]?.src || null, // optional chaining
-    price: shopifyProduct.variants?.[0]?.price || '0.00',
-    options: shopifyProduct.options,
-    variants: shopifyProduct.variants,
-  };
+  // const productData = {
+  //   id: shopifyProduct.id,
+  //   title: shopifyProduct.title,
+  //   description: shopifyProduct.body_html,
+  //   vendor: shopifyProduct.vendor,
+  //   product_type: shopifyProduct.product_type,
+  //   created_at: shopifyProduct.created_at,
+  //   handle: shopifyProduct.handle,
+  //   updated_at: shopifyProduct.updated_at,
+  //   published_at: shopifyProduct.published_at,
+  //   template_suffix: shopifyProduct.template_suffix,
+  //   published_scope: shopifyProduct.published_scope,
+  //   tags: shopifyProduct.tags,
+  //   status: shopifyProduct.status,
+  //   image: shopifyProduct.images?.[0]?.src || null, // optional chaining
+  //   price: shopifyProduct.variants?.[0]?.price || '0.00',
+  //   options: shopifyProduct.options,
+  //   variants: shopifyProduct.variants,
+  // };
 
   // Set to cache
 
-  return productData;
+  return shopifyProduct;
 };
 
 export const productService = {
