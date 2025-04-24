@@ -42,6 +42,7 @@ async function main() {
     //@ts-ignore
     global.io = io;
   } catch (error) {
+    console.log(error, "error message");
     errorLogger.error(colors.red('🤢 Failed to connect Database'));
   }
 
