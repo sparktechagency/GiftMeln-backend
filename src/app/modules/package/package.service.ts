@@ -368,7 +368,7 @@ const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
                 name: payload.name || existingPackage.name,
                 description: payload.description || existingPackage.description,
               },
-            //   @ts-ignore
+              //   @ts-ignore
               unit_amount: (payload.price || existingPackage.price) * 100,
               recurring: {
                 interval:

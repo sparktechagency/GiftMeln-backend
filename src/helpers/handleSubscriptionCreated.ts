@@ -99,6 +99,5 @@ export const handleSubscriptionCreated = async (subscription: Stripe.Subscriptio
         return true;
     } catch (error) {
         console.error("Error in handleSubscriptionCreated:", error);
-        // throw error;
     }
 };
