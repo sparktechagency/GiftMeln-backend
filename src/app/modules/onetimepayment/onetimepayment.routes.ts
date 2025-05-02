@@ -5,7 +5,7 @@ import { USER_ROLES } from '../../../enums/user';
 
 const router = express.Router();
 
-router.get('/', auth(USER_ROLES.USER, USER_ROLES.SUPER_ADMIN), OnetimepaymentController.purchaseData);
+router.get('/', auth(USER_ROLES.USER, USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), OnetimepaymentController.purchaseData);
 
 
 

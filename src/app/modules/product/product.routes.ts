@@ -98,7 +98,7 @@ router.patch(
 // delete product
 router.delete(
   '/:id',
-  auth(USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
   productController.deleteProduct
 );
 

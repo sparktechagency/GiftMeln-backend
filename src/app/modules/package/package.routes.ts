@@ -34,7 +34,7 @@ router.post('/subscribe', PackageController.subscribeToPackage);
 
 //! Get User's Active Subscription
 // get all subscriptions from user
-router.get("/all-subscriptions", auth(USER_ROLES.SUPER_ADMIN), PackageController.getAllSubscription);
+router.get("/all-subscriptions", auth(USER_ROLES.SUPER_ADMIN,USER_ROLES.ADMIN), PackageController.getAllSubscription);
 router.get('/user-subscription/:userId', PackageController.getUserSubscription);
 // Get details of a specific package by ID
 router.get('/:id', PackageController.getPackageById);
