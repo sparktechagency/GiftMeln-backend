@@ -306,6 +306,64 @@ const banUser = async (id: string) => {
   return result;
 };
 
+const adminLoginWithTwoFactor = async (email: string, password: string) => {
+  const isExistUser = await User.findOne({ email }).select('+password');
+  if (!isExistUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+  }
+
+  // Check if the account is active
+  if (isExistUser.status === 'delete') {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Your account has been banned. Please contact the administrator for more information.'
+    );
+  }
+
+  // Match password
+  if (!(await User.isMatchPassword(password, isExistUser.password))) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect!');
+  }
+
+  // Generate OTP
+  const otp = generateOTP();
+  const values = {
+    name: isExistUser.name,
+    otp: otp,
+    email: isExistUser.email!,
+  };
+  const loginVerificationTemplate = emailTemplate.createAccount(values);
+  emailHelper.sendEmail(loginVerificationTemplate);
+
+  // Save OTP in DB
+  const authentication = {
+    oneTimeCode: otp,
+    expireAt: new Date(Date.now() + 3 * 60000),
+  };
+
+  await User.findByIdAndUpdate(
+    isExistUser._id,
+    { $set: { authentication } },
+    { new: true }
+  );
+  const createToken = jwtHelper.createToken(
+    {
+      id: isExistUser._id,
+      role: isExistUser.role,
+      email: isExistUser.email,
+    },
+    config.jwt.jwt_secret as Secret,
+    config.jwt.jwt_expire_in as string
+  );
+
+  return {
+    message: 'OTP sent successfully',
+    role: isExistUser.role,
+    createToken: createToken,
+  };
+};
+
+
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
@@ -315,4 +373,5 @@ export const AuthService = {
   addAdminIntoDB,
   deleteAdminFromDB,
   banUser,
+  adminLoginWithTwoFactor
 };

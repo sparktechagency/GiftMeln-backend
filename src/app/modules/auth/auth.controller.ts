@@ -106,6 +106,19 @@ const banUserIntoDB = catchAsync(async (req: Request, res: Response) => {
   })
 })
 
+
+const loginAdmin = catchAsync(async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const result = await AuthService.adminLoginWithTwoFactor(email, password);
+  
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Please check your email for verification code',
+    data: result
+  });
+});
+
 export const AuthController = {
   verifyEmail,
   loginUser,
@@ -114,5 +127,6 @@ export const AuthController = {
   changePassword,
   addAdmin,
   deleteAdmin,
-  banUserIntoDB
+  banUserIntoDB,
+  loginAdmin
 };

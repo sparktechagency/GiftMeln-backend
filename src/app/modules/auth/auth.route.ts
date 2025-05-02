@@ -53,5 +53,8 @@ router.patch('/ban-user/:id',
   AuthController.banUserIntoDB
 )
 
+router.post("/admin-login", AuthController.loginAdmin)
+
+
 
 export const AuthRoutes = router;
