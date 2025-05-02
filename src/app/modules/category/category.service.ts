@@ -63,7 +63,8 @@ const getAllCategories = async () => {
             data: categoriesWithCounts,
         };
     } catch (error) {
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error fetching categories");
+        // throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error fetching categories");
+        return []
     }
 };
 

@@ -70,18 +70,18 @@ const parseTag = (value: any) => {
 // * shopify
 router.get(
   '/search',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER),
+  auth(USER_ROLES.SUPER_ADMIN,USER_ROLES.ADMIN, USER_ROLES.USER),
   productController.shopifyProduct
 );
 
 router.get(
   '/',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER),
+  auth(USER_ROLES.SUPER_ADMIN,USER_ROLES.ADMIN, USER_ROLES.USER),
   productController.getAllProducts
 );
 router.get(
   '/:id',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER),
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN),
   productController.getSingleProduct
 );
 // * shopify
@@ -89,7 +89,7 @@ router.get('/shopify/:id', productController.getSingleShopifyProduct);
 
 router.patch(
   '/update/:id',
-  auth(USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.SUPER_ADMIN,USER_ROLES.ADMIN),
   // @ts-ignore
   fileUploadHandler(),
   productController.updateProduct
