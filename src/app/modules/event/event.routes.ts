@@ -7,9 +7,9 @@ import { USER_ROLES } from '../../../enums/user';
 
 const router = express.Router();
 
-router.post('/create', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), EventController.createEvent);
-router.get('/', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), EventController.getAllEvents);
-router.get('/:id', auth(USER_ROLES.USER, USER_ROLES.SUPER_ADMIN), EventController.getSingleEvent);
-router.patch("/:id", auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), EventController.updateEvent);
-router.delete("/:id", auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), EventController.deleteEvent);
+router.post('/create', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER,USER_ROLES.ADMIN), EventController.createEvent);
+router.get('/', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN), EventController.getAllEvents);
+router.get('/:id', auth(USER_ROLES.USER, USER_ROLES.SUPER_ADMIN,USER_ROLES.ADMIN), EventController.getSingleEvent);
+router.patch("/:id", auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER,USER_ROLES.ADMIN), EventController.updateEvent);
+router.delete("/:id", auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER,USER_ROLES.ADMIN), EventController.deleteEvent);
 export const EventRoutes = router;
