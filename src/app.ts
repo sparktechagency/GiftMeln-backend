@@ -51,7 +51,7 @@ app.get('/', (req: Request, res: Response) => {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>HRM Server Status</title>
+      <title>Giftmelan Server Status</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto+Mono:wght@300&display=swap');
         
