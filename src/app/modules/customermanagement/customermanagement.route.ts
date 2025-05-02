@@ -5,9 +5,9 @@ import { USER_ROLES } from '../../../enums/user';
 
 const router = express.Router();
 
-router.get('/', auth(USER_ROLES.SUPER_ADMIN), CustomerManagementController.getAllUser);
-router.get('/:id', auth(USER_ROLES.SUPER_ADMIN), CustomerManagementController.getSingleUser);
-router.delete('/:id', auth(USER_ROLES.SUPER_ADMIN), CustomerManagementController.deleteCustomer);
+router.get('/', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), CustomerManagementController.getAllUser);
+router.get('/:id', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), CustomerManagementController.getSingleUser);
+router.delete('/:id', auth(USER_ROLES.SUPER_ADMIN,USER_ROLES.ADMIN), CustomerManagementController.deleteCustomer);
 
 
 // subscription amount how much have in his account
