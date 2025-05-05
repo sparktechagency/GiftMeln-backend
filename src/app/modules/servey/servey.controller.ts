@@ -77,8 +77,32 @@ const getAllSurveys = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getSingleSurvey = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await SurveyService.getSingleSurvey(id)
+    sendResponse(res, {
+        success: true,
+        statusCode: 200,
+        message: "Survey fetched successfully",
+        data: result
+    })
+})
+
+const getAllSurveysAllForAdmin = catchAsync(async (req: Request, res: Response) => {
+    const result = await SurveyService.getAllSurveys()
+    sendResponse(res, {
+        success: true,
+        statusCode: 200,
+        message: "Surveys fetched successfully",
+        data: result
+    })
+})
+
+
 export const SurveyController = {
     createSurvey,
     updateSurvey,
-    getAllSurveys
+    getAllSurveys,
+    getSingleSurvey,
+    getAllSurveysAllForAdmin
 }
