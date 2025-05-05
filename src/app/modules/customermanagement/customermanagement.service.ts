@@ -42,7 +42,6 @@ const getSubscriptionPlanFromDB = async (id: string) => {
 
 const editUserDetailsFromDB = async (id: string, payload: any) => {
   const result = await User.findByIdAndUpdate(id, payload, { new: true });
-  console.log(result);
   if (!result) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
   }

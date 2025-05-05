@@ -19,10 +19,7 @@ router.patch(
     async (req, res, next) => {
       const payload = req.body;
       const profileImage = getSingleFilePath(req.files, 'image');
-  
-      if (!profileImage) {
-        return res.status(400).json({ message: 'Profile image is required.' });
-      }
+
   
       req.body = {
         image: profileImage,

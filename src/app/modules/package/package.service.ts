@@ -32,7 +32,7 @@ const createPackageIntoDB = async (payload: IPackage) => {
           quantity: 1,
         },
       ],
-      success_url: 'https://yourdomain.com/success',
+      success_url: 'http://localhost:3000/surveyQuestions',
       cancel_url: 'https://yourdomain.com/cancel',
     });
 
@@ -378,7 +378,7 @@ const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
             quantity: 1,
           },
         ],
-        success_url: 'https://yourdomain.com/success',
+        success_url: "http://localhost:3000/surveyQuestions",
         cancel_url: 'https://yourdomain.com/cancel',
       });
 
