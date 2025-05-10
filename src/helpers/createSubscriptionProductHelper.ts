@@ -2,7 +2,6 @@ import { StatusCodes } from 'http-status-codes';
 import { IPackage } from '../app/modules/package/package.interface';
 import ApiError from '../errors/ApiError';
 import { stripe } from '../config/stripe';
-import config from '../config';
 
 export const createSubscriptionProductHelper = async (
   payload: Partial<IPackage>
