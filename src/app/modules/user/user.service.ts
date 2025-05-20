@@ -25,7 +25,8 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   };
   // Send email using emailHelper
   const createAccountTemplate = emailTemplate.createAccount(values);
-  await emailHelper.sendEmail(createAccountTemplate);
+  // await emailHelper.sendEmail(createAccountTemplate);
+  await twilioHelper.sendEmailOTP(createUser.email!);
   //save to DB
   const authentication = {
     oneTimeCode: otp,
