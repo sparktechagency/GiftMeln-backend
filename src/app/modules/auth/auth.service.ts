@@ -16,6 +16,7 @@ import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
 import { emailTemplate } from '../../../shared/emailTemplate';
+import { twilioHelper } from '../../../helpers/twilio.helper';
 
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
@@ -65,8 +66,13 @@ const forgetPasswordToDB = async (email: string) => {
     otp,
     email: isExistUser.email,
   };
-  const forgetPassword = emailTemplate.resetPassword(value);
-  emailHelper.sendEmail(forgetPassword);
+
+  // Option 1: Use Twilio helper
+  await twilioHelper.sendEmailOTP(isExistUser.email);
+
+  // Option 2: Or use your custom email template (choose one approach)
+  // const forgetPassword = emailTemplate.resetPassword(value);
+  // await emailHelper.sendEmail(forgetPassword);
 
   //save to DB
   const authentication = {
@@ -77,6 +83,66 @@ const forgetPasswordToDB = async (email: string) => {
 };
 
 //verify email
+// const verifyEmailToDB = async (payload: IVerifyEmail) => {
+//   const { email, oneTimeCode } = payload;
+//   const isExistUser = await User.findOne({ email }).select('+authentication');
+//   if (!isExistUser) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+//   }
+
+//   if (!oneTimeCode) {
+//     throw new ApiError(
+//       StatusCodes.BAD_REQUEST,
+//       'Please give the otp, check your email we send a code'
+//     );
+//   }
+
+//   if (isExistUser.authentication?.oneTimeCode !== oneTimeCode) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, 'You provided wrong otp');
+//   }
+
+//   const date = new Date();
+//   if (date > isExistUser.authentication?.expireAt) {
+//     throw new ApiError(
+//       StatusCodes.BAD_REQUEST,
+//       'Otp already expired, Please try again'
+//     );
+//   }
+
+//   let message;
+//   let data;
+
+//   if (!('verified' in isExistUser && isExistUser.verified)) {
+//     await User.findOneAndUpdate(
+//       { _id: isExistUser._id },
+//       { verified: true, authentication: { oneTimeCode: null, expireAt: null } }
+//     );
+//     message = 'Email verify successfully';
+//   } else {
+//     await User.findOneAndUpdate(
+//       { _id: isExistUser._id },
+//       {
+//         authentication: {
+//           isResetPassword: true,
+//           oneTimeCode: null,
+//           expireAt: null,
+//         },
+//       }
+//     );
+
+//     //create token ;
+//     const createToken = cryptoToken();
+//     await ResetToken.create({
+//       user: isExistUser._id,
+//       token: createToken,
+//       expireAt: new Date(Date.now() + 5 * 60000),
+//     });
+//     message =
+//       'Verification Successful: Please securely store and utilize this code for reset password';
+//     data = createToken;
+//   }
+//   return { data, message };
+// };
 const verifyEmailToDB = async (payload: IVerifyEmail) => {
   const { email, oneTimeCode } = payload;
   const isExistUser = await User.findOne({ email }).select('+authentication');
@@ -91,15 +157,19 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
     );
   }
 
-  if (isExistUser.authentication?.oneTimeCode !== oneTimeCode) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'You provided wrong otp');
-  }
+  // Use Twilio to verify the OTP
+  try {
+    const verification = await twilioHelper.verifyEmailOTP(email, oneTimeCode);
 
-  const date = new Date();
-  if (date > isExistUser.authentication?.expireAt) {
+    // Check if verification was successful
+    if (verification.status !== 'approved') {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'You provided wrong otp');
+    }
+  } catch (error) {
+    // Handle Twilio API errors
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Otp already expired, Please try again'
+      'Invalid or expired verification code'
     );
   }
 
