@@ -36,4 +36,10 @@ export default {
     accessToken: process.env.SHOPIFY_ACCESS_TOKEN!,
     apiVersion: '2024-04',
   },
+  // towilo
+  twilio: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    authToken: process.env.TWILIO_AUTH_TOKEN,
+    serviceId: process.env.TWILIO_SERVICE_ID,
+  },
 };

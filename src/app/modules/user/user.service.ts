@@ -8,6 +8,7 @@ import unlinkFile from '../../../shared/unlinkFile';
 import generateOTP from '../../../util/generateOTP';
 import { IUser } from './user.interface';
 import { User } from './user.model';
+import { twilioHelper } from '../../../helpers/twilio.helper';
 
 const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   const createUser = await User.create(payload);
@@ -22,9 +23,9 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
     otp: otp,
     email: createUser.email!,
   };
+  // Send email using emailHelper
   const createAccountTemplate = emailTemplate.createAccount(values);
-  emailHelper.sendEmail(createAccountTemplate);
-
+  await emailHelper.sendEmail(createAccountTemplate);
   //save to DB
   const authentication = {
     oneTimeCode: otp,
@@ -73,17 +74,18 @@ const updateProfileToDB = async (
 };
 
 const getAllAdminsFromDB = async (): Promise<Partial<IUser[]> | null> => {
-  const admins = await User.find({ role: USER_ROLES.ADMIN }).select("-password");
+  const admins = await User.find({ role: USER_ROLES.ADMIN }).select(
+    '-password'
+  );
   if (!admins || admins.length === 0) {
-    return []
+    return [];
   }
   return admins;
 };
-
 
 export const UserService = {
   createUserToDB,
   getUserProfileFromDB,
   updateProfileToDB,
-  getAllAdminsFromDB
+  getAllAdminsFromDB,
 };
