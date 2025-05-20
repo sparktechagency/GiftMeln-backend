@@ -22,7 +22,8 @@ app.use(
     origin: [
       // "http://139.59.0.25:6009",
       // "http://139.59.0.25:6007"
-      'http://localhost:3000',
+      // 'http://localhost:3000',
+      'http://64.23.193.89:3000',
       'http://localhost:3001',
       'http://localhost:3002',
     ],
