@@ -66,13 +66,8 @@ const forgetPasswordToDB = async (email: string) => {
     otp,
     email: isExistUser.email,
   };
-
-  // Option 1: Use Twilio helper
-  await twilioHelper.sendEmailOTP(isExistUser.email);
-
-  // Option 2: Or use your custom email template (choose one approach)
-  // const forgetPassword = emailTemplate.resetPassword(value);
-  // await emailHelper.sendEmail(forgetPassword);
+  const forgetPassword = emailTemplate.resetPassword(value);
+  emailHelper.sendEmail(forgetPassword);
 
   //save to DB
   const authentication = {
@@ -81,7 +76,6 @@ const forgetPasswordToDB = async (email: string) => {
   };
   await User.findOneAndUpdate({ email }, { $set: { authentication } });
 };
-
 //verify email
 const verifyEmailToDB = async (payload: IVerifyEmail) => {
   const { email, oneTimeCode } = payload;
@@ -271,7 +265,7 @@ const addAdminIntoDB = async (payload: {
     email: createUser.email!,
   };
 
-  
+
   const createAccountTemplate = emailTemplate.createAccount(values);
   emailHelper.sendEmail(createAccountTemplate);
 
