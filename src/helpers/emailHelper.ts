@@ -1,33 +1,46 @@
-import nodemailer from 'nodemailer';
 import config from '../config';
-import { errorLogger, logger } from '../shared/logger';
+import { emailTemplate } from '../shared/emailTemplate';
+import sgMail from '@sendgrid/mail';
 import { ISendEmail } from '../types/email';
+import ApiError from '../errors/ApiError';
+import { StatusCodes } from 'http-status-codes';
 
-const transporter = nodemailer.createTransport({
-  host: config.email.host,
-  port: Number(config.email.port),
-  secure: false,
-  auth: {
-    user: config.email.user,
-    pass: config.email.pass,
-  },
-});
+sgMail.setApiKey(config.sendgrid.apiKey!);
+const sendOtpEmail = async (email: string, name: string, otp: number) => {
+  const message = emailTemplate.createAccount({ email, name, otp });
 
+  const msg = {
+    to: message.to,
+    from: config.sendgrid.email as string,
+    subject: message.subject,
+    html: message.html,
+  };
+  // @ts-ignore
+  await sgMail.send(msg);
+  console.log(`OTP sent to ${email}: ${otp}`);
+};
 const sendEmail = async (values: ISendEmail) => {
-  try {
-    const info = await transporter.sendMail({
-      from: `"Giftmelan" ${config.email.from}`,
-      to: values.to,
-      subject: values.subject,
-      html: values.html,
-    });
+  const msg = {
+    to: values.to,
+    from: config.sendgrid.email,
+    subject: values.subject,
+    html: values.html,
+  };
 
-    logger.info('Mail send successfully', info.accepted);
+  try {
+    // @ts-ignore
+    const response = await sgMail.send(msg);
+    console.log('✅ Email sent successfully:', response[0].statusCode);
   } catch (error) {
-    errorLogger.error('Email', error);
+    console.error('❌ Failed to send email:', error);
+    throw new ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Email sending failed'
+    );
   }
 };
 
 export const emailHelper = {
   sendEmail,
+  sendOtpEmail,
 };

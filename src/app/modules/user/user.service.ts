@@ -9,29 +9,24 @@ import generateOTP from '../../../util/generateOTP';
 import { IUser } from './user.interface';
 import { User } from './user.model';
 import { twilioHelper } from '../../../helpers/twilio.helper';
-
 const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   const createUser = await User.create(payload);
   if (!createUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
   }
 
-  //send email
+  // Generate OTP
   const otp = generateOTP();
-  const values = {
-    name: createUser.name,
-    otp: otp,
-    email: createUser.email!,
-  };
-  // Send email using emailHelper
-  const createAccountTemplate = emailTemplate.createAccount(values);
-  // await emailHelper.sendEmail(createAccountTemplate);
-  await twilioHelper.sendEmailOTP(createUser.email!);
-  //save to DB
+
+  // Send Email OTP using SendGrid
+  await emailHelper.sendOtpEmail(createUser.email!, createUser.name, otp);
+
+  // Save OTP + expiry to DB
   const authentication = {
     oneTimeCode: otp,
-    expireAt: new Date(Date.now() + 3 * 60000),
+    expireAt: new Date(Date.now() + 3 * 60000), // 3 minutes expiry
   };
+
   await User.findOneAndUpdate(
     { _id: createUser._id },
     { $set: { authentication } }

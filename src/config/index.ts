@@ -42,4 +42,9 @@ export default {
     authToken: process.env.TWILIO_AUTH_TOKEN,
     serviceId: process.env.TWILIO_SERVICE_ID,
   },
+  // sendgrid
+  sendgrid: {
+    apiKey: process.env.SENDGRID_API_KEY,
+    email: process.env.SANDGRIDEMAIL,
+  },
 };
