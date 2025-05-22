@@ -24,8 +24,8 @@ app.use(
       // "http://139.59.0.25:6007"
       // 'http://localhost:3000',
       'http://64.23.193.89:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
+      'http://64.23.193.89:3001',
+      'http://64.23.193.89:3002',
     ],
     credentials: true,
   })

@@ -32,8 +32,8 @@ const createPackageIntoDB = async (payload: IPackage) => {
           quantity: 1,
         },
       ],
-      success_url: 'http://localhost:3000/surveyQuestions',
-      cancel_url: 'https://yourdomain.com/cancel',
+      success_url: 'http://64.23.193.89:3000/surveyQuestions',
+      cancel_url: 'https://64.23.193.89:3000/cancel',
     });
 
     // ✅ Assign Stripe details for Free Plan
@@ -378,7 +378,7 @@ const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
             quantity: 1,
           },
         ],
-        success_url: "http://localhost:3000/surveyQuestions",
+        success_url: 'http://64.23.193.89:3000/surveyQuestions',
         cancel_url: 'https://yourdomain.com/cancel',
       });
 

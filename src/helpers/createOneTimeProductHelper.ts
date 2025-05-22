@@ -22,16 +22,16 @@ export const createOneTimeProductHelper = async (params: {
         });
 
         const paymentLink = await stripe.paymentLinks.create({
-            line_items: [
-                {
-                    price: priceObject.id,
-                    quantity: 1,
-                },
-            ],
-            after_completion: {
-                type: "redirect",
-                redirect: { url: 'http://localhost:3000/payment/success' }
-            }
+          line_items: [
+            {
+              price: priceObject.id,
+              quantity: 1,
+            },
+          ],
+          after_completion: {
+            type: 'redirect',
+            redirect: { url: 'http://64.23.193.89:3000/payment/success' },
+          },
         });
 
         if (!paymentLink) {
