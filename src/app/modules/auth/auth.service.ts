@@ -16,16 +16,34 @@ import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
 import { emailTemplate } from '../../../shared/emailTemplate';
-import { twilioHelper } from '../../../helpers/twilio.helper';
 
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
 
   // Find the user and include password for verification
   const isExistUser = await User.findOne({ email }).select('+password');
+
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
+  // login otp
+  const otp = generateOTP();
+  const value = {
+    otp,
+    email: isExistUser.email,
+  };
+  const loginOtp = emailTemplate.loginOTP(value);
+  emailHelper.sendEmail(loginOtp);
+
+  //save to DB
+  const authentication = {
+    oneTimeCode: otp,
+    expireAt: new Date(Date.now() + 3 * 60000),
+  };
+  await User.findOneAndUpdate(
+    { _id: isExistUser._id },
+    { $set: { authentication } }
+  );
 
   // Check if the account is active
   if (isExistUser.status === 'delete') {
@@ -137,7 +155,6 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   }
   return { data, message };
 };
-
 
 //forget password
 const resetPasswordToDB = async (
@@ -264,7 +281,6 @@ const addAdminIntoDB = async (payload: {
     otp: otp,
     email: createUser.email!,
   };
-
 
   const createAccountTemplate = emailTemplate.createAccount(values);
   emailHelper.sendEmail(createAccountTemplate);
