@@ -38,7 +38,7 @@ export const handleSubscriptionCreated = async (subscription: Stripe.Subscriptio
         const invoice = await stripe.invoices.retrieve(fullSubscription.latest_invoice as string);
         const trxId = invoice.payment_intent as string;
         const amountPaid = (invoice.total || 0) / 100;
-
+        // const balance = 
         // Get email from the subscription or customer
         // @ts-ignore
         let email = fullSubscription.customer_email;
@@ -79,6 +79,7 @@ export const handleSubscriptionCreated = async (subscription: Stripe.Subscriptio
             currentPeriodStart,
             currentPeriodEnd,
             amountPaid,
+            balance:Number(amountPaid) /2,
             status: "active",
             paymentType: "subscription",
         };

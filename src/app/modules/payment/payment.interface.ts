@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export interface IPayment {
+export type IPayment ={
   user: Types.ObjectId | undefined;
   customerId: string;
   package: Types.ObjectId | undefined;
@@ -11,5 +11,6 @@ export interface IPayment {
   amountPaid: number;
   status: "active" | "canceled" | "expired";
   paymentType: "subscription";
+  balance?: number;
 }
 

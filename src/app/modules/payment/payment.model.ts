@@ -1,4 +1,4 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { IPayment } from './payment.interface';
 
 const PaymentSchema = new Schema<IPayment>({
@@ -16,6 +16,7 @@ const PaymentSchema = new Schema<IPayment>({
     required: true,
   },
   paymentType: { type: String, enum: ['subscription'], required: true },
+  balance: { type: Number , default: 0},
 });
 
 export const Subscription = model<IPayment>('Subscription', PaymentSchema);

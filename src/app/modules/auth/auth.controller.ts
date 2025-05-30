@@ -3,6 +3,7 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
+import { IUser } from '../user/user.interface';
 
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   const { ...verifyData } = req.body;
@@ -90,34 +91,47 @@ const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: 200,
-    message: "Successfully Delete Admin",
-    data: deletedAdmin
-  })
+    message: 'Successfully Delete Admin',
+    data: deletedAdmin,
+  });
 });
 
 const banUserIntoDB = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await AuthService.banUser(id)
+  const result = await AuthService.banUser(id);
   sendResponse(res, {
     success: true,
     statusCode: 200,
-    message: "User has been successfully banned",
-    data: result
-  })
-})
-
+    message: 'User has been successfully banned',
+    data: result,
+  });
+});
 
 const loginAdmin = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const result = await AuthService.adminLoginWithTwoFactor(email, password);
-  
+
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Please check your email for verification code',
-    data: result
+    data: result,
   });
 });
+
+const googleAuthCallback = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthService.handleGoogleLogin(
+    req.user as IUser & { profile: any },
+  )
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Login successful',
+    data: result,
+  })
+})
+
+
 
 export const AuthController = {
   verifyEmail,
@@ -128,5 +142,6 @@ export const AuthController = {
   addAdmin,
   deleteAdmin,
   banUserIntoDB,
-  loginAdmin
+  loginAdmin,
+  googleAuthCallback,
 };

@@ -1,10 +1,13 @@
 import cors from 'cors';
 import express, { Request, Response } from 'express';
+import session from 'express-session';
+
 import { StatusCodes } from 'http-status-codes';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import router from './routes';
 import { Morgan } from './shared/morgen';
 import handleStripeWebhook from './app/stripe/handleStripeWebhook';
+import passport from 'passport';
 const app = express();
 
 //morgan
@@ -15,6 +18,9 @@ app.post(
   express.raw({ type: 'application/json' }),
   handleStripeWebhook
 );
+app.use(session({ secret: 'secret', resave: false, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 //body parser
 app.use(
@@ -24,11 +30,13 @@ app.use(
       // "http://139.59.0.25:6007"
       'http://localhost:3000',
       'http://localhost:3002',
+      "https://mahmud.binarybards.online/"
       // 'http://64.23.193.89:3000',
       // 'http://64.23.193.89:3001',
       // 'http://64.23.193.89:3002',
     ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
   })
 );
 

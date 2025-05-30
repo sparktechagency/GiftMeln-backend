@@ -16,6 +16,9 @@ import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
 import { emailTemplate } from '../../../shared/emailTemplate';
+import { USER_ROLES } from '../../../enums/user';
+import { IUser } from '../user/user.interface';
+import { AuthHelper } from '../../../helpers/AuthHelper';
 
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
@@ -381,6 +384,46 @@ const adminLoginWithTwoFactor = async (email: string, password: string) => {
   };
 };
 
+const handleGoogleLogin = async (payload: IUser & { profile: any }) => {
+  console.log("payload", payload);
+  const { emails, photos, displayName, id } = payload.profile
+  const email = emails[0].value.toLowerCase().trim()
+  const isUserExist = await User.findOne({
+    email,
+    status: { $in: ["active"] },
+  })
+  if (isUserExist) {
+    //return only the token
+    const tokens = AuthHelper.createToken(isUserExist._id, isUserExist.role)
+    return { tokens }
+  }
+ 
+ 
+  const userData = {
+    email: emails[0].value,
+    profile: photos[0].value,
+    name: displayName,
+    verified: true,
+    password: id,
+    status: "active",
+    appId: id,
+    role: payload.role,
+  }
+ 
+  try {
+    const user = await User.create([userData])
+ 
+    //create token
+    const tokens = AuthHelper.createToken(user[0]._id, user[0].role)
+ 
+    
+ 
+    return { tokens }
+  } catch (error) {
+    // throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user')
+    console.log(error);
+  }
+}
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
@@ -391,4 +434,5 @@ export const AuthService = {
   deleteAdminFromDB,
   banUser,
   adminLoginWithTwoFactor,
+  handleGoogleLogin,
 };

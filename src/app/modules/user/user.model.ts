@@ -25,11 +25,15 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     phone: {
       type: String,
-      required: false
+      required: false,
     },
+    provider: { type: String, default: 'google' },
+    googleId: { type: String, default: null },
+    isGoogleAccount: { type: Boolean, default: false },
+
     password: {
       type: String,
-      required: true,
+      // required: true,
       select: 0,
       minlength: 8,
     },

@@ -47,4 +47,10 @@ export default {
     apiKey: process.env.SENDGRID_API_KEY,
     email: process.env.SANDGRIDEMAIL,
   },
+  // google login
+  google: {
+    clientID: process.env.CLIENT_ID!,
+    clientSecret: process.env.CLIENT_SECRET!,
+    callbackURL: process.env.CALLBACK_URL!,
+  },
 };

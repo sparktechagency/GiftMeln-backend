@@ -27,7 +27,7 @@ router
 router
   .route('/register')
   .post(
-    validateRequest(UserValidation.createUserZodSchema),
+    // validateRequest(UserValidation.createUserZodSchema),
     UserController.createUser
   );
 router.get('/admins', auth(USER_ROLES.SUPER_ADMIN), UserController.getAllAdmins);
