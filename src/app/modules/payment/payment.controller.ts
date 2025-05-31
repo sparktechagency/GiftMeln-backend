@@ -6,7 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 
 const subscriptionDetails = catchAsync(async (req: Request, res: Response) => {
-  const result = await PaymentServices.subscriptionDetailsFromDB(req.user);
+  const result = await PaymentServices.subscriptionDetailsFromDB(req.user!);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -34,37 +34,72 @@ const allSubscription = catchAsync(async (req: Request, res: Response) => {
 // get all subscription history base this user
 const getSubscriptionHistory = catchAsync(
   async (req: Request, res: Response) => {
-    const result = await PaymentServices.getSubscriptionHistory(req.user);
+    const result = await PaymentServices.getSubscriptionHistory(req.user!);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: 'Subscription history retrieved successfully.',
       data: result,
     });
-  }
+  },
 );
 
 const editPriceByAdmin = catchAsync(async (req: Request, res: Response) => {
-    const { userId } = req.params;
-    const { amountPaid } = req.body;
-  
-    const result = await PaymentServices.editPriceByAdminFromDB(userId, amountPaid);
-  
+  const { userId } = req.params;
+  const { amountPaid } = req.body;
+
+  const result = await PaymentServices.editPriceByAdminFromDB(
+    userId,
+    amountPaid,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Subscription price updated successfully.',
+    data: result,
+  });
+});
+
+const overviewData = catchAsync(async (req: Request, res: Response) => {
+  const result = await PaymentServices.overViewFromDB();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Retrieve data successfully',
+    data: result,
+  });
+});
+
+const getRevenueAnalyticsFromDB = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await PaymentServices.getRevenueAnalytics(req.query);
     sendResponse(res, {
+      statusCode: 200,
       success: true,
-      statusCode: StatusCodes.OK,
-      message: 'Subscription price updated successfully.',
+      message: `Retrieve ${req.query.type} Data successfully`,
       data: result,
     });
+  },
+);
+
+// active user
+const totalActiveUser = catchAsync(async (req: Request, res: Response) => {
+  const result = await PaymentServices.activeUserFromDB();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: `Retrieve All Active user successfully`,
+    data: { result },
   });
-  
-
-
-
+});
 
 export const PaymentController = {
   subscriptionDetails,
   allSubscription,
   getSubscriptionHistory,
-  editPriceByAdmin
+  editPriceByAdmin,
+  overviewData,
+  getRevenueAnalyticsFromDB,
+  totalActiveUser,
 };

@@ -1,13 +1,13 @@
 import { Model, Types } from 'mongoose';
 
 export type ICheckout = {
-  user: Types.ObjectId
-  country: String
-  city: String;
-  streetAddress: string
-  postCode: String
+  user: Types.ObjectId;
+  country: string;
+  city: string;
+  streetAddress: string;
+  postCode: string;
   message: string;
-  orderSummary: Types.ObjectId
+  orderSummary: Types.ObjectId;
 };
 
 export type CheckoutModel = Model<ICheckout>;

@@ -45,14 +45,14 @@ const loginUserFromDB = async (payload: ILoginData) => {
   };
   await User.findOneAndUpdate(
     { _id: isExistUser._id },
-    { $set: { authentication } }
+    { $set: { authentication } },
   );
 
   // Check if the account is active
   if (isExistUser.status === 'delete') {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Your account has been banned. Please contact the administrator for more information.'
+      'Your account has been banned. Please contact the administrator for more information.',
     );
   }
 
@@ -65,7 +65,7 @@ const loginUserFromDB = async (payload: ILoginData) => {
   const createToken = jwtHelper.createToken(
     { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
     config.jwt.jwt_secret as Secret,
-    config.jwt.jwt_expire_in as string
+    config.jwt.jwt_expire_in as string,
   );
 
   // Exclude password before returning user data
@@ -108,7 +108,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   if (!oneTimeCode) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Please give the otp, check your email we send a code'
+      'Please give the otp, check your email we send a code',
     );
   }
 
@@ -120,7 +120,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   if (date > isExistUser.authentication?.expireAt) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Otp already expired, Please try again'
+      'Otp already expired, Please try again',
     );
   }
 
@@ -130,7 +130,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   if (!('verified' in isExistUser && isExistUser.verified)) {
     await User.findOneAndUpdate(
       { _id: isExistUser._id },
-      { verified: true, authentication: { oneTimeCode: null, expireAt: null } }
+      { verified: true, authentication: { oneTimeCode: null, expireAt: null } },
     );
     message = 'Email verify successfully';
   } else {
@@ -142,7 +142,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
           oneTimeCode: null,
           expireAt: null,
         },
-      }
+      },
     );
 
     //create token ;
@@ -162,7 +162,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
 //forget password
 const resetPasswordToDB = async (
   token: string,
-  payload: IAuthResetPassword
+  payload: IAuthResetPassword,
 ) => {
   const { newPassword, confirmPassword } = payload;
   //isExist token
@@ -173,12 +173,12 @@ const resetPasswordToDB = async (
 
   //user permission check
   const isExistUser = await User.findById(isExistToken.user).select(
-    '+authentication'
+    '+authentication',
   );
   if (!isExistUser?.authentication?.isResetPassword) {
     throw new ApiError(
       StatusCodes.UNAUTHORIZED,
-      "You don't have permission to change the password. Please click again to 'Forgot Password'"
+      "You don't have permission to change the password. Please click again to 'Forgot Password'",
     );
   }
 
@@ -187,7 +187,7 @@ const resetPasswordToDB = async (
   if (!isValid) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Token expired, Please click again to the forget password'
+      'Token expired, Please click again to the forget password',
     );
   }
 
@@ -195,13 +195,13 @@ const resetPasswordToDB = async (
   if (newPassword !== confirmPassword) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      "New password and Confirm password doesn't match!"
+      "New password and Confirm password doesn't match!",
     );
   }
 
   const hashPassword = await bcrypt.hash(
     newPassword,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
 
   const updateData = {
@@ -218,7 +218,7 @@ const resetPasswordToDB = async (
 
 const changePasswordToDB = async (
   user: JwtPayload,
-  payload: IChangePassword
+  payload: IChangePassword,
 ) => {
   const { currentPassword, newPassword, confirmPassword } = payload;
   const isExistUser = await User.findById(user.id).select('+password');
@@ -238,21 +238,21 @@ const changePasswordToDB = async (
   if (currentPassword === newPassword) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Please give different password from current password'
+      'Please give different password from current password',
     );
   }
   //new password and confirm password check
   if (newPassword !== confirmPassword) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      "Password and Confirm password doesn't matched"
+      "Password and Confirm password doesn't matched",
     );
   }
 
   //hash password
   const hashPassword = await bcrypt.hash(
     newPassword,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
 
   const updateData = {
@@ -297,7 +297,7 @@ const addAdminIntoDB = async (payload: {
   await User.findByIdAndUpdate(
     createUser._id,
     { $set: { authentication } },
-    { new: true }
+    { new: true },
   );
   return { message: 'Admin created successfully' };
 };
@@ -319,7 +319,7 @@ const banUser = async (id: string) => {
   const result = await User.findByIdAndUpdate(
     id,
     { status: 'delete' },
-    { new: true }
+    { new: true },
   );
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Can't find this user");
@@ -337,7 +337,7 @@ const adminLoginWithTwoFactor = async (email: string, password: string) => {
   if (isExistUser.status === 'delete') {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Your account has been banned. Please contact the administrator for more information.'
+      'Your account has been banned. Please contact the administrator for more information.',
     );
   }
 
@@ -347,26 +347,26 @@ const adminLoginWithTwoFactor = async (email: string, password: string) => {
   }
 
   // Generate OTP
-  const otp = generateOTP();
-  const values = {
-    name: isExistUser.name,
-    otp: otp,
-    email: isExistUser.email!,
-  };
-  const loginVerificationTemplate = emailTemplate.createAccount(values);
-  emailHelper.sendEmail(loginVerificationTemplate);
+  // const otp = generateOTP();
+  // const values = {
+  //   name: isExistUser.name,
+  //   otp: otp,
+  //   email: isExistUser.email!,
+  // };
+  // const loginVerificationTemplate = emailTemplate.createAccount(values);
+  // emailHelper.sendEmail(loginVerificationTemplate);
 
-  // Save OTP in DB
-  const authentication = {
-    oneTimeCode: otp,
-    expireAt: new Date(Date.now() + 3 * 60000),
-  };
+  // // Save OTP in DB
+  // const authentication = {
+  //   oneTimeCode: otp,
+  //   expireAt: new Date(Date.now() + 3 * 60000),
+  // };
 
-  await User.findByIdAndUpdate(
-    isExistUser._id,
-    { $set: { authentication } },
-    { new: true }
-  );
+  // await User.findByIdAndUpdate(
+  //   isExistUser._id,
+  //   { $set: { authentication } },
+  //   { new: true }
+  // );
   const createToken = jwtHelper.createToken(
     {
       id: isExistUser._id,
@@ -374,7 +374,7 @@ const adminLoginWithTwoFactor = async (email: string, password: string) => {
       email: isExistUser.email,
     },
     config.jwt.jwt_secret as Secret,
-    config.jwt.jwt_expire_in as string
+    config.jwt.jwt_expire_in as string,
   );
 
   return {
@@ -385,45 +385,41 @@ const adminLoginWithTwoFactor = async (email: string, password: string) => {
 };
 
 const handleGoogleLogin = async (payload: IUser & { profile: any }) => {
-  console.log("payload", payload);
-  const { emails, photos, displayName, id } = payload.profile
-  const email = emails[0].value.toLowerCase().trim()
+  const { emails, photos, displayName, id } = payload.profile;
+  const email = emails[0].value.toLowerCase().trim();
   const isUserExist = await User.findOne({
     email,
-    status: { $in: ["active"] },
-  })
+    status: { $in: ['active'] },
+  });
   if (isUserExist) {
     //return only the token
-    const tokens = AuthHelper.createToken(isUserExist._id, isUserExist.role)
-    return { tokens }
+    const tokens = AuthHelper.createToken(isUserExist._id, isUserExist.role);
+    return { tokens };
   }
- 
- 
+
   const userData = {
     email: emails[0].value,
     profile: photos[0].value,
     name: displayName,
     verified: true,
     password: id,
-    status: "active",
+    status: 'active',
     appId: id,
     role: payload.role,
-  }
- 
+  };
+
   try {
-    const user = await User.create([userData])
- 
+    const user = await User.create([userData]);
+
     //create token
-    const tokens = AuthHelper.createToken(user[0]._id, user[0].role)
- 
-    
- 
-    return { tokens }
+    const tokens = AuthHelper.createToken(user[0]._id, user[0].role);
+
+    return { tokens };
   } catch (error) {
     // throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user')
     console.log(error);
   }
-}
+};
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
