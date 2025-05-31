@@ -8,7 +8,7 @@ passport.use(
     {
       clientID: config.google.clientID!,
       clientSecret: config.google.clientSecret!,
-      callbackURL: config.google.callbackURL!,
+      callbackURL: config.google.callbackURL!,  
       passReqToCallback: true,
     },
     async (req, accessToken, refreshToken, profile, done) => {

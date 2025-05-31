@@ -10,7 +10,7 @@ const subscriptionDetailsFromDB = async (
   user: JwtPayload
 ): Promise<{ subscription: IPayment | {} }> => {
   const subscription = await Subscription.findOne({ user: user?.id })
-    .populate('package').populate('user')
+    .populate('package').populate('user').populate('balanceAmount')
     .lean();
   // if not found any subscription for the user, return an empty object
   if (!subscription) {

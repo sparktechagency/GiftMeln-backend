@@ -342,7 +342,7 @@ const adminLoginWithTwoFactor = async (email: string, password: string) => {
   }
 
   // Match password
-  if (!(await User.isMatchPassword(password, isExistUser.password))) {
+  if (!(await User.isMatchPassword(password, isExistUser.password!))) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect!');
   }
 

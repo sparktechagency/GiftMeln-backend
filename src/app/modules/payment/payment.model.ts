@@ -5,6 +5,7 @@ const PaymentSchema = new Schema<IPayment>({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   customerId: { type: String, required: true },
   package: { type: Schema.Types.ObjectId, ref: 'Package', required: true },
+  balanceAmount: { type: Schema.Types.ObjectId, ref:"Subscription"},
   trxId: { type: String },
   subscriptionId: { type: String, required: true },
   currentPeriodStart: { type: Date, required: true },

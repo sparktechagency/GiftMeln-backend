@@ -30,7 +30,8 @@ app.use(
       // "http://139.59.0.25:6007"
       'http://localhost:3000',
       'http://localhost:3002',
-      "https://mahmud.binarybards.online/"
+      "https://mahmud.binarybards.online/",
+      "https://accounts.google.com/o/oauth2/v2/auth"
       // 'http://64.23.193.89:3000',
       // 'http://64.23.193.89:3001',
       // 'http://64.23.193.89:3002',

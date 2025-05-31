@@ -34,6 +34,7 @@ router.post(
   validateRequest(AuthValidation.createForgetPasswordZodSchema),
   AuthController.forgetPassword
 );
+router.post("/admin-login", AuthController.loginAdmin)
 
 router.post(
   '/verify-email',

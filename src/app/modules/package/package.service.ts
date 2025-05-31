@@ -326,7 +326,7 @@ const getUserSubscription = async (userId: string) => {
 const getAllUserSubscriptions = async () => {
   const subscriptions = await Subscription.find()
     .populate('package')
-    .populate('user');
+    .populate('user')
   if (subscriptions.length === 0) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'No subscriptions found');
   }
@@ -336,6 +336,7 @@ const getAllUserSubscriptions = async () => {
 // update package
 const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
   const existingPackage = await Package.findById(id);
+
   if (!existingPackage) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Package not found');
   }
