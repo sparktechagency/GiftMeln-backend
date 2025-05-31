@@ -4,7 +4,6 @@ import { IProduct } from './product.interface';
 import { ProductModel } from './product.model';
 import mongoose from 'mongoose';
 import config from '../../../config';
-import axios from 'axios';
 const baseURL = `https://${config.shopify.storeDomain}/admin/api/${config.shopify.apiVersion}`;
 const createProductIntoDB = async (productData: IProduct) => {
   const product = await ProductModel.create(productData);
