@@ -16,7 +16,6 @@ import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
 import { emailTemplate } from '../../../shared/emailTemplate';
-import { USER_ROLES } from '../../../enums/user';
 import { IUser } from '../user/user.interface';
 import { AuthHelper } from '../../../helpers/AuthHelper';
 
@@ -30,23 +29,6 @@ const loginUserFromDB = async (payload: ILoginData) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
   // login otp
-  const otp = generateOTP();
-  const value = {
-    otp,
-    email: isExistUser.email,
-  };
-  const loginOtp = emailTemplate.loginOTP(value);
-  emailHelper.sendEmail(loginOtp);
-
-  //save to DB
-  const authentication = {
-    oneTimeCode: otp,
-    expireAt: new Date(Date.now() + 3 * 60000),
-  };
-  await User.findOneAndUpdate(
-    { _id: isExistUser._id },
-    { $set: { authentication } },
-  );
 
   // Check if the account is active
   if (isExistUser.status === 'delete') {
@@ -57,7 +39,7 @@ const loginUserFromDB = async (payload: ILoginData) => {
   }
 
   // Match password
-  if (!(await User.isMatchPassword(password, isExistUser.password))) {
+  if (!(await User.isMatchPassword(password, isExistUser.password!))) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect!');
   }
 
