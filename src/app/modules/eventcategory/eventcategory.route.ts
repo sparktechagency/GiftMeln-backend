@@ -22,6 +22,13 @@ router.get(
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
   EventCategoryController.getSingleEventCategory,
 );
+
+router.patch(
+  '/:id',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  EventCategoryController.updateEventCategory,
+);
+
 router.delete(
   '/:id',
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),

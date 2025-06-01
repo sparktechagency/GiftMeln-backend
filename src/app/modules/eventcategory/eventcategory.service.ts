@@ -43,10 +43,20 @@ const deleteEventCategoryFromDB = async (id: string) => {
   }
   return result;
 };
+const updateEventCategoryIntoDB = async (
+  id: string,
+  payload: Partial<IEventCategory>,
+) => {
+  const result = await EventCategory.findOneAndUpdate({ _id: id }, payload, {
+    new: true,
+  });
+  return result;
+};
 
 export const EventCategoryServices = {
   createEventCategoryIntoDB,
   getAllEventCategoryFromDB,
   getSingleEventCategoryFromDB,
   deleteEventCategoryFromDB,
+  updateEventCategoryIntoDB,
 };

@@ -49,9 +49,24 @@ const deleteSingleEventCategory = catchAsync(
   },
 );
 
+const updateEventCategory = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await EventCategoryServices.updateEventCategoryIntoDB(
+    id,
+    req.body,
+  );
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Update Event Category',
+    data: result,
+  });
+});
+
 export const EventCategoryController = {
   createEventCategory,
   getAllEventCategory,
   getSingleEventCategory,
   deleteSingleEventCategory,
+  updateEventCategory,
 };
