@@ -358,16 +358,20 @@ const getActiveAndInactiveUserFromDB = async () => {
   const activeUserIds = await Subscription.find({ status: 'active' }).distinct(
     'user',
   );
-  const activeUser = await User.countDocuments({
+
+  const activeUsers = await User.find({
     _id: { $in: activeUserIds },
     role: 'USER',
   });
-  const inactiveUser = await User.countDocuments({
+
+  const inactiveUsers = await User.find({
     _id: { $nin: activeUserIds },
     role: 'USER',
   });
-
-  return { activeUser, inactiveUser };
+  return {
+    activeUsers,
+    inactiveUsers,
+  };
 };
 
 export const PaymentServices = {
