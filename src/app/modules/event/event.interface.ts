@@ -9,7 +9,7 @@ export type IEvent = {
   eventDate: Date;
   RecipientName: string;
   category: string;
-  giftPreferences: giftPreferences[];
+  preferences: giftPreferences[];
 };
 
 export type EventModel = Model<IEvent>;

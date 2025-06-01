@@ -16,9 +16,8 @@ const eventSchema = new Schema<IEvent, EventModel>(
       type: String,
       required: true,
     },
-    giftPreferences: {
+    preferences: {
       type: [String],
-      enum: Object.values(giftPreferences),
       required: true,
     },
     user: {
