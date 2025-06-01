@@ -240,20 +240,18 @@ const exportRevenueCSVIndoDB = async (
       startDate = startOfWeek(now, { weekStartsOn: 0 });
       endDate = now;
       groupFormat = 'EEE';
-      groupByLabels = eachDayOfInterval({
-        start: startDate,
-        end: endDate,
-      }).map(date => format(date, 'EEE'));
+      groupByLabels = eachDayOfInterval({ start: startDate, end: endDate }).map(
+        date => format(date, 'EEE'),
+      );
       break;
 
     case 'monthly':
       startDate = startOfMonth(now);
-      endDate = now;
+      endDate = endOfMonth(now);
       groupFormat = 'd';
-      groupByLabels = eachDayOfInterval({
-        start: startDate,
-        end: endDate,
-      }).map(date => format(date, 'd'));
+      groupByLabels = eachDayOfInterval({ start: startDate, end: endDate }).map(
+        date => format(date, 'd'),
+      );
       break;
 
     case 'yearly':
@@ -279,13 +277,8 @@ const exportRevenueCSVIndoDB = async (
   // Group revenue
   const groupedRevenue: Record<string, number> = {};
   for (const sub of subscriptions) {
-    const dateForLabel =
-      sub?.currentPeriodStart ||
-      (sub?._id && sub?._id.getTimestamp && sub._id.getTimestamp()) ||
-      new Date();
-
+    const dateForLabel = sub?.currentPeriodStart || new Date();
     const label = format(new Date(dateForLabel), groupFormat);
-
     groupedRevenue[label] =
       (groupedRevenue[label] || 0) + (sub?.amountPaid || 0);
   }
@@ -296,21 +289,28 @@ const exportRevenueCSVIndoDB = async (
     completeGroupedData[label] = groupedRevenue[label] || 0;
   }
 
-  // Prepare CSV headers & data
+  // Prepare headers
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader(
     'Content-Disposition',
     `attachment; filename="revenue-${type}-${formatDate(new Date(), 'yyyy-MM-dd_HH-mm')}.csv"`,
   );
 
+  // 👇 Custom Header Row (manual write)
+  res.write(
+    `Revenue Report - ${type.toUpperCase()} (${formatDate(new Date(), 'yyyy-MM-dd')})\n\n`,
+  );
+
+  // Start CSV stream
   const csvStream = csvFormat({ headers: true });
   csvStream.pipe(res);
 
+  // 👇 Actual CSV headers
+  csvStream.write(['Label', 'Amount']);
+
+  // 👇 Write each data row
   for (const label of groupByLabels) {
-    csvStream.write({
-      Label: label,
-      Amount: completeGroupedData[label],
-    });
+    csvStream.write([label, completeGroupedData[label]]);
   }
 
   csvStream.end();
