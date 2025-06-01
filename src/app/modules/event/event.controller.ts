@@ -3,19 +3,20 @@ import catchAsync from '../../../shared/catchAsync';
 import { StatusCodes } from 'http-status-codes';
 import sendResponse from '../../../shared/sendResponse';
 import { EventServices } from './event.service';
+import { JwtPayload } from 'jsonwebtoken';
 
 // create event
 const createEvent = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
   const eventData = req.body;
-  const result = await EventServices.createEventIntoDB(eventData);
+  const result = await EventServices.createEventIntoDB(user!, eventData);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Event created successfully',
-    data: { result }
+    data: { result },
   });
 });
-
 
 // get all events
 const getAllEvents = catchAsync(async (req: Request, res: Response) => {
@@ -25,10 +26,22 @@ const getAllEvents = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'All events retrieved successfully',
-    data: result
+    data: result,
   });
 });
 
+// get user events
+const getUserEvents = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user as JwtPayload; // make sure to cast if needed
+  const result = await EventServices.getUserEventFromDB(user.id); // only pass the ID
+  sendResponse(res, {
+    Total: result?.length,
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'User events retrieved successfully',
+    data: result,
+  });
+});
 
 // get single event
 const getSingleEvent = catchAsync(async (req: Request, res: Response) => {
@@ -38,10 +51,9 @@ const getSingleEvent = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Single event retrieved successfully',
-    data: result
+    data: result,
   });
 });
-
 
 // delete event
 const deleteEvent = catchAsync(async (req: Request, res: Response) => {
@@ -51,11 +63,11 @@ const deleteEvent = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Event deleted successfully',
-    data: result
+    data: result,
   });
 });
 
-// updateEvent 
+// updateEvent
 const updateEvent = catchAsync(async (req: Request, res: Response) => {
   const eventId = req.params.id;
   const eventData = req.body;
@@ -64,15 +76,15 @@ const updateEvent = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Event updated successfully',
-    data: result
+    data: result,
   });
 });
-
 
 export const EventController = {
   createEvent,
   getAllEvents,
   getSingleEvent,
   deleteEvent,
-  updateEvent
+  updateEvent,
+  getUserEvents,
 };
