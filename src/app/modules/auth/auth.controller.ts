@@ -122,16 +122,20 @@ const loginAdmin = catchAsync(async (req: Request, res: Response) => {
 const googleAuthCallback = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.handleGoogleLogin(
     req.user as IUser & { profile: any },
-  )
+  );
+  res.redirect(
+    `http://rakib5000.binarybards.online/?token=${result?.tokens?.accessToken}`,
+  );
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Login successful',
-    data: result,
-  })
-})
-
-
+    data: {
+      createToken: result?.token,
+      role: result?.user?.role,
+    },
+  });
+});
 
 export const AuthController = {
   verifyEmail,
