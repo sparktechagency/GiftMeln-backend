@@ -33,12 +33,28 @@ router.get(
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
   PaymentController.getRevenueAnalyticsFromDB,
 );
+router.get(
+  '/active-user',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  PaymentController.exportActiveUserCSV,
+);
 
 // active user
 router.get(
   '/active-user',
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.SUPER_ADMIN),
   PaymentController.totalActiveUser,
+);
+router.get(
+  '/export-revenue',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  PaymentController.exportRevenueCSV,
+);
+
+router.get(
+  '/active-inactive-user',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  PaymentController.totalActiveUserAndInactiveUser,
 );
 
 router.patch(

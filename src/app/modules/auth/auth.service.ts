@@ -28,7 +28,10 @@ const loginUserFromDB = async (payload: ILoginData) => {
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
-  // login otp
+  // if don't verify email
+  if (isExistUser.verified === false) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Please verify your email');
+  }
 
   // Check if the account is active
   if (isExistUser.status === 'delete') {
@@ -211,7 +214,7 @@ const changePasswordToDB = async (
   //current password match
   if (
     currentPassword &&
-    !(await User.isMatchPassword(currentPassword, isExistUser.password))
+    !(await User.isMatchPassword(currentPassword, isExistUser.password!))
   ) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect');
   }

@@ -5,18 +5,24 @@ import { stripe } from '../../../config/stripe';
 import { User } from '../user/user.model';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
+import { format as csvFormat } from 'fast-csv';
 import {
-  format,
-  eachMonthOfInterval,
-  startOfYear,
-  eachDayOfInterval,
-  startOfMonth,
-  startOfWeek,
-  eachHourOfInterval,
   startOfDay,
-  endOfYear,
   endOfDay,
+  startOfMonth,
+  startOfYear,
+  endOfYear,
+  endOfDay as endOfDayFn,
+  eachHourOfInterval,
+  eachDayOfInterval,
+  eachMonthOfInterval,
+  subDays,
+  format,
+  startOfWeek,
+  formatDate,
+  endOfMonth,
 } from 'date-fns';
+import { Response } from 'express';
 
 const subscriptionDetailsFromDB = async (
   user: JwtPayload,
@@ -49,8 +55,8 @@ const subscriptionDetailsFromDB = async (
   return { subscription };
 };
 //
-const getAllSubscriptionIntoDB = async () => {
-  const subscription = await Subscription.find()
+const getAllSubscriptionIntoDB = async (userId: string) => {
+  const subscription = await Subscription.find({ user: userId })
     .limit(20)
     .populate({
       path: 'package',
@@ -114,6 +120,7 @@ const overViewFromDB = async () => {
 const getRevenueAnalytics = async (query: Record<string, any>) => {
   const type = query.type;
   const now = new Date();
+
   let startDate: Date;
   let endDate: Date;
   let groupFormat: string;
@@ -123,31 +130,29 @@ const getRevenueAnalytics = async (query: Record<string, any>) => {
     case 'daily':
       startDate = startOfDay(now);
       endDate = endOfDay(now);
-      groupFormat = 'HH'; // 00-23 hours
+      groupFormat = 'HH';
       groupByLabels = eachHourOfInterval({
         start: startDate,
         end: endDate,
-      })?.map(date => format(date, 'HH'));
+      }).map(date => format(date, 'HH'));
       break;
 
     case 'weekly':
-      startDate = startOfWeek(now, { weekStartsOn: 0 }); // Sunday start
-      endDate = now;
+      startDate = startOfDay(subDays(now, 6)); // last 7 days
+      endDate = endOfDay(now);
       groupFormat = 'EEE';
-      groupByLabels = eachDayOfInterval({
-        start: startDate,
-        end: endDate,
-      })?.map(date => format(date, 'EEE'));
+      groupByLabels = eachDayOfInterval({ start: startDate, end: endDate }).map(
+        date => format(date, 'EEE'),
+      );
       break;
 
     case 'monthly':
       startDate = startOfMonth(now);
-      endDate = now;
-      groupFormat = 'd';
-      groupByLabels = eachDayOfInterval({
-        start: startDate,
-        end: endDate,
-      })?.map(date => format(date, 'd'));
+      endDate = endOfMonth(now); // ✅ fix to include full month
+      groupFormat = 'dd'; // two-digit day label (01, 02, ..., 31)
+      groupByLabels = eachDayOfInterval({ start: startDate, end: endDate }).map(
+        date => format(date, 'dd'),
+      );
       break;
 
     case 'yearly':
@@ -157,7 +162,7 @@ const getRevenueAnalytics = async (query: Record<string, any>) => {
       groupByLabels = eachMonthOfInterval({
         start: startDate,
         end: endDate,
-      })?.map(date => format(date, 'MMM'));
+      }).map(date => format(date, 'MMM'));
       break;
 
     default:
@@ -169,30 +174,25 @@ const getRevenueAnalytics = async (query: Record<string, any>) => {
     currentPeriodStart: { $gte: startDate, $lte: endDate },
   }).lean();
 
-  // Group revenue by dynamic label based on date field and format
   const groupedRevenue: Record<string, number> = {};
 
   for (const sub of subscriptions) {
-    // Dynamic date extraction: prioritize currentPeriodStart, fallback to _id timestamp
     const dateForLabel =
       sub?.currentPeriodStart ||
-      (sub?._id && sub?._id?.getTimestamp && sub?._id?.getTimestamp()) ||
+      (sub?._id?.getTimestamp?.() as Date) ||
       new Date();
 
     const label = format(new Date(dateForLabel), groupFormat);
-
     groupedRevenue[label] =
       (groupedRevenue[label] || 0) + (sub?.amountPaid || 0);
   }
 
-  // Fill missing labels with zero for full timeline
   const completeGroupedData: Record<string, number> = {};
   for (const label of groupByLabels) {
     completeGroupedData[label] = groupedRevenue[label] || 0;
   }
 
-  // Optionally return as an array with label and amount
-  const orderedData = groupByLabels?.map(label => ({
+  const orderedData = groupByLabels.map(label => ({
     label,
     amount: completeGroupedData[label],
   }));
@@ -209,6 +209,167 @@ const activeUserFromDB = async () => {
   return result;
 };
 
+// TODO: export csv file
+const exportRevenueCSVIndoDB = async (
+  query: Record<string, any>,
+  res: Response,
+) => {
+  const type = query.type;
+  if (!type) {
+    throw new Error('Query parameter "type" is required');
+  }
+
+  const now = new Date();
+  let startDate: Date;
+  let endDate: Date;
+  let groupFormat: string;
+  let groupByLabels: string[];
+
+  switch (type) {
+    case 'daily':
+      startDate = startOfDay(now);
+      endDate = endOfDay(now);
+      groupFormat = 'HH';
+      groupByLabels = eachHourOfInterval({
+        start: startDate,
+        end: endDate,
+      }).map(date => format(date, 'HH'));
+      break;
+
+    case 'weekly':
+      startDate = startOfWeek(now, { weekStartsOn: 0 });
+      endDate = now;
+      groupFormat = 'EEE';
+      groupByLabels = eachDayOfInterval({
+        start: startDate,
+        end: endDate,
+      }).map(date => format(date, 'EEE'));
+      break;
+
+    case 'monthly':
+      startDate = startOfMonth(now);
+      endDate = now;
+      groupFormat = 'd';
+      groupByLabels = eachDayOfInterval({
+        start: startDate,
+        end: endDate,
+      }).map(date => format(date, 'd'));
+      break;
+
+    case 'yearly':
+      startDate = startOfYear(now);
+      endDate = endOfYear(now);
+      groupFormat = 'MMM';
+      groupByLabels = eachMonthOfInterval({
+        start: startDate,
+        end: endDate,
+      }).map(date => format(date, 'MMM'));
+      break;
+
+    default:
+      throw new Error('Invalid type. Use daily, weekly, monthly, or yearly');
+  }
+
+  // Fetch active subscriptions in date range
+  const subscriptions = await Subscription.find({
+    status: 'active',
+    currentPeriodStart: { $gte: startDate, $lte: endDate },
+  }).lean();
+
+  // Group revenue
+  const groupedRevenue: Record<string, number> = {};
+  for (const sub of subscriptions) {
+    const dateForLabel =
+      sub?.currentPeriodStart ||
+      (sub?._id && sub?._id.getTimestamp && sub._id.getTimestamp()) ||
+      new Date();
+
+    const label = format(new Date(dateForLabel), groupFormat);
+
+    groupedRevenue[label] =
+      (groupedRevenue[label] || 0) + (sub?.amountPaid || 0);
+  }
+
+  // Fill missing labels with zero
+  const completeGroupedData: Record<string, number> = {};
+  for (const label of groupByLabels) {
+    completeGroupedData[label] = groupedRevenue[label] || 0;
+  }
+
+  // Prepare CSV headers & data
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="revenue-${type}-${formatDate(new Date(), 'yyyy-MM-dd_HH-mm')}.csv"`,
+  );
+
+  const csvStream = csvFormat({ headers: true });
+  csvStream.pipe(res);
+
+  for (const label of groupByLabels) {
+    csvStream.write({
+      Label: label,
+      Amount: completeGroupedData[label],
+    });
+  }
+
+  csvStream.end();
+};
+
+// TODO: all subscriber list export csv
+const exportAllSubscriberCSVIndoDB = async (res: Response) => {
+  const subscriptions = await Subscription.find({ status: 'active' })
+    .populate({
+      path: 'user',
+      select: 'name email phone',
+    })
+    .populate({
+      path: 'package',
+      select: 'name price duration',
+    })
+    .lean();
+
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="active-users-${formatDate(new Date(), 'yyyy-MM-dd_HH-mm')}.csv"`,
+  );
+
+  const csvStream = csvFormat({ headers: true });
+  csvStream.pipe(res);
+
+  subscriptions.forEach(sub => {
+    csvStream.write({
+      Name: sub?.user?.name,
+      Email: sub?.user?.email,
+      Phone: sub?.user?.phone,
+      Package: sub?.package?.name,
+      Price: sub?.package?.price,
+      Duration: sub?.package?.duration,
+      Status: sub?.status,
+    });
+  });
+
+  csvStream.end();
+};
+
+// TODO: Active user and inactive user
+const getActiveAndInactiveUserFromDB = async () => {
+  const activeUserIds = await Subscription.find({ status: 'active' }).distinct(
+    'user',
+  );
+  const activeUser = await User.countDocuments({
+    _id: { $in: activeUserIds },
+    role: 'USER',
+  });
+  const inactiveUser = await User.countDocuments({
+    _id: { $nin: activeUserIds },
+    role: 'USER',
+  });
+
+  return { activeUser, inactiveUser };
+};
+
 export const PaymentServices = {
   subscriptionDetailsFromDB,
   getAllSubscriptionIntoDB,
@@ -217,4 +378,7 @@ export const PaymentServices = {
   overViewFromDB,
   getRevenueAnalytics,
   activeUserFromDB,
+  exportRevenueCSVIndoDB,
+  exportAllSubscriberCSVIndoDB,
+  getActiveAndInactiveUserFromDB,
 };

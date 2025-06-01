@@ -18,10 +18,13 @@ const subscriptionDetails = catchAsync(async (req: Request, res: Response) => {
 
 // get all subscription
 const allSubscription = catchAsync(async (req: Request, res: Response) => {
-  const result = await PaymentServices.getAllSubscriptionIntoDB();
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'No data found');
+  const userId = req.user?.id || req.params.userId;
+
+  if (!userId) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid User');
   }
+
+  const result = await PaymentServices.getAllSubscriptionIntoDB(userId);
   sendResponse(res, {
     success: true,
     Total: result.length,
@@ -93,6 +96,27 @@ const totalActiveUser = catchAsync(async (req: Request, res: Response) => {
     data: { result },
   });
 });
+const exportRevenueCSV = catchAsync(async (req: Request, res: Response) => {
+  await PaymentServices.exportRevenueCSVIndoDB(req.query, res);
+});
+
+const exportActiveUserCSV = catchAsync(async (req: Request, res: Response) => {
+  await PaymentServices.exportAllSubscriberCSVIndoDB(res);
+});
+
+// TODO: Total active user and inactive user
+
+const totalActiveUserAndInactiveUser = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await PaymentServices.getActiveAndInactiveUserFromDB();
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Retrieved active and inactive user counts successfully`,
+      data: { result },
+    });
+  },
+);
 
 export const PaymentController = {
   subscriptionDetails,
@@ -102,4 +126,7 @@ export const PaymentController = {
   overviewData,
   getRevenueAnalyticsFromDB,
   totalActiveUser,
+  exportRevenueCSV,
+  exportActiveUserCSV,
+  totalActiveUserAndInactiveUser,
 };
