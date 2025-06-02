@@ -3,7 +3,6 @@ import ApiError from '../../../errors/ApiError';
 import { EventModel, IEvent } from './event.interface';
 import { Event } from './event.model';
 import { CATEGORY } from '../../../enums/category';
-import { JwtPayload } from 'jsonwebtoken';
 
 // create event into database
 const createEventIntoDB = async (userId: string, eventData: IEvent) => {

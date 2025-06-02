@@ -123,9 +123,7 @@ const googleAuthCallback = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.handleGoogleLogin(
     req.user as IUser & { profile: any },
   );
-  res.redirect(
-    `http://rakib5000.binarybards.online/?token=${result?.tokens?.accessToken}`,
-  );
+  res.redirect(`http://10.0.70.111:3000/?token=${result?.tokens?.accessToken}`);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
