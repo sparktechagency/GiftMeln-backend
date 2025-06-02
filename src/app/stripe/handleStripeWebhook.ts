@@ -19,13 +19,13 @@ const handleStripeWebhook = async (req: Request, res: Response) => {
     event = stripe.webhooks.constructEvent(
       req.body,
       req.headers['stripe-signature'] as string,
-      config.stripe.webhookSecret as string
+      config.stripe.webhookSecret as string,
     );
   } catch (error) {
     // Return an error if verification fails
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      `Webhook signature verification failed. ${error}`
+      `Webhook signature verification failed. ${error}`,
     );
   }
 
@@ -36,6 +36,7 @@ const handleStripeWebhook = async (req: Request, res: Response) => {
 
   // Extract event data and type
   const data = event.data.object as Stripe.Subscription | Stripe.Account;
+
   const eventType = event.type;
   try {
     switch (eventType) {
@@ -84,7 +85,7 @@ const handleStripeWebhook = async (req: Request, res: Response) => {
   } catch (error) {
     throw new ApiError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Error handling event: ${error}`
+      `Error handling event: ${error}`,
     );
   }
 

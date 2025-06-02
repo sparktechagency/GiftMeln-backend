@@ -185,9 +185,9 @@ const startTrial = catchAsync(async (req: Request, res: Response) => {
 const subscribeToPackage = catchAsync(async (req: Request, res: Response) => {
   const { userId, packageId, paymentMethodId } = req.body;
   const result = await PackageServices.subscribeToPackage(
-    userId,
+    userId || authId,
     packageId,
-    paymentMethodId
+    paymentMethodId,
   );
   sendResponse(res, {
     success: true,

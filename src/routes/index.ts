@@ -13,6 +13,7 @@ import { OneTimePaymentRoutes } from '../app/modules/onetimepayment/onetimepayme
 import { SurveyRoute } from '../app/modules/servey/servey.routes';
 import { CustomerManagementRoutes } from '../app/modules/customermanagement/customermanagement.route';
 import { EventCategoryRoutes } from '../app/modules/eventcategory/eventcategory.route';
+import { GiftCollectionRoutes } from '../app/modules/giftcollection/giftcollection.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -71,6 +72,10 @@ const apiRoutes = [
   {
     path: '/event-category',
     route: EventCategoryRoutes,
+  },
+  {
+    path: '/gift-collection',
+    route: GiftCollectionRoutes,
   },
 ];
 

@@ -7,7 +7,7 @@ import { JwtPayload } from 'jsonwebtoken';
 
 // create event
 const createEvent = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user;
+  const user = req.user || req.authId;
   const eventData = req.body;
   const result = await EventServices.createEventIntoDB(user!, eventData);
   sendResponse(res, {

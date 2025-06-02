@@ -40,7 +40,7 @@ export const createSubscriptionProductHelper = async (
         intervalCount = 1;
         break;
       case '7 days':
-        interval = 'month'; // Stripe does not support 'days'
+        interval = 'month';
         intervalCount = 1;
         break;
       default:
@@ -58,7 +58,7 @@ export const createSubscriptionProductHelper = async (
     if (!price?.id) {
       throw new ApiError(
         StatusCodes.INTERNAL_SERVER_ERROR,
-        'Failed to create price in Stripe'
+        'Failed to create price in Stripe',
       );
     }
 
@@ -72,7 +72,7 @@ export const createSubscriptionProductHelper = async (
       ],
       after_completion: {
         type: 'redirect',
-        redirect: { url: 'http://localhost:3000/surveyQuestions' }
+        redirect: { url: 'http://10.0.70.111:3000/surveyQuestions' },
         // redirect: {
         //   url: 'http://localhost:3000/surveyQuestions',
         // },

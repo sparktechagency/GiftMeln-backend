@@ -6,18 +6,19 @@ import { StatusCodes } from 'http-status-codes';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import router from './routes';
 import { Morgan } from './shared/morgen';
-import handleStripeWebhook from './app/stripe/handleStripeWebhook';
 import passport from 'passport';
+import handleStripeWebhook from './app/stripe/handleStripeWebhook';
 const app = express();
+
+app.post(
+  '/api/stripe/webhook',
+  express.raw({ type: 'application/json' }),
+  handleStripeWebhook,
+);
 
 //morgan
 app.use(Morgan.successHandler);
 app.use(Morgan.errorHandler);
-app.post(
-  '/api/stripe/webhook',
-  express.raw({ type: 'application/json' }),
-  handleStripeWebhook
-);
 app.use(session({ secret: 'secret', resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());

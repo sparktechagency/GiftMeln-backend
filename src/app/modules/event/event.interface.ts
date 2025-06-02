@@ -2,6 +2,7 @@ import { Model, Types } from 'mongoose';
 import { giftPreferences } from '../../../enums/giftPreferences';
 
 export type IEvent = {
+  _id?: Types.ObjectId;
   eventName: string;
   price?: number;
   user: Types.ObjectId;

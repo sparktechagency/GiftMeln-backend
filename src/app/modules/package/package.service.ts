@@ -26,8 +26,8 @@ const createPackageIntoDB = async (payload: IPackage) => {
           price_data: {
             currency: 'usd',
             product_data: { name: 'Free Trial Plan' },
-            unit_amount: 0, // Free Plan
-            recurring: { interval: 'month' }, // Set your trial duration
+            unit_amount: 0,
+            recurring: { interval: 'month' },
           },
           quantity: 1,
         },
@@ -35,8 +35,6 @@ const createPackageIntoDB = async (payload: IPackage) => {
       success_url: 'http://64.23.193.89:3000/surveyQuestions',
       cancel_url: 'https://64.23.193.89:3000/cancel',
     });
-
-    // ✅ Assign Stripe details for Free Plan
     product = {
       paymentLink: session.url,
       productId: session.id,
@@ -57,7 +55,7 @@ const createPackageIntoDB = async (payload: IPackage) => {
     if (!product) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
-        'Failed to create subscription product'
+        'Failed to create subscription product',
       );
     }
   }
@@ -92,7 +90,7 @@ const checkTrialStatus = async (userId: string) => {
       await Package.updateOne({ userId }, { $set: { hasTrial: false } });
       throw new ApiError(
         StatusCodes.FORBIDDEN,
-        'Your free trial has expired. Please subscribe.'
+        'Your free trial has expired. Please subscribe.',
       );
     }
   }
@@ -106,7 +104,7 @@ const checkTrialStatus = async (userId: string) => {
 const startTrialSubscription = async (
   userId: string,
   packageId: string,
-  paymentMethodId: string
+  paymentMethodId: string,
 ) => {
   const user = await User.findById(userId);
   if (!user) {
@@ -136,7 +134,7 @@ const startTrialSubscription = async (
       } catch (error) {
         throw new ApiError(
           StatusCodes.INTERNAL_SERVER_ERROR,
-          'Stripe customer creation failed.'
+          'Stripe customer creation failed.',
         );
       }
     }
@@ -153,7 +151,7 @@ const startTrialSubscription = async (
   } catch (error) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Failed to attach payment method.'
+      'Failed to attach payment method.',
     );
   }
 
@@ -173,7 +171,7 @@ const startTrialSubscription = async (
   } catch (error) {
     throw new ApiError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      'Failed to create subscription.'
+      'Failed to create subscription.',
     );
   }
 
@@ -211,7 +209,7 @@ const getPackageById = async (packageId: string) => {
 const subscribeToPackage = async (
   userId: string,
   packageId: string,
-  paymentMethodId: string
+  paymentMethodId: string,
 ) => {
   try {
     const user = await User.findById(userId);
@@ -238,7 +236,7 @@ const subscribeToPackage = async (
 
     const subscription = await stripe.subscriptions.create({
       customer: user.stripeCustomerId,
-      items: [{ price: packageData.productId }], // Ensure packageData.productId is a valid Stripe price ID
+      items: [{ price: packageData.productId }],
       default_payment_method: paymentMethodId,
       expand: ['latest_invoice.payment_intent'],
     });
@@ -264,7 +262,7 @@ const subscribeToPackage = async (
   } catch (error) {
     throw new ApiError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      'Subscription failed'
+      'Subscription failed',
     );
   }
 };

@@ -7,9 +7,8 @@ const ProductSchema = new Schema<IProduct>(
     productName: { type: String, required: true },
     description: { type: String, required: true },
     additionalInfo: { type: String, required: false },
-    productCategory: {
-      type: Schema.Types.ObjectId,
-      ref: 'Category',
+    category: {
+      type: String,
       required: true,
     },
     size: { type: [String], required: true },
@@ -22,11 +21,6 @@ const ProductSchema = new Schema<IProduct>(
     availability: {
       type: String,
       enum: Object.values(AVAILABILITY),
-      required: true,
-    },
-    eventCategory: {
-      type: Schema.Types.ObjectId,
-      ref: 'EventCategory',
       required: true,
     },
   },

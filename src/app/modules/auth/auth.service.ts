@@ -393,7 +393,7 @@ const handleGoogleLogin = async (payload: IUser & { profile: any }) => {
     verified: true,
     password: id,
     status: 'active',
-    appId: id,
+    id: id,
     role: payload.role,
   };
 

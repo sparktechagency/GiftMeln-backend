@@ -3,18 +3,30 @@ import ApiError from '../../../errors/ApiError';
 import { EventModel, IEvent } from './event.interface';
 import { Event } from './event.model';
 import { CATEGORY } from '../../../enums/category';
-import { giftData, surveyQuestions } from './event.constants';
+import { ProductModel } from '../product/product.model';
+import { GiftCollection } from '../giftcollection/giftcollection.model';
+import { JwtPayload } from 'jsonwebtoken';
 
-// create event into database
-const createEventIntoDB = async (userId: string, eventData: IEvent) => {
-  const giftDatas = await giftData?.map(gift => gift.occasion.toLowerCase());
-  const servayQuestions = surveyQuestions?.map(preference => preference);
-  // console.log(giftData);
-  console.log(servayQuestions);
-  const event = await Event.create({ ...eventData, userId });
-  if (!event) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create the event');
+const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
+  const product = await ProductModel.findOne({ category: eventData.category });
+
+  if (!product) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Invalid Event Category');
   }
+
+  const event = (await Event.create(eventData)) as IEvent;
+  if (!event) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create event');
+  }
+
+  if (event) {
+    await GiftCollection.create({
+      user: userId.authId || userId.id,
+      product: product._id,
+      event: event?._id,
+    });
+  }
+
   return event;
 };
 

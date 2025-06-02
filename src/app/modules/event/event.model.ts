@@ -1,6 +1,5 @@
 import { Schema, model } from 'mongoose';
 import { IEvent, EventModel } from './event.interface';
-import { giftPreferences } from '../../../enums/giftPreferences';
 
 const eventSchema = new Schema<IEvent, EventModel>(
   {
