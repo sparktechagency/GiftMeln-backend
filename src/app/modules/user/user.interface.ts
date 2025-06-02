@@ -5,6 +5,7 @@ export type IUser = {
   _id?: Types.ObjectId;
   name: string;
   role: USER_ROLES;
+  authId?: string;
   // contact: string;
   phone: string;
   email: string;

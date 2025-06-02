@@ -113,7 +113,7 @@ const totalActiveUserAndInactiveUser = catchAsync(
       statusCode: 200,
       success: true,
       message: `Retrieved active and inactive user counts successfully`,
-      data: { result },
+      data: result,
     });
   },
 );

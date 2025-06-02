@@ -378,7 +378,11 @@ const handleGoogleLogin = async (payload: IUser & { profile: any }) => {
   });
   if (isUserExist) {
     //return only the token
-    const tokens = AuthHelper.createToken(isUserExist._id, isUserExist.role);
+    const tokens = AuthHelper.createToken(
+      isUserExist._id,
+      isUserExist.role,
+      isUserExist.email,
+    );
     return { tokens };
   }
 
