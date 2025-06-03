@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import catchAsync from '../../../shared/catchAsync';
 import { SurveyService } from './servey.service';
 import sendResponse from '../../../shared/sendResponse';
-import { Types } from 'mongoose';
 
 const createSurvey = catchAsync(async (req: Request, res: Response) => {
   const result = req.body;
@@ -43,19 +42,9 @@ const updateSurvey = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// get suer servery
+// get user servery
 const getAllSurveys = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user?.id || req.params.userId;
-
-  if (!userId) {
-    return sendResponse(res, {
-      success: false,
-      statusCode: 400,
-      message: 'User ID is required',
-      data: null,
-    });
-  }
-
+  const userId = req.user?.id || req.params.userId || req?.user?.authId;
   const data = await SurveyService.getAllSurveysFromDB(userId);
 
   sendResponse(res, {

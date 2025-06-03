@@ -3,6 +3,7 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { productService } from './product.service';
 import ApiError from '../../../errors/ApiError';
+import { Request, Response } from 'express';
 
 const createProduct = catchAsync(async (req, res) => {
   const result = await productService.createProductIntoDB(req.body);
@@ -15,7 +16,7 @@ const createProduct = catchAsync(async (req, res) => {
 });
 
 // get all products
-const getAllProducts = catchAsync(async (req, res) => {
+const getAllProducts = catchAsync(async (req: Request, res: Response) => {
   const filters = req.query;
   const result = await productService.getAllProducts(filters);
   sendResponse(res, {
@@ -57,7 +58,7 @@ const updateProduct = catchAsync(async (req, res) => {
   const updatedProduct = await productService.updateProductInDB(
     id,
     updatedData,
-    files
+    files,
   );
 
   sendResponse(res, {

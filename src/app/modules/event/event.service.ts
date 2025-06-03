@@ -19,13 +19,11 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create event');
   }
 
-  if (event) {
-    await GiftCollection.create({
-      user: userId.authId || userId.id,
-      product: product._id,
-      event: event?._id,
-    });
-  }
+  await GiftCollection.create({
+    user: userId.authId || userId.id,
+    product: product?._id || null,
+    event: event?._id,
+  });
 
   return event;
 };
@@ -81,8 +79,9 @@ const updateEventInDB = async (id: string, eventData: EventModel) => {
 };
 
 const getUserEventFromDB = async (userId: string) => {
+  console.log(userId);
   const result = await Event.find({ user: userId });
-  return result || [];
+  return result;
 };
 
 export const EventServices = {

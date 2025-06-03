@@ -20,17 +20,18 @@ route.get(
   auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   SurveyController.getSingleSurvey
 );
+route.get(
+  '/:id',
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  SurveyController.getAllSurveys,
+);
 route.patch(
   '/:id',
   auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   SurveyController.updateSurvey
 );
 
-route.get(
-  '/:id',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
-  SurveyController.getAllSurveys
-);
+
 
 // export route
 export const SurveyRoute = route;

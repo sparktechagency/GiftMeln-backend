@@ -14,6 +14,7 @@ const eventSchema = new Schema<IEvent, EventModel>(
     category: {
       type: String,
       required: true,
+      default: 'Other',
     },
     preferences: {
       type: [String],

@@ -33,7 +33,7 @@ const getAllEvents = catchAsync(async (req: Request, res: Response) => {
 // get user events
 const getUserEvents = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as JwtPayload;
-  const result = await EventServices.getUserEventFromDB(user.id);
+  const result = await EventServices.getUserEventFromDB(user.id || user.authId);
   sendResponse(res, {
     Total: result?.length,
     success: true,

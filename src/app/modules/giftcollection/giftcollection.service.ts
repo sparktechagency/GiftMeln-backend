@@ -14,6 +14,7 @@ const getAllGiftCollectionFromDB = async () => {
   );
 
   const allCollections = await GiftCollection.find();
+    
   return allCollections;
 };
 const updateGiftCollection = async (

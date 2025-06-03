@@ -12,7 +12,7 @@ const createOrUpdateSurvey = async (payload: IServay) => {
     {
       $set: { body },
     },
-    { new: true, upsert: true, runValidators: true }
+    { new: true, upsert: true, runValidators: true },
   );
 
   return survey;
@@ -22,7 +22,7 @@ const createOrUpdateSurvey = async (payload: IServay) => {
 
 const getSingleSurvey = async (id: string) => {
   const survey = await SurveyModel.findOne({ user: id });
-  console.log("survey", survey);
+  console.log('survey', survey);
   if (!survey) {
     throw new Error('Survey not found.');
   }
@@ -47,15 +47,15 @@ const updateSurveyIntoDB = async (id: string, payload: Partial<IServay>) => {
   const survey = await SurveyModel.findByIdAndUpdate(
     id,
     { $push: { body: { $each: bodyWithIds } } },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
 
   return survey;
 };
 
 // get servey for user
-const getAllSurveysFromDB = async (userId: string) => {
-  const surveys = await SurveyModel.find({ user: userId });
+const getAllSurveysFromDB = async (userId: string, authId?: string) => {
+  const surveys = await SurveyModel.find({ user: userId || authId });
 
   return surveys.length > 0 ? surveys : null;
 };
@@ -69,13 +69,10 @@ const getAllSurveys = async () => {
   return surveys;
 };
 
-
-
-
 export const SurveyService = {
   createOrUpdateSurvey,
   updateSurveyIntoDB,
   getAllSurveysFromDB,
   getSingleSurvey,
-  getAllSurveys
+  getAllSurveys,
 };

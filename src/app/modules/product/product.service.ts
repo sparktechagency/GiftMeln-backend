@@ -4,6 +4,7 @@ import { IProduct } from './product.interface';
 import { ProductModel } from './product.model';
 import mongoose from 'mongoose';
 import config from '../../../config';
+import QueryBuilder from '../../builder/QueryBuilder';
 const baseURL = `https://${config.shopify.storeDomain}/admin/api/${config.shopify.apiVersion}`;
 const createProductIntoDB = async (productData: IProduct) => {
   const product = await ProductModel.create(productData);
@@ -15,71 +16,82 @@ const createProductIntoDB = async (productData: IProduct) => {
 
 // get all products
 
-const getAllProducts = async (filters: any) => {
-  try {
-    const query: any = {};
+// const getAllProducts = async (filters: any) => {
+//   try {
+//     const query: any = {};
 
-    if (filters?.categoryName) {
-      query['productCategory.categoryName'] = {
-        $regex: new RegExp(filters.categoryName, 'i'),
-      };
-    }
+//     if (filters?.category) {
+//       query['productCategory.category'] = {
+//         $regex: new RegExp(filters.categoryName, 'i'),
+//       };
+//     }
 
-    if (filters?.categoryId) {
-      if (Array.isArray(filters.categoryId)) {
-        query['productCategory._id'] = {
-          $in: filters.categoryId.map(
-            (id: string) => new mongoose.Types.ObjectId(id)
-          ),
-        };
-      } else {
-        query['productCategory._id'] = new mongoose.Types.ObjectId(
-          filters.categoryId
-        );
-      }
-    }
+//     if (filters?.categoryId) {
+//       if (Array.isArray(filters.category)) {
+//         query['category._id'] = {
+//           $in: filters.categoryId.map(
+//             (id: string) => new mongoose.Types.ObjectId(id),
+//           ),
+//         };
+//       } else {
+//         query['productCategory._id'] = new mongoose.Types.ObjectId(
+//           filters.category,
+//         );
+//       }
+//     }
 
-    if (filters.availability) {
-      query.availability = filters.availability;
-    }
+//     if (filters.availability) {
+//       query.availability = filters.availability;
+//     }
 
-    // Handle price range filter based on discountedPrice
-    if (filters.minPrice || filters.maxPrice) {
-      query.discountedPrice = {}; // Apply the filter on discountedPrice instead of regularPrice
-      if (filters.minPrice) {
-        query.discountedPrice.$gte = parseFloat(filters.minPrice);
-      }
-      if (filters.maxPrice) {
-        query.discountedPrice.$lte = parseFloat(filters.maxPrice);
-      }
-    }
+//     // Handle price range filter based on discountedPrice
+//     if (filters.minPrice || filters.maxPrice) {
+//       query.discountedPrice = {}; // Apply the filter on discountedPrice instead of regularPrice
+//       if (filters.minPrice) {
+//         query.discountedPrice.$gte = parseFloat(filters.minPrice);
+//       }
+//       if (filters.maxPrice) {
+//         query.discountedPrice.$lte = parseFloat(filters.maxPrice);
+//       }
+//     }
 
-    // Run the query with the price filter and other filters
-    const products = await ProductModel.aggregate([
-      {
-        $lookup: {
-          from: 'categories',
-          localField: 'productCategory',
-          foreignField: '_id',
-          as: 'productCategory',
-        },
-      },
-      { $unwind: '$productCategory' },
-      { $match: query },
-    ]);
+//     // Run the query with the price filter and other filters
+//     const products = await ProductModel.aggregate([
+//       {
+//         $lookup: {
+//           from: 'categories',
+//           localField: 'category',
+//           foreignField: '_id',
+//           as: 'category',
+//         },
+//       },
+//       { $unwind: '$category' },
+//       { $match: query },
+//     ]);
 
-    // If no products found (including price not matching), return empty array
-    if (!products || products.length === 0) {
-      return [];
-    }
+//     // If no products found (including price not matching), return empty array
+//     if (!products || products.length === 0) {
+//       return [];
+//     }
 
-    return products;
-  } catch (error) {
-    console.error('Error occurred:', error);
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'No product found');
-  }
+//     return products;
+//   } catch (error) {
+//     console.error('Error occurred:', error);
+//     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'No product found');
+//   }
+// };
+const getAllProducts = async (query: Record<string, any>) => {
+  const queryBuilder = new QueryBuilder(ProductModel.find(), query)
+    .search(['productName', 'description'])
+    .filter()
+    .sort()
+    .paginate();
+
+  // Execute the final query
+  const products = await queryBuilder.modelQuery;
+
+  return products;
 };
-
 // get single product
 const getSingleProduct = async (id: string) => {
   const product = await ProductModel.findById(id).populate('productCategory');
@@ -87,7 +99,7 @@ const getSingleProduct = async (id: string) => {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
   }
   const relatedProducts = await ProductModel.find({
-    productCategory: product.productCategory,
+    productCategory: product.category,
     _id: { $ne: id },
   }).limit(4);
 
@@ -98,7 +110,7 @@ const getSingleProduct = async (id: string) => {
 const updateProductInDB = async (
   productId: string,
   updatedData: Partial<IProduct>,
-  files: { [fieldname: string]: Express.Multer.File[] }
+  files: { [fieldname: string]: Express.Multer.File[] },
 ) => {
   // Process files
   if (files.featureImage && files.featureImage.length > 0) {
@@ -108,7 +120,7 @@ const updateProductInDB = async (
   if (files.additionalImages && files.additionalImages.length > 0) {
     // @ts-ignore
     updatedData.additionalImages = files.additionalImages.map(
-      file => file.path
+      file => file.path,
     );
   }
 
@@ -119,7 +131,7 @@ const updateProductInDB = async (
     } catch (error) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
-        'Invalid JSON format for tags'
+        'Invalid JSON format for tags',
       );
     }
   }
@@ -147,7 +159,6 @@ const deleteProductFromDB = async (id: string) => {
 };
 // shopify all service
 const shopifyProductFromDB = async () => {
-
   // 👇 Check if accessToken exists
   if (!config.shopify.accessToken) {
     throw new Error('Shopify Access Token missing!');
@@ -176,7 +187,7 @@ const getSingleProductFromShopify = async (id: string) => {
         'Content-Type': 'application/json',
         'X-Shopify-Access-Token': config.shopify.accessToken!,
       },
-    }
+    },
   );
 
   if (!res.ok) {
