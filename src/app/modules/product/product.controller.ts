@@ -105,6 +105,16 @@ const getSingleShopifyProduct = catchAsync(async (req, res) => {
   });
 });
 
+const createBulkProduct = catchAsync(async (req: Request, res: Response) => {
+  const result = await productService.createBulkProductToDB(req.body.people);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Company Created Successfully',
+    data: result,
+  });
+});
+
 export const productController = {
   createProduct,
   getAllProducts,
@@ -114,4 +124,5 @@ export const productController = {
   // shopify
   shopifyProduct,
   getSingleShopifyProduct,
+  createBulkProduct,
 };

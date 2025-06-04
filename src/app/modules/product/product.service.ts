@@ -2,7 +2,6 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { IProduct } from './product.interface';
 import { ProductModel } from './product.model';
-import mongoose from 'mongoose';
 import config from '../../../config';
 import QueryBuilder from '../../builder/QueryBuilder';
 const baseURL = `https://${config.shopify.storeDomain}/admin/api/${config.shopify.apiVersion}`;
@@ -222,6 +221,14 @@ const getSingleProductFromShopify = async (id: string) => {
 
   return shopifyProduct;
 };
+const createBulkProductToDB = async (
+  payload: IProduct[],
+): Promise<IProduct[]> => {
+  const createProduct = await ProductModel.insertMany(payload);
+  if (!createProduct)
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to created Company');
+  return createProduct;
+};
 
 export const productService = {
   createProductIntoDB,
@@ -232,4 +239,5 @@ export const productService = {
   ///shopify
   shopifyProductFromDB,
   getSingleProductFromShopify,
+  createBulkProductToDB,
 };

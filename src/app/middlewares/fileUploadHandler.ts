@@ -40,6 +40,9 @@ const fileUploadHandler = () => {
         case 'doc':
           uploadDir = path.join(baseUploadDir, 'doc');
           break;
+        case 'csv':
+          uploadDir = path.join(baseUploadDir, 'csv');
+          break;
         default:
           throw new ApiError(StatusCodes.BAD_REQUEST, 'File is not supported');
       }
@@ -62,27 +65,40 @@ const fileUploadHandler = () => {
 
   //file filter
   const filterFilter = (req: Request, file: any, cb: FileFilterCallback) => {
-    if (file.fieldname === 'image' || file.fieldname === 'feature' || file.fieldname === "additional") {
-      if (file.mimetype.startsWith('image/')) {
-
+    if (
+      file.fieldname === 'image' ||
+      file.fieldname === 'feature' ||
+      file.fieldname === 'additional' ||
+      file.fieldname === 'csv'
+    ) {
+      if (file.mimetype.startsWith('image')) {
         cb(null, true);
+      } else if (file?.fieldname === 'csv') {
+        if (file.mimetype === 'text/csv') {
+          cb(null, true);
+        } else {
+          cb(new ApiError(StatusCodes.BAD_REQUEST, 'Only .csv file supported'));
+        }
       } else {
         cb(
           new ApiError(
-            StatusCodes.BAD_REQUEST,
-            'Only .jpeg, .png, .jpg file supported'
-          )
+            'Only .jpeg, .png, .jpg file supported',
+          ),
         );
       }
     } else if (file.fieldname === 'media') {
-      if (file.mimetype === 'video/mp4' || file.mimetype === 'audio/mpeg') {
+      if (
+        file.mimetype === 'video/mp4' ||
+        file.mimetype === 'audio/mpeg' ||
+        file.mimetype === 'csv'
+      ) {
         cb(null, true);
       } else {
         cb(
           new ApiError(
             StatusCodes.BAD_REQUEST,
-            'Only .mp4, .mp3, file supported'
-          )
+            'Only .mp4, .mp3, file supported',
+          ),
         );
       }
     } else if (file.fieldname === 'doc') {
@@ -96,7 +112,6 @@ const fileUploadHandler = () => {
     }
   };
 
-
   const upload = multer({
     storage: storage,
     // @ts-ignore
@@ -106,7 +121,8 @@ const fileUploadHandler = () => {
     { name: 'media', maxCount: 3 },
     { name: 'doc', maxCount: 3 },
     { name: 'feature', maxCount: 1 },
-    { name: 'additional', maxCount: 5 }
+    { name: 'additional', maxCount: 5 },
+    { name: 'csv', maxCount: 1 },
   ]);
   return upload;
 };

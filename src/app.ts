@@ -8,6 +8,7 @@ import router from './routes';
 import { Morgan } from './shared/morgen';
 import passport from 'passport';
 import handleStripeWebhook from './app/stripe/handleStripeWebhook';
+import { apiRateLimiter } from './rateLimiter';
 const app = express();
 
 app.post(
@@ -50,7 +51,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('uploads'));
 
 //router
-app.use('/api/v1', router);
+app.use('/api/v1', apiRateLimiter, router);
 
 //file retrieve
 app.use(express.static('uploads'));
