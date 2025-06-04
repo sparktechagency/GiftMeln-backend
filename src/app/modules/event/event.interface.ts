@@ -11,6 +11,7 @@ export type IEvent = {
   RecipientName: string;
   category: string;
   preferences: giftPreferences[];
+  giftCreated?: boolean;
 };
 
 export type EventModel = Model<IEvent>;

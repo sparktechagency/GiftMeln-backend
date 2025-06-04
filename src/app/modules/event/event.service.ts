@@ -21,7 +21,6 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
   if (!event) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create event');
   }
-
   await GiftCollection.create({
     user: userId.authId || userId.id,
     product: product?._id || null,

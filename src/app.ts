@@ -37,7 +37,7 @@ app.use(
       'https://accounts.google.com/o/oauth2/v2/auth',
       // 'http://64.23.193.89:3000',
       // 'http://64.23.193.89:3001',
-      // 'http://64.23.193.89:3002',
+      'http://64.23.193.89:3002',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],

@@ -6,6 +6,7 @@ import config from './config';
 import { seedSuperAdmin } from './DB/seedAdmin';
 import { socketHelper } from './helpers/socketHelper';
 import { errorLogger, logger } from './shared/logger';
+import { startGiftExpiryJob } from './nodeCrons';
 
 //uncaught exception
 process.on('uncaughtException', error => {
@@ -21,6 +22,8 @@ async function main() {
 
     //Seed Super Admin after database connection is successful
     await seedSuperAdmin();
+    // start gift expiry job
+    startGiftExpiryJob();
 
     const port =
       typeof config.port === 'number' ? config.port : Number(config.port);

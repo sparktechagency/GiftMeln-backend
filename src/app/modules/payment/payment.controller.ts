@@ -20,9 +20,9 @@ const subscriptionDetails = catchAsync(async (req: Request, res: Response) => {
 const allSubscription = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id || req.params.userId || req?.user?.authId;
 
-  if (!userId) {
-    throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid User');
-  }
+  // if (!userId) {
+  //   throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid User');
+  // }
 
   const result = await PaymentServices.getAllSubscriptionIntoDB(userId);
   sendResponse(res, {

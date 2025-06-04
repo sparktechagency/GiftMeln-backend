@@ -29,6 +29,10 @@ const eventSchema = new Schema<IEvent, EventModel>(
       type: Number,
       // required: true,
     },
+    giftCreated: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
