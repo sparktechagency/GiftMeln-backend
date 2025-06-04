@@ -82,19 +82,19 @@ const createProductIntoDB = async (productData: IProduct) => {
 const getAllProductsFromDB = async (query: Record<string, any>) => {
   const filters = { ...query };
 
-  const priceFilter: any = {};
+  const discountedPriceFilter: any = {};
 
   if (filters.minPrice) {
-    priceFilter.$gte = Number(filters.minPrice);
+    discountedPriceFilter.$gte = Number(filters.minPrice);
     delete filters.minPrice;
   }
   if (filters.maxPrice) {
-    priceFilter.$lte = Number(filters.maxPrice);
+    discountedPriceFilter.$lte = Number(filters.maxPrice);
     delete filters.maxPrice;
   }
 
-  if (Object.keys(priceFilter).length > 0) {
-    filters.price = priceFilter;
+  if (Object.keys(discountedPriceFilter).length > 0) {
+    filters.discountedPrice = discountedPriceFilter;
   }
 
   const queryBuilder = new QueryBuilder(ProductModel.find(), filters)
@@ -106,6 +106,7 @@ const getAllProductsFromDB = async (query: Record<string, any>) => {
   const products = await queryBuilder.modelQuery;
   return products;
 };
+
 
 // get single product
 const getSingleProduct = async (id: string) => {
