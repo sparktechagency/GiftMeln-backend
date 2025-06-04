@@ -13,8 +13,11 @@ const getAllGiftCollectionFromDB = async () => {
     },
   );
 
-  const allCollections = await GiftCollection.find();
-    
+  const allCollections = await GiftCollection.find()
+    .populate('user')
+    .populate('product')
+    .populate('event');
+
   return allCollections;
 };
 const updateGiftCollection = async (

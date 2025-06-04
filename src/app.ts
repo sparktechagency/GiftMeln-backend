@@ -32,7 +32,7 @@ app.use(
       // "http://139.59.0.25:6007"
       'http://10.0.70.111:3000',
       'http://localhost:3000',
-      'http://localhost:3002',
+      'http://10.0.70.111:3002',
       'https://mahmud.binarybards.online/',
       'https://accounts.google.com/o/oauth2/v2/auth',
       // 'http://64.23.193.89:3000',
@@ -40,7 +40,7 @@ app.use(
       // 'http://64.23.193.89:3002',
     ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   }),
 );
 
