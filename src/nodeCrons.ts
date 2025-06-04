@@ -4,6 +4,8 @@ import { logger } from './shared/logger';
 import cron from 'node-cron';
 import { Event } from './app/modules/event/event.model';
 import { ProductModel } from './app/modules/product/product.model';
+import { USER_ROLES } from './enums/user';
+import { User } from './app/modules/user/user.model';
 
 export const startGiftExpiryJob = () => {
   cron.schedule(
@@ -46,4 +48,23 @@ export const startGiftExpiryJob = () => {
   );
 
   logger.info('✅ Gift Expiry Cron Job started and runs every minute');
+};
+export const unVerifiedUserDeleteJob = () => {
+  cron.schedule(
+    // delete after 12 hours
+    '0 0 */12 * * *',
+    async () => {
+      try {
+        const twelveHoursAgo = subDays(new Date(), 1);
+        const result = await User.deleteMany({
+          role: USER_ROLES.USER,
+          verified: false,
+          createdAt: { $lte: twelveHoursAgo },
+        });
+        logger.info(`Deleted ${result.deletedCount} unverified users`);
+      } catch (error) {
+        logger.error('⛔ Cron Job Error:', error);
+      }
+    },
+  );
 };
