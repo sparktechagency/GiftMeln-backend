@@ -14,6 +14,7 @@ import { SurveyRoute } from '../app/modules/servey/servey.routes';
 import { CustomerManagementRoutes } from '../app/modules/customermanagement/customermanagement.route';
 import { EventCategoryRoutes } from '../app/modules/eventcategory/eventcategory.route';
 import { GiftCollectionRoutes } from '../app/modules/giftcollection/giftcollection.route';
+import { NotificationRoute } from '../app/modules/notification/notification.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -28,6 +29,10 @@ const apiRoutes = [
   {
     path: '/event',
     route: EventRoutes,
+  },
+  {
+    path: '/notification',
+    route: NotificationRoute,
   },
   {
     path: '/wishlist',

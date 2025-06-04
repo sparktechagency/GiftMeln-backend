@@ -6,6 +6,9 @@ import { CATEGORY } from '../../../enums/category';
 import { ProductModel } from '../product/product.model';
 import { GiftCollection } from '../giftcollection/giftcollection.model';
 import { JwtPayload } from 'jsonwebtoken';
+import { sendNotifications } from '../../../helpers/notificationSender';
+import { User } from '../user/user.model';
+import { USER_ROLES } from '../../../enums/user';
 
 const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
   const product = await ProductModel.findOne({ category: eventData.category });
@@ -24,6 +27,21 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
     product: product?._id || null,
     event: event?._id,
   });
+  const creatorId = userId.authId || userId.id;
+  const creator = await User.findById(creatorId);
+  const userName = creator?.name || 'Unknown User';
+  const adminUsers = await User.find({
+    role: USER_ROLES.SUPER_ADMIN || USER_ROLES.ADMIN,
+  });
+
+  for (const admin of adminUsers) {
+    await sendNotifications({
+      userId: admin._id.toString(),
+      title: 'New Event Created',
+      message: `User ${userName} created a new event: "${event.eventName}"`,
+      isRead: false,
+    });
+  }
 
   return event;
 };
@@ -79,7 +97,6 @@ const updateEventInDB = async (id: string, eventData: EventModel) => {
 };
 
 const getUserEventFromDB = async (userId: string) => {
-  console.log(userId);
   const result = await Event.find({ user: userId });
   return result;
 };

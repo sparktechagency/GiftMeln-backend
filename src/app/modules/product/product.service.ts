@@ -79,18 +79,34 @@ const createProductIntoDB = async (productData: IProduct) => {
 //     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'No product found');
 //   }
 // };
-const getAllProducts = async (query: Record<string, any>) => {
-  const queryBuilder = new QueryBuilder(ProductModel.find(), query)
+const getAllProductsFromDB = async (query: Record<string, any>) => {
+  const filters = { ...query };
+
+  const priceFilter: any = {};
+
+  if (filters.minPrice) {
+    priceFilter.$gte = Number(filters.minPrice);
+    delete filters.minPrice;
+  }
+  if (filters.maxPrice) {
+    priceFilter.$lte = Number(filters.maxPrice);
+    delete filters.maxPrice;
+  }
+
+  if (Object.keys(priceFilter).length > 0) {
+    filters.price = priceFilter;
+  }
+
+  const queryBuilder = new QueryBuilder(ProductModel.find(), filters)
     .search(['productName', 'description'])
     .filter()
     .sort()
     .paginate();
 
-  // Execute the final query
   const products = await queryBuilder.modelQuery;
-
   return products;
 };
+
 // get single product
 const getSingleProduct = async (id: string) => {
   const product = await ProductModel.findById(id).populate('productCategory');
@@ -232,7 +248,7 @@ const createBulkProductToDB = async (
 
 export const productService = {
   createProductIntoDB,
-  getAllProducts,
+  getAllProductsFromDB,
   getSingleProduct,
   updateProductInDB,
   deleteProductFromDB,
