@@ -1,40 +1,62 @@
-import { subDays } from 'date-fns';
+import { subDays, isSameDay } from 'date-fns';
 import { GiftCollection } from './app/modules/giftcollection/giftcollection.model';
 import { logger } from './shared/logger';
 import cron from 'node-cron';
 import { Event } from './app/modules/event/event.model';
-import { ProductModel } from './app/modules/product/product.model';
 import { USER_ROLES } from './enums/user';
 import { User } from './app/modules/user/user.model';
+import { sendNotifications } from './helpers/notificationSender';
 
 export const startGiftExpiryJob = () => {
   cron.schedule(
     '*/1 * * * *',
     async () => {
       try {
-        const thirtyTwoDaysAgo = new Date(
-          new Date().setDate(new Date().getDate() - 32),
-        );
-        const oldEvents = await Event.find({
-          eventDate: { $lte: thirtyTwoDaysAgo },
-          giftCreated: { $ne: true },
+        const today = new Date();
+
+        const events = await Event.find({
+          eventDate: { $gte: today },
         });
 
-        if (oldEvents.length > 0) {
-          for (const event of oldEvents) {
-            const product = await ProductModel.findOne({
-              category: event.category,
-            });
-            await GiftCollection.create({
-              event: event._id,
-              user: event.user,
-              product: product?._id,
-            });
-            logger.info(`🎉 Gift Collections created for ${event.eventName}`);
-            await Event.findOneAndUpdate(
-              { _id: event._id },
-              { $set: { giftCreated: true } },
+        for (const event of events) {
+          const eventDate = new Date(event.eventDate);
+          const date32DaysBefore = subDays(eventDate, 32);
+          const date30DaysBefore = subDays(eventDate, 30);
+          if (isSameDay(today, date32DaysBefore)) {
+            const updated = await GiftCollection.updateMany(
+              { event: event._id, status: 'initial' },
+              { $set: { status: 'pending' } },
             );
+
+            if (updated.modifiedCount > 0) {
+              logger.info(
+                `🎁 GiftCollection updated to 'pending' for ${event.eventName}`,
+              );
+
+              const admins = await User.find({
+                role: { $in: [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN] },
+              });
+
+              for (const admin of admins) {
+                await sendNotifications({
+                  userId: admin._id.toString(),
+                  title: 'Gift Pending',
+                  message: `Gift for event ${event.eventName} is now pending.`,
+                  isRead: false,
+                });
+              }
+            }
+          }
+          if (today >= date30DaysBefore) {
+            const updated = await GiftCollection.updateMany(
+              { event: event._id, status: 'pending' },
+              { $set: { status: 'send' } },
+            );
+            if (updated.modifiedCount > 0) {
+              logger.info(
+                `✅ GiftCollection updated to 'send' for ${event.eventName}`,
+              );
+            }
           }
         }
       } catch (error) {
@@ -52,7 +74,7 @@ export const startGiftExpiryJob = () => {
 export const unVerifiedUserDeleteJob = () => {
   cron.schedule(
     // delete after 12 hours
-    '0 0 */12 * * *',
+    '0 0  * * *',
     async () => {
       try {
         const twelveHoursAgo = subDays(new Date(), 1);

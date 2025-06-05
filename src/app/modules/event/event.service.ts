@@ -22,25 +22,11 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create event');
   }
   await GiftCollection.create({
-    user: userId.authId || userId.id,
-    product: product?._id || null,
-    event: event?._id,
+    event: event._id,
+    user: event.user,
+    product: product._id,
+    status: 'initial',
   });
-  const creatorId = userId.authId || userId.id;
-  const creator = await User.findById(creatorId);
-  const userName = creator?.name || 'Unknown User';
-  const adminUsers = await User.find({
-    role: USER_ROLES.SUPER_ADMIN || USER_ROLES.ADMIN,
-  });
-
-  for (const admin of adminUsers) {
-    await sendNotifications({
-      userId: admin._id.toString(),
-      title: 'New Event Created',
-      message: `User ${userName} created a new event: "${event.eventName}"`,
-      isRead: false,
-    });
-  }
 
   return event;
 };

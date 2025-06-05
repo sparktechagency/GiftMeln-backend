@@ -2,18 +2,11 @@ import { IGiftCollection } from './giftcollection.interface';
 import { GiftCollection } from './giftcollection.model';
 
 const getAllGiftCollectionFromDB = async () => {
-  const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
-  await GiftCollection.updateMany(
-    {
-      status: 'pending',
-      createdAt: { $lt: fortyEightHoursAgo },
-    },
-    {
-      $set: { status: 'send' },
-    },
-  );
 
-  const allCollections = await GiftCollection.find()
+
+  const allCollections = await GiftCollection.find({
+    status: { $ne: 'initial' },
+  })
     .populate('user')
     .populate('product')
     .populate('event');
