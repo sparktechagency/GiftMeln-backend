@@ -24,6 +24,17 @@ const updateGift = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const allGift = catchAsync(async (req: Request, res: Response) => {
+  const result = await GiftCollectionServices.getAllGiftFromDB();
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Gift collection retrieved successfully',
+    data: result,
+  });
+});
+
 const deleteGift = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await GiftCollectionServices.deleteGiftCollection(id);
@@ -38,4 +49,5 @@ export const GiftCollectionController = {
   getAllGift,
   updateGift,
   deleteGift,
+  allGift,
 };

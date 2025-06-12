@@ -18,13 +18,13 @@ const subscriptionDetails = catchAsync(async (req: Request, res: Response) => {
 
 // get all subscription
 const allSubscription = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user?.id || req.params.userId || req?.user?.authId;
+  // const userId = req.user?.id || req.params.userId || req?.user?.authId;
 
   // if (!userId) {
   //   throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid User');
   // }
 
-  const result = await PaymentServices.getAllSubscriptionIntoDB(userId);
+  const result = await PaymentServices.getAllSubscriptionIntoDB();
   sendResponse(res, {
     success: true,
     Total: result.length,
@@ -49,12 +49,10 @@ const getSubscriptionHistory = catchAsync(
 
 const editPriceByAdmin = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.params;
-  const { amountPaid } = req.body;
+  const { balance } = req.body;
+  console.log(userId, balance);
 
-  const result = await PaymentServices.editPriceByAdminFromDB(
-    userId,
-    amountPaid,
-  );
+  const result = await PaymentServices.editPriceByAdminFromDB(userId, balance);
 
   sendResponse(res, {
     success: true,

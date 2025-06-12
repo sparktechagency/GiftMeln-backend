@@ -12,7 +12,7 @@ export const startGiftExpiryJob = () => {
     '*/1 * * * *',
     async () => {
       try {
-        const today = new Date();
+        const today = new Date('2025-06-05T06:48:19.969+00:00');
 
         const events = await Event.find({
           eventDate: { $gte: today },
@@ -21,7 +21,8 @@ export const startGiftExpiryJob = () => {
         for (const event of events) {
           const eventDate = new Date(event.eventDate);
           const date32DaysBefore = subDays(eventDate, 32);
-          const date30DaysBefore = subDays(eventDate, 30);
+          const date2DaysBefore = subDays(eventDate, 2);
+
           if (isSameDay(today, date32DaysBefore)) {
             const updated = await GiftCollection.updateMany(
               { event: event._id, status: 'initial' },
@@ -47,7 +48,7 @@ export const startGiftExpiryJob = () => {
               }
             }
           }
-          if (today >= date30DaysBefore) {
+          if (isSameDay(today, date2DaysBefore)) {
             const updated = await GiftCollection.updateMany(
               { event: event._id, status: 'pending' },
               { $set: { status: 'send' } },

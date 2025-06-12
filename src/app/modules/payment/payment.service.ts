@@ -55,8 +55,8 @@ const subscriptionDetailsFromDB = async (
   return { subscription };
 };
 //
-const getAllSubscriptionIntoDB = async (userId: string, authId: string) => {
-  const subscription = await Subscription.find({ user: userId || authId })
+const getAllSubscriptionIntoDB = async () => {
+  const subscription = await Subscription.find()
     .limit(20)
     .populate({
       path: 'package',
@@ -87,7 +87,7 @@ const getSubscriptionHistory = async (user: JwtPayload) => {
 const editPriceByAdminFromDB = async (userId: string, newAmount: number) => {
   const subscription = await Subscription.findOneAndUpdate(
     { user: userId },
-    { $set: { amountPaid: newAmount } },
+    { $set: { balance: newAmount } },
     { new: true },
   ).lean();
 

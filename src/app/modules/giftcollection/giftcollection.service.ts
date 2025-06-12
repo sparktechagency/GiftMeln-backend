@@ -2,8 +2,6 @@ import { IGiftCollection } from './giftcollection.interface';
 import { GiftCollection } from './giftcollection.model';
 
 const getAllGiftCollectionFromDB = async () => {
-
-
   const allCollections = await GiftCollection.find({
     status: { $ne: 'initial' },
   })
@@ -12,6 +10,12 @@ const getAllGiftCollectionFromDB = async () => {
     .populate('event');
 
   return allCollections;
+};
+const getAllGiftFromDB = async () => {
+  const allGifts = await GiftCollection.find({
+    status: 'pending',
+  });
+  return allGifts;
 };
 const updateGiftCollection = async (
   id: string,
@@ -30,4 +34,5 @@ export const GiftCollectionServices = {
   getAllGiftCollectionFromDB,
   updateGiftCollection,
   deleteGiftCollection,
+  getAllGiftFromDB,
 };
