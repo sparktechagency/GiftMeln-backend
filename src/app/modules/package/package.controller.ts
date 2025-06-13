@@ -95,7 +95,7 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
           price: priceObject.id,
           quantity: quantity || 1,
         };
-      })
+      }),
     );
 
     const session = await stripe.checkout.sessions.create({
@@ -172,7 +172,7 @@ const startTrial = catchAsync(async (req: Request, res: Response) => {
   const result = await PackageServices.startTrialSubscription(
     userId,
     packageId,
-    paymentMethodId
+    paymentMethodId,
   );
   sendResponse(res, {
     success: true,
@@ -245,12 +245,24 @@ const getAllSubscription = catchAsync(async (req: Request, res: Response) => {
 const updatePackage = catchAsync(async (req: Request, res: Response) => {
   const result = await PackageServices.updatePackageIntoDB(
     req.params.id,
-    req.body
+    req.body,
   );
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Package updated successfully.',
+    data: result,
+  });
+});
+
+// * Package visibility controller
+const updateVisibility = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await PackageServices.packageVisibilityFromDB(id);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Package visibility updated successfully.',
     data: result,
   });
 });
@@ -268,4 +280,5 @@ export const PackageController = {
   getPackageById,
   getAllSubscription,
   updatePackage,
+  updateVisibility,
 };

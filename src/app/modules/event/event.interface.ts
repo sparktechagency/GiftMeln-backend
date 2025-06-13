@@ -12,6 +12,8 @@ export type IEvent = {
   category: string;
   preferences: giftPreferences[];
   giftCreated?: boolean;
+  address: string;
+  phone: string;
 };
 
 export type EventModel = Model<IEvent>;

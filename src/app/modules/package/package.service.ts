@@ -280,7 +280,7 @@ const cancelSubscription = async (userId, subscriptionId) => {
   // @ts-ignore
   const subscriptionToCancel = userSubscription.subscriptions.find(
     // @ts-ignore
-    sub => sub.subscriptionId === subscriptionId
+    sub => sub.subscriptionId === subscriptionId,
   );
 
   if (!subscriptionToCancel) {
@@ -324,7 +324,7 @@ const getUserSubscription = async (userId: string) => {
 const getAllUserSubscriptions = async () => {
   const subscriptions = await Subscription.find()
     .populate('package')
-    .populate('user')
+    .populate('user');
   if (subscriptions.length === 0) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'No subscriptions found');
   }
@@ -454,6 +454,21 @@ const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
   return updatedPackage;
 };
 
+// * package visibility controller
+const packageVisibilityFromDB = async (id: string) => {
+  const packageData = await Package.findById(id);
+
+  if (!packageData) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Have no Package');
+  }
+
+  // toggle isActive
+  packageData.isActive = !packageData.isActive;
+  await packageData.save();
+
+  return packageData;
+};
+
 export const PackageServices = {
   createPackageIntoDB,
   checkTrialStatus,
@@ -465,4 +480,5 @@ export const PackageServices = {
   getUserSubscription,
   getAllUserSubscriptions,
   updatePackageIntoDB,
+  packageVisibilityFromDB,
 };

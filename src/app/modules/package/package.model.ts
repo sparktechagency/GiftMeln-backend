@@ -5,12 +5,12 @@ const packageSchema = new Schema<IPackage>(
   {
     name: {
       type: String,
-      required: [true, "Package name is required"],
+      required: [true, 'Package name is required'],
       trim: true,
     },
     description: {
       type: String,
-      required: [true, "Description is required"],
+      required: [true, 'Description is required'],
       trim: true,
     },
     price: {
@@ -18,21 +18,20 @@ const packageSchema = new Schema<IPackage>(
       required: function () {
         return this.paymentType !== 'Free';
       },
-      min: [0, "Price cannot be negative"],
+      min: [0, 'Price cannot be negative'],
     },
     duration: {
       type: String,
-      required: [true, "Duration is required"],
-      enum: ["7 days", "month", "year"],
+      required: [true, 'Duration is required'],
+      enum: ['7 days', 'month', 'year'],
     },
     paymentType: {
       type: String,
-      required: [true, "Payment type is required"],
-      enum: ["Free", "Paid"],
+      required: [true, 'Payment type is required'],
+      enum: ['Free', 'Paid'],
     },
     trialEndsAt: {
       type: Date,
-
     },
     hasTrial: {
       type: Boolean,
@@ -44,8 +43,13 @@ const packageSchema = new Schema<IPackage>(
     },
     category: {
       type: String,
-      required: [true, "Category is required"],
-      enum: ["Free Trial", "Budget Friendly", "Premium Plan", "Spoiling Myself"],
+      required: [true, 'Category is required'],
+      enum: [
+        'Free Trial',
+        'Budget Friendly',
+        'Premium Plan',
+        'Spoiling Myself',
+      ],
     },
     priceId: {
       type: String,
@@ -62,7 +66,7 @@ const packageSchema = new Schema<IPackage>(
     },
     isRecommended: {
       type: Boolean,
-      required: true
+      required: true,
     },
     updatePrice: {
       type: Number,
@@ -76,11 +80,12 @@ const packageSchema = new Schema<IPackage>(
       type: String,
       default: null,
     },
-
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Package = model<IPackage>('Package', packageSchema);
-
-

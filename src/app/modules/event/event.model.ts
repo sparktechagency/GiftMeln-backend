@@ -33,6 +33,14 @@ const eventSchema = new Schema<IEvent, EventModel>(
       type: Boolean,
       default: false,
     },
+    address: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

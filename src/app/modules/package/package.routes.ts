@@ -6,12 +6,14 @@ import { USER_ROLES } from '../../../enums/user';
 const router = express.Router();
 
 // Create a Package
-router.post('/create', auth(USER_ROLES.SUPER_ADMIN), PackageController.createPackage);
+router.post(
+  '/create',
+  auth(USER_ROLES.SUPER_ADMIN),
+  PackageController.createPackage,
+);
 
 // Get all available packages
-router.get("/",PackageController.getAllPackages);
-
-
+router.get('/', PackageController.getAllPackages);
 
 // !Check if a user is eligible for a trial
 router.get('/check-trial', PackageController.checkUserTrial);
@@ -21,7 +23,6 @@ router.post('/start-trial', PackageController.startTrial);
 
 // !Checkout for a one-time package purchase
 router.post('/checkout', PackageController.createOneTimePackage);
-
 
 //! Subscribe to a Monthly or Yearly Package
 router.post('/subscribe', PackageController.subscribeToPackage);
@@ -34,14 +35,27 @@ router.post('/subscribe', PackageController.subscribeToPackage);
 
 //! Get User's Active Subscription
 // get all subscriptions from user
-router.get("/all-subscriptions", auth(USER_ROLES.SUPER_ADMIN,USER_ROLES.ADMIN), PackageController.getAllSubscription);
+router.get(
+  '/all-subscriptions',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  PackageController.getAllSubscription,
+);
 router.get('/user-subscription/:userId', PackageController.getUserSubscription);
 // Get details of a specific package by ID
 router.get('/:id', PackageController.getPackageById);
 
-
 // * Update a Package
-router.patch("/:id", auth(USER_ROLES.SUPER_ADMIN), PackageController.updatePackage)
+router.patch(
+  '/:id',
+  auth(USER_ROLES.SUPER_ADMIN),
+  PackageController.updatePackage,
+);
 
+// * isActive package controller from ADMIN
+router.patch(
+  '/visibility/:id',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  PackageController.updateVisibility,
+);
 
 export const PackageRoutes = router;

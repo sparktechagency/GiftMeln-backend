@@ -2,8 +2,8 @@ export interface IPackage {
   name: string;
   description: string;
   price?: number;
-  duration: "7 days" | "month" | "year";
-  paymentType: "Free" | "Paid";
+  duration: '7 days' | 'month' | 'year';
+  paymentType: 'Free' | 'Paid';
   trialEndsAt: Date;
   productId?: string;
   priceId?: string;
@@ -12,7 +12,12 @@ export interface IPackage {
   hasTrial?: boolean;
   stripePriceId?: string;
   stripeSubscriptionId?: string;
-  category: "Free Trial" | "Budget Friendly" | "Premium Plan" | "Spoiling Myself";
+  category:
+    | 'Free Trial'
+    | 'Budget Friendly'
+    | 'Premium Plan'
+    | 'Spoiling Myself';
   isRecommended: boolean;
   updatePrice?: number;
+  isActive: boolean;
 }

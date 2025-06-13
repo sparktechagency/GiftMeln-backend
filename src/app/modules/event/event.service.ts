@@ -6,13 +6,9 @@ import { CATEGORY } from '../../../enums/category';
 import { ProductModel } from '../product/product.model';
 import { GiftCollection } from '../giftcollection/giftcollection.model';
 import { JwtPayload } from 'jsonwebtoken';
-import { sendNotifications } from '../../../helpers/notificationSender';
-import { User } from '../user/user.model';
-import { USER_ROLES } from '../../../enums/user';
 
 const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
   const product = await ProductModel.findOne({ category: eventData.category });
-
   if (!product) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Invalid Event Category');
   }

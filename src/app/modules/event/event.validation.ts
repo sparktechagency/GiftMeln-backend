@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { CATEGORY } from '../../../enums/category';
 import { giftPreferences } from '../../../enums/giftPreferences';
 
 const createEventValidation = z.object({
@@ -24,5 +23,5 @@ const createEventValidation = z.object({
 });
 
 export const eventValidation = {
-    createEventValidation
+  createEventValidation,
 };
