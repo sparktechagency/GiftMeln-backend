@@ -50,12 +50,4 @@ router.patch(
   auth(USER_ROLES.SUPER_ADMIN),
   PackageController.updatePackage,
 );
-
-// * isActive package controller from ADMIN
-router.patch(
-  '/visibility/:id',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-  PackageController.updateVisibility,
-);
-
 export const PackageRoutes = router;

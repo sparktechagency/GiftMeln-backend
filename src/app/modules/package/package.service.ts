@@ -344,7 +344,6 @@ const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
     await stripe.products.update(existingPackage.productId, {
       name: payload.name || existingPackage.name,
       description: payload.description || existingPackage.description,
-      // Add other metadata as needed
     });
   }
 
@@ -424,7 +423,7 @@ const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
                 },
               ],
             });
-            payload.paymentLink = existingPackage.paymentLink; // Keep same URL
+            payload.paymentLink = existingPackage.paymentLink;
           }
         } catch (error) {
           console.error('Error updating payment link:', error);
@@ -454,21 +453,6 @@ const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
   return updatedPackage;
 };
 
-// * package visibility controller
-const packageVisibilityFromDB = async (id: string) => {
-  const packageData = await Package.findById(id);
-
-  if (!packageData) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Have no Package');
-  }
-
-  // toggle isActive
-  packageData.isActive = !packageData.isActive;
-  await packageData.save();
-
-  return packageData;
-};
-
 export const PackageServices = {
   createPackageIntoDB,
   checkTrialStatus,
@@ -480,5 +464,4 @@ export const PackageServices = {
   getUserSubscription,
   getAllUserSubscriptions,
   updatePackageIntoDB,
-  packageVisibilityFromDB,
 };

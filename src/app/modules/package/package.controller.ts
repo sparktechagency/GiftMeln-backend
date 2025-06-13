@@ -255,18 +255,6 @@ const updatePackage = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// * Package visibility controller
-const updateVisibility = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const result = await PackageServices.packageVisibilityFromDB(id);
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: 'Package visibility updated successfully.',
-    data: result,
-  });
-});
-
 export const PackageController = {
   createPackage,
   checkUserTrial,
@@ -280,5 +268,4 @@ export const PackageController = {
   getPackageById,
   getAllSubscription,
   updatePackage,
-  updateVisibility,
 };
