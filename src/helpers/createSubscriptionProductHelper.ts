@@ -4,13 +4,13 @@ import ApiError from '../errors/ApiError';
 import { stripe } from '../config/stripe';
 
 export const createSubscriptionProductHelper = async (
-  payload: Partial<IPackage>
+  payload: Partial<IPackage>,
 ): Promise<{ productId: string; paymentLink: string } | null> => {
   try {
     if (!payload.name || !payload.description || !payload.price) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
-        'Missing required package details'
+        'Missing required package details',
       );
     }
 
@@ -23,7 +23,7 @@ export const createSubscriptionProductHelper = async (
     if (!product?.id) {
       throw new ApiError(
         StatusCodes.INTERNAL_SERVER_ERROR,
-        'Failed to create product in Stripe'
+        'Failed to create product in Stripe',
       );
     }
 
@@ -81,11 +81,11 @@ export const createSubscriptionProductHelper = async (
         productId: String(product.id),
       },
     });
-   
+
     if (!paymentLink?.url) {
       throw new ApiError(
         StatusCodes.INTERNAL_SERVER_ERROR,
-        'Failed to create payment link'
+        'Failed to create payment link',
       );
     }
 
@@ -93,7 +93,7 @@ export const createSubscriptionProductHelper = async (
   } catch (error) {
     throw new ApiError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Subscription creation failed: ${error}`
+      `Subscription creation failed: ${error}`,
     );
   }
 };
