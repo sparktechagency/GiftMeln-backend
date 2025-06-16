@@ -1,3 +1,4 @@
+import { ProductModel } from '../product/product.model';
 import { IGiftCollection } from './giftcollection.interface';
 import { GiftCollection } from './giftcollection.model';
 
@@ -30,9 +31,19 @@ const deleteGiftCollection = async (id: string) => {
   const result = await GiftCollection.findByIdAndDelete(id);
   return result;
 };
+
+const getProductBaseOnCategory = async (category: string) => {
+  const result = await ProductModel.find({ category });
+  if (!result) {
+    return [];
+  }
+  return result;
+};
+
 export const GiftCollectionServices = {
   getAllGiftCollectionFromDB,
   updateGiftCollection,
   deleteGiftCollection,
   getAllGiftFromDB,
+  getProductBaseOnCategory,
 };

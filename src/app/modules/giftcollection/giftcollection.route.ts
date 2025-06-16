@@ -11,6 +11,11 @@ router.get(
   GiftCollectionController.getAllGift,
 );
 router.get(
+  '/:category',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  GiftCollectionController.getProductBaseOnCtg,
+);
+router.get(
   '/',
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
   GiftCollectionController.allGift,

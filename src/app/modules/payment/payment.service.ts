@@ -32,6 +32,7 @@ const subscriptionDetailsFromDB = async (
     .populate('user')
     .populate('balanceAmount')
     .lean();
+    console.log('subscription', subscription);
   // if not found any subscription for the user, return an empty object
   if (!subscription) {
     return { subscription: {} };

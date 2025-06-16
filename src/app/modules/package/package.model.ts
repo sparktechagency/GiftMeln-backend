@@ -66,7 +66,7 @@ const packageSchema = new Schema<IPackage>(
     },
     isRecommended: {
       type: Boolean,
-      required: true,
+      required: false,
     },
     updatePrice: {
       type: Number,
@@ -83,6 +83,10 @@ const packageSchema = new Schema<IPackage>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    addGiftBalance: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true },

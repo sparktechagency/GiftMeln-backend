@@ -7,7 +7,7 @@ import {
 const giftCollectionSchema = new Schema<IGiftCollection, GiftCollectionModel>(
   {
     product: {
-      type: Schema.Types.ObjectId,
+      type: [Schema.Types.ObjectId],
       ref: 'Product',
       required: true,
     },

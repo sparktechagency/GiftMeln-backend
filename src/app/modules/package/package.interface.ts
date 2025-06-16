@@ -1,4 +1,4 @@
-export interface IPackage {
+export type IPackage = {
   name: string;
   description: string;
   price?: number;
@@ -17,7 +17,8 @@ export interface IPackage {
     | 'Budget Friendly'
     | 'Premium Plan'
     | 'Spoiling Myself';
-  isRecommended: boolean;
+  isRecommended?: boolean;
   updatePrice?: number;
   isActive: boolean;
-}
+  addGiftBalance?: number;
+};

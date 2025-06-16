@@ -45,9 +45,23 @@ const deleteGift = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const getProductBaseOnCtg = catchAsync(async (req: Request, res: Response) => {
+  const { category } = req.params;
+  const result =
+    await GiftCollectionServices.getProductBaseOnCategory(category);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Product retrieved successfully',
+    data: result,
+  });
+});
+
 export const GiftCollectionController = {
   getAllGift,
   updateGift,
   deleteGift,
   allGift,
+  getProductBaseOnCtg,
 };

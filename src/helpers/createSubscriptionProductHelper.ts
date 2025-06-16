@@ -72,10 +72,10 @@ export const createSubscriptionProductHelper = async (
       ],
       after_completion: {
         type: 'redirect',
-        redirect: { url: 'http://64.23.193.89:3000/surveyQuestions' },
-        // redirect: {
-        //   url: 'http://localhost:3000/surveyQuestions',
-        // },
+        // redirect: { url: 'http://64.23.193.89:3000/surveyQuestions' },
+        redirect: {
+          url: 'http://10.0.70.111:3000/surveyQuestions',
+        },
       },
       metadata: {
         productId: String(product.id),
