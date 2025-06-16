@@ -58,7 +58,6 @@ const editUserDetails = catchAsync(async (req: Request, res: Response) => {
     id,
     req.body
   );
-  console.log(result);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,

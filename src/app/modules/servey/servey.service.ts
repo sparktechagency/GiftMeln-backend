@@ -22,7 +22,6 @@ const createOrUpdateSurvey = async (payload: IServay) => {
 
 const getSingleSurvey = async (id: string) => {
   const survey = await SurveyModel.findOne({ user: id });
-  console.log('survey', survey);
   if (!survey) {
     throw new Error('Survey not found.');
   }

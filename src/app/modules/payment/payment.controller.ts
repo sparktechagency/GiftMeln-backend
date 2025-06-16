@@ -50,7 +50,6 @@ const getSubscriptionHistory = catchAsync(
 const editPriceByAdmin = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.params;
   const { balance } = req.body;
-  console.log(userId, balance);
 
   const result = await PaymentServices.editPriceByAdminFromDB(userId, balance);
 

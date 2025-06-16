@@ -15,9 +15,7 @@ const sendOtpEmail = async (email: string, name: string, otp: number) => {
     subject: message.subject,
     html: message.html,
   };
-  // @ts-ignore
   await sgMail.send(msg);
-  console.log(`OTP sent to ${email}: ${otp}`);
 };
 const sendEmail = async (values: ISendEmail) => {
   const msg = {
@@ -35,7 +33,7 @@ const sendEmail = async (values: ISendEmail) => {
     console.error('❌ Failed to send email:', error);
     throw new ApiError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      'Email sending failed'
+      'Email sending failed',
     );
   }
 };

@@ -1,35 +1,21 @@
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
-import { CartModel, ICart } from './cart.interface';
 import { Cart } from './cart.model';
+import { ICart } from './cart.interface';
 
 // create cart service
-const createCartServiceIntoDB = async (payload: {
-  user: string;
-  products: Array<any>;
-}) => {
+const createCartServiceIntoDB = async (userId: string, payload: ICart) => {
   const cart = await Cart.create(payload);
-
   if (!cart) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cart');
   }
-  // Return final structured data
-  const formattedCart = {
-    _id: cart._id,
-    user: cart.user,
-    // @ts-ignore
-    products: cart.products,
-    // @ts-ignore
-    createdAt: cart.createdAt,
-  };
-  return formattedCart;
+  return cart;
 };
 
 // !get all cart with product details
 ///maybe next time change it if it's not work
-const getAllCart = async (userId: string) => {
-  const cart = await Cart.find({ user: userId }).populate('user');
-
+const getAllCart = async (id: string) => {
+  const cart = await Cart.find({ user: id }).populate('user');
   if (!cart.length) {
     return {
       success: true,
@@ -79,12 +65,12 @@ const getAllCart = async (userId: string) => {
 const updateQuantity = async (
   userId: string,
   cartItemId: string,
-  quantity: number
+  quantity: number,
 ) => {
   const cart = await Cart.findOneAndUpdate(
     { user: userId, _id: cartItemId },
     { $set: { 'variations.quantity': quantity } },
-    { new: true }
+    { new: true },
   );
 
   if (!cart) {
@@ -128,7 +114,7 @@ const clearCart = async (userId: string) => {
   } catch (error) {
     throw new ApiError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      'Failed to clear cart'
+      'Failed to clear cart',
     );
   }
 };

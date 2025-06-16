@@ -6,49 +6,29 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 
 //create cart constructor
-const createCart = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user.id; // Get user ID from JWT token
-    const { products } = req.body;
-
-    // Ensure that variations are provided in the request body
-    if (!products || products.length === 0) {
-      return sendResponse(res, {
-        success: false,
-        statusCode: StatusCodes.BAD_REQUEST,
-        message: 'At least one product variation is required',
-        data: {},
-      });
-    }
-
-    // Call service to create cart
-    const result = await CartServices.createCartServiceIntoDB({
-      user: userId,
-      products,
-    });
-
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: 'Cart created successfully',
-      data: result,
-    });
-  }
-);
-
+const createCart = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.user!;
+  const data = req.body;
+  const result = await CartServices.createCartServiceIntoDB(id, data);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Cart created successfully',
+    data: result,
+  });
+});
 // get all cart items
-const getAllCartItems = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user.id;
-    const result = await CartServices.getAllCart(userId);
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: 'User cart items retrieved successfully',
-      data: result,
-    });
-  }
-);
+const getAllCartItems = catchAsync(async (req: Request, res: Response) => {
+  const id = req.user?.authId || req.user.id;
+
+  const result = await CartServices.getAllCart(id);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'User cart items retrieved successfully',
+    data: result,
+  });
+});
 
 // update cart items quantity
 const updateCartQuantity = catchAsync(
@@ -59,7 +39,7 @@ const updateCartQuantity = catchAsync(
     const updatedCart = await CartServices.updateQuantity(
       userId,
       cartItemId,
-      quantity
+      quantity,
     );
 
     sendResponse(res, {
@@ -68,7 +48,7 @@ const updateCartQuantity = catchAsync(
       message: 'Cart item quantity updated successfully',
       data: updatedCart,
     });
-  }
+  },
 );
 
 // delete cart items
@@ -89,7 +69,7 @@ const deleteCartItemController = catchAsync(
       message: 'Cart item deleted successfully',
       data: result,
     });
-  }
+  },
 );
 const clearCartAfterPayment = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -104,7 +84,7 @@ const clearCartAfterPayment = catchAsync(
       message: 'Cart cleared successfully after payment',
       data: result,
     });
-  }
+  },
 );
 
 export const CartController = {

@@ -5,23 +5,27 @@ import { USER_ROLES } from '../../../enums/user';
 
 const router = express.Router();
 
-router.post('/create', CartController.createCart);
+router.post(
+  '/create',
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  CartController.createCart,
+);
 router.get(
   '/',
   auth(USER_ROLES.USER, USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-  CartController.getAllCartItems
+  CartController.getAllCartItems,
 );
 
 router.put(
   '/:id',
   auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
-  CartController.updateCartQuantity
+  CartController.updateCartQuantity,
 );
 
 router.delete(
   '/:cartItemId',
   auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
-  CartController.deleteCartItemController
+  CartController.deleteCartItemController,
 );
 
 export const CartRoutes = router;

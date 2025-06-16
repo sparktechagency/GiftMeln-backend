@@ -1,82 +1,39 @@
 import { model, Schema, Types } from 'mongoose';
-import { ICart } from './cart.interface';
+import { CartModel, ICart } from './cart.interface';
 
-const CartSchema = new Schema<any>(
+const CartSchema = new Schema<ICart>(
   {
     user: {
       type: Types.ObjectId,
       ref: 'User',
       required: true,
     },
-    products: [
+    variations: [
       {
-        title: {
+        product: {
+          type: Schema.Types.ObjectId,
+          ref: 'Product', // optional: if you have Product model
+          required: true,
+        },
+        color: {
           type: String,
           required: true,
         },
-        vendor: {
+        size: {
           type: String,
+          required: true,
         },
-        handle: {
-          type: String,
-        },
-        published_scope: {
-          type: String,
-        },
-        image: {
-          type: String,
-        },
-        price: {
+        quantity: {
           type: Number,
-        },
-        options: [
-          {
-            id: {
-              type: Number,
-            },
-            product_id: {
-              type: Number,
-            },
-            name: {
-              type: String,
-            },
-            position: {
-              type: Number,
-            },
-            values: {
-              type: [String],
-            },
-          },
-        ],
-        variants: [
-          {
-            id: {
-              type: Number,
-            },
-            product_id: {
-              type: Number,
-            },
-            title: {
-              type: String,
-            },
-            price: {
-              type: Number,
-            },
-            taxable: {
-              type: Boolean,
-            },
-            compare_at_price: {
-              type: Number,
-            },
-          },
-        ],
-        tags: {
-          type: String,
+          required: true,
+          min: 1,
         },
       },
     ],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  },
 );
 
-export const Cart = model<ICart>('Cart', CartSchema);
+export const Cart = model<ICart, CartModel>('Cart', CartSchema);
