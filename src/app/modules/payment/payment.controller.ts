@@ -15,7 +15,7 @@ const subscriptionDetails = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// get all subscription
+// get user subscription
 const allSubscription = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id || req.params.userId || req?.user?.authId;
 
@@ -32,6 +32,22 @@ const allSubscription = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const allSubscriptionAllUser = catchAsync(
+  async (req: Request, res: Response) => {
+    // if (!userId) {
+    //   throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid User');
+    // }
+
+    const result = await PaymentServices.getUserSubscriptionIntoDB();
+    sendResponse(res, {
+      success: true,
+      Total: result.length,
+      statusCode: StatusCodes.OK,
+      message: 'Subscriptions fetched successfully',
+      data: result,
+    });
+  },
+);
 
 // get all subscription history base this user
 const getSubscriptionHistory = catchAsync(
@@ -125,4 +141,5 @@ export const PaymentController = {
   exportRevenueCSV,
   exportActiveUserCSV,
   totalActiveUserAndInactiveUser,
+  allSubscriptionAllUser,
 };

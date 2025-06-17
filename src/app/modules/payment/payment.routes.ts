@@ -10,6 +10,11 @@ router.get(
   auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   PaymentController.allSubscription,
 );
+router.get(
+  '/all-subscriber',
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  PaymentController.allSubscriptionAllUser,
+);
 
 // * Over view page
 router.get(

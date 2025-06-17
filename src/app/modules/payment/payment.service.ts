@@ -54,9 +54,26 @@ const subscriptionDetailsFromDB = async (
 
   return { subscription };
 };
-//
+// it's for just show user subscription
 const getAllSubscriptionIntoDB = async (userId: string) => {
   const subscription = await Subscription.find({ user: userId })
+    .limit(20)
+    .populate({
+      path: 'package',
+      select: 'name  duration',
+    })
+    .populate({
+      path: 'user',
+      select: 'name email phone image',
+    });
+  if (!subscription.length) {
+    throw new ApiError(StatusCodes.BAD_GATEWAY, "Can't Find any Subscription");
+  }
+  return subscription;
+};
+// it's for show all user subscription
+const getUserSubscriptionIntoDB = async () => {
+  const subscription = await Subscription.find()
     .limit(20)
     .populate({
       path: 'package',
@@ -385,4 +402,5 @@ export const PaymentServices = {
   exportRevenueCSVIndoDB,
   exportAllSubscriberCSVIndoDB,
   getActiveAndInactiveUserFromDB,
+  getUserSubscriptionIntoDB,
 };
