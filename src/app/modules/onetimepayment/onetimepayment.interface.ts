@@ -4,7 +4,7 @@ export interface IOnetimePayment extends Document {
   user: Schema.Types.ObjectId;
   amountPaid?: number;
   trxId?: string;
-  status: "pending" | "completed" | "failed";
+  status: 'pending' | 'completed' | 'failed';
   userName: string;
   userEmail: string;
   country: string;
@@ -15,15 +15,15 @@ export interface IOnetimePayment extends Document {
 
   products: Array<{
     id: string;
-    name: string;
+    name?: string;
     quantity: number;
     price: number;
     color?: string;
     size?: string;
   }>;
 
-  checkoutSessionId: string;
-  paymentUrl: string;
+  checkoutSessionId?: string;
+  paymentUrl?: string;
 }
 
 export type OnetimePaymentModel = Model<IOnetimePayment>;

@@ -14,6 +14,19 @@ const purchaseData = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const checkoutProduct = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const data = req.body;
+  const result = await OnetimePaymentServices.checkoutProduct(data, user);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Purchase data fetched successfully',
+    data: result,
+  });
+});
+
 export const OnetimePaymentController = {
   purchaseData,
+  checkoutProduct,
 };

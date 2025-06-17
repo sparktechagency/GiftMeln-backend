@@ -3,7 +3,6 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { PaymentServices } from './payment.service';
 import { StatusCodes } from 'http-status-codes';
-import ApiError from '../../../errors/ApiError';
 
 const subscriptionDetails = catchAsync(async (req: Request, res: Response) => {
   const result = await PaymentServices.subscriptionDetailsFromDB(req.user!);
