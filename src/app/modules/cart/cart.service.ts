@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { Cart } from './cart.model';
 import { ICart } from './cart.interface';
+import { Subscription } from '../payment/payment.model';
 
 // create cart service
 const createCartServiceIntoDB = async (userId: string, payload: ICart) => {
@@ -15,7 +16,10 @@ const createCartServiceIntoDB = async (userId: string, payload: ICart) => {
 // !get all cart with product details
 ///maybe next time change it if it's not work
 const getAllCart = async (id: string) => {
-  const cart = await Cart.find({ user: id }).populate('user');
+  const cart = await Cart.find({ user: id })
+    .populate('user')
+    .populate('variations.product');
+
   if (!cart.length) {
     return {
       success: true,
@@ -38,15 +42,11 @@ const getAllCart = async (id: string) => {
     variations.forEach(variation => {
       if (
         variation.product &&
-        Array.isArray(variation.product) &&
-        variation.product.length > 0
+        variation.product.discountedPrice &&
+        variation.quantity
       ) {
-        const product = variation.product[0];
-
-        if (product.discountedPrice && variation.quantity) {
-          totalPrice += product.discountedPrice * variation.quantity;
-          totalItems += variation.quantity;
-        }
+        totalPrice += variation.product.discountedPrice * variation.quantity;
+        totalItems += variation.quantity;
       }
     });
   });
@@ -62,36 +62,36 @@ const getAllCart = async (id: string) => {
 };
 
 // update quantity
+
 const updateQuantity = async (
-  userId: string,
-  cartItemId: string,
+  cartId: string,
+  variationId: string,
   quantity: number,
 ) => {
-  const cart = await Cart.findOneAndUpdate(
-    { user: userId, _id: cartItemId },
-    { $set: { 'variations.quantity': quantity } },
+  const result = await Cart.findOneAndUpdate(
+    { _id: cartId, 'variations._id': variationId },
+    { $set: { 'variations.$.quantity': quantity } },
     { new: true },
-  );
+  )
+    .populate('user')
+    .populate('variations.product');
 
-  if (!cart) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Cart item not found');
+  if (!result) {
+    throw new ApiError(
+      StatusCodes.NOT_FOUND,
+      'Cart item or variation not found',
+    );
   }
 
-  return cart;
+  return result;
 };
 
 // delete cart item's
-const deleteCartItem = async (userId: any, cartItemId: any) => {
-  if (!cartItemId) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Cart item ID is required');
-  }
-
-  const cart = await Cart.findOneAndDelete({ user: userId, _id: cartItemId });
-
-  if (!cart) {
+const deleteCartItem = async (userId: any, id: string) => {
+  const result = await Cart.findOneAndDelete({ user: userId, _id: id });
+  if (!result) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Cart item not found');
   }
-
   return { message: 'Cart item deleted successfully' };
 };
 
@@ -119,10 +119,24 @@ const clearCart = async (userId: string) => {
   }
 };
 
+// TODO: need to remove money from subscription base on cart total price
+const parchesBaseOnSubscriptionPrice = async (
+  userId: string,
+  totalPrice: number,
+) => {
+  const result = await Subscription.findOne({ user: userId });
+  if (result) {
+    result.balance = result.balance! - totalPrice;
+    await result.save();
+  }
+  return result;
+};
+
 export const CartServices = {
   createCartServiceIntoDB,
   getAllCart,
   updateQuantity,
   deleteCartItem,
   clearCart,
+  parchesBaseOnSubscriptionPrice,
 };

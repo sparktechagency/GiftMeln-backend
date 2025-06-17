@@ -8,7 +8,7 @@ const getAllProductPurchaseDataIntoDB = async () => {
   return result;
 };
 
-export const OnetimepaymentServices = {
+export const OnetimePaymentServices = {
   getAllProductPurchaseDataIntoDB,
 };
  

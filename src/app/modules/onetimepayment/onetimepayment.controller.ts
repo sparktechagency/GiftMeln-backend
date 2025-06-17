@@ -1,19 +1,19 @@
-import { Request, Response, NextFunction } from 'express';
-import { OnetimepaymentServices } from './onetimepayment.service';
+import { Request, Response } from 'express';
+import { OnetimePaymentServices } from './onetimepayment.service';
 import catchAsync from '../../../shared/catchAsync';
-import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
-
+import sendResponse from '../../../shared/sendResponse';
 
 const purchaseData = catchAsync(async (req: Request, res: Response) => {
-    const result = await OnetimepaymentServices.getAllProductPurchaseDataIntoDB();
-    res.status(StatusCodes.OK).json({
-        success: true,
-        message: "Purchase data fetched successfully",
-        data: result,
-    });
+  const result = await OnetimePaymentServices.getAllProductPurchaseDataIntoDB();
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Purchase data fetched successfully',
+    data: result,
+  });
 });
 
-export const OnetimepaymentController = {
-    purchaseData
+export const OnetimePaymentController = {
+  purchaseData,
 };

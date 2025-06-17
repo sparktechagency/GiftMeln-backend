@@ -16,6 +16,7 @@ import { EventCategoryRoutes } from '../app/modules/eventcategory/eventcategory.
 import { GiftCollectionRoutes } from '../app/modules/giftcollection/giftcollection.route';
 import { NotificationRoute } from '../app/modules/notification/notification.route';
 import { FaqRoutes } from '../app/modules/faq/faq.route';
+import { ProductListRoutes } from '../app/modules/productlist/productlist.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -82,6 +83,10 @@ const apiRoutes = [
   {
     path: '/gift-collection',
     route: GiftCollectionRoutes,
+  },
+  {
+    path: '/product-list',
+    route: ProductListRoutes,
   },
   {
     path: '/faq',

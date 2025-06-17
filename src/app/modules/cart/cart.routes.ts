@@ -17,13 +17,13 @@ router.get(
 );
 
 router.put(
-  '/:id',
+  '/:cartId',
   auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   CartController.updateCartQuantity,
 );
 
 router.delete(
-  '/:cartItemId',
+  '/:id',
   auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   CartController.deleteCartItemController,
 );
