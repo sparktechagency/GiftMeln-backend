@@ -55,8 +55,8 @@ const subscriptionDetailsFromDB = async (
   return { subscription };
 };
 //
-const getAllSubscriptionIntoDB = async () => {
-  const subscription = await Subscription.find()
+const getAllSubscriptionIntoDB = async (userId: string) => {
+  const subscription = await Subscription.find({ user: userId })
     .limit(20)
     .populate({
       path: 'package',

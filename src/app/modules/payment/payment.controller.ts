@@ -17,13 +17,13 @@ const subscriptionDetails = catchAsync(async (req: Request, res: Response) => {
 
 // get all subscription
 const allSubscription = catchAsync(async (req: Request, res: Response) => {
-  // const userId = req.user?.id || req.params.userId || req?.user?.authId;
+  const userId = req.user?.id || req.params.userId || req?.user?.authId;
 
   // if (!userId) {
   //   throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid User');
   // }
 
-  const result = await PaymentServices.getAllSubscriptionIntoDB();
+  const result = await PaymentServices.getAllSubscriptionIntoDB(userId);
   sendResponse(res, {
     success: true,
     Total: result.length,
