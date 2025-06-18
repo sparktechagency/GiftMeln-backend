@@ -124,7 +124,7 @@ const googleAuthCallback = catchAsync(async (req: Request, res: Response) => {
     req.user as IUser & { profile: any },
   );
   res.redirect(
-    `http://10.0.70.111:3000/dashboard/surveys/?token=${result?.tokens?.accessToken}`,
+    `https://giftmein.com/dashboard/surveys/?token=${result?.tokens?.accessToken}`,
   );
   sendResponse(res, {
     statusCode: StatusCodes.OK,
