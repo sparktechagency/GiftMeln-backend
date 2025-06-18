@@ -39,6 +39,7 @@ app.use(
       'http://64.23.193.89:3000',
       // 'http://64.23.193.89:3001',
       'http://64.23.193.89:3002',
+      'https://api.giftmein.com',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
