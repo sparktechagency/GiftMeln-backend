@@ -1,10 +1,6 @@
-import { StatusCodes } from 'http-status-codes';
-import ApiError from '../../../errors/ApiError';
 import { Subscription } from '../payment/payment.model';
 import { OneTimePayment } from './onetimepayment.model';
-import { IOnetimePayment } from './onetimepayment.interface';
 import { Cart } from '../cart/cart.model';
-import mongoose from 'mongoose';
 import { Types } from 'mongoose';
 
 const getAllProductPurchaseDataIntoDB = async () => {
@@ -46,7 +42,7 @@ const checkoutProduct = async (data: any, user: any) => {
 
     products: data.products.map((p: any) => ({
       id: p.id,
-      name: p.name,
+      name: p?.productName,
       quantity: p.quantity,
       price: p.price,
       color: p.color || '',

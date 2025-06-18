@@ -8,20 +8,21 @@ passport.use(
     {
       clientID: config.google.clientID!,
       clientSecret: config.google.clientSecret!,
-      callbackURL: config.google.callbackURL!,  
+      callbackURL: config.google.callbackURL!,
       passReqToCallback: true,
+      scope: ['profile', 'email'],
     },
     async (req, accessToken, refreshToken, profile, done) => {
-      req.body.profile = profile
-      req.body.role = USER_ROLES.USER
- 
+      req.body.profile = profile;
+      req.body.role = USER_ROLES.USER;
+
       try {
-        return done(null, req.body)
+        return done(null, req.body);
       } catch (err) {
-        return done(err)
+        return done(err);
       }
     },
   ),
-)
+);
 
 export default passport;
