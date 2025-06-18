@@ -106,8 +106,8 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
       })),
       mode: 'payment',
       // success_url: 'http://139.59.0.25:6009/payment/success',
-      success_url: 'http://10.0.70.188:5004/payment/success',
-      cancel_url: 'http://10.0.70.188:5004/payment/cancel',
+      success_url: 'http://10.0.70.111:5004/payment/success',
+      cancel_url: 'http://10.0.70.111:5004/payment/cancel',
       // cancel_url: 'http://139.59.0.25:6009/payment/cancel',
     });
 
