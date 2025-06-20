@@ -115,6 +115,19 @@ const createBulkProduct = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateProductFromDBController = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await productService.updateProductFromDB(id, req.body);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Product updated successfully',
+      data: result,
+    });
+  },
+);
+
 export const productController = {
   createProduct,
   getAllProducts,
@@ -125,4 +138,5 @@ export const productController = {
   shopifyProduct,
   getSingleShopifyProduct,
   createBulkProduct,
+  updateProductFromDBController,
 };

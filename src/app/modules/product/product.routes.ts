@@ -129,6 +129,37 @@ router.patch(
   fileUploadHandler(),
   productController.updateProduct,
 );
+// product details update
+router.patch(
+  '/productDetails/:id',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  fileUploadHandler(),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const payload = req.body;
+      const featureImage = getSingleFilePath(req.files, 'feature');
+      const additionalImages = getMultipleFilesPath(req.files, 'additional');
+
+      if (!featureImage) {
+        return res.status(400).json({ message: 'Feature image is required.' });
+      }
+
+      req.body = {
+        feature: featureImage,
+        additional: additionalImages,
+        ...payload,
+        color: parseArray(payload.color),
+        tag: parseTag(payload.tag),
+        size: parseArray(payload.size),
+      };
+      next();
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to upload Image' });
+    }
+  },
+
+  productController.updateProductFromDBController,
+);
 
 // delete product
 router.delete(
