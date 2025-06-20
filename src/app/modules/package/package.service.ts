@@ -512,8 +512,8 @@ const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
             quantity: 1,
           },
         ],
-        success_url: 'http://64.23.193.89:3000/surveyQuestions',
-        cancel_url: 'http://64.23.193.89:3000/cancel',
+        success_url: 'https://giftmein.com/surveyQuestions',
+        cancel_url: 'https://giftmein.com/cancel',
       });
 
       // Update database with new link
@@ -551,6 +551,7 @@ const updatePackageIntoDB = async (id: string, payload: Partial<IPackage>) => {
             await stripe.paymentLinks.update(paymentLinkId, {
               line_items: [
                 {
+                  // @ts-ignore
                   price: newPrice.id,
                   adjustable_quantity: { enabled: false },
                   quantity: 1,
