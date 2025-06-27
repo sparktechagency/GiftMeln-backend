@@ -80,6 +80,20 @@ const updateEvent = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const editEventFromDB = catchAsync(async (req: Request, res: Response) => {
+  const eventId = req.params.id;
+  const eventData = req.body;
+  const result = await EventServices.eventEditFromDB(eventId, eventData);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Event updated successfully',
+    data: result,
+  });
+});
+
+
+
 export const EventController = {
   createEvent,
   getAllEvents,
@@ -87,4 +101,5 @@ export const EventController = {
   deleteEvent,
   updateEvent,
   getUserEvents,
+  editEventFromDB
 };

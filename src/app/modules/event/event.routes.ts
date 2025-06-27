@@ -30,6 +30,12 @@ router.patch(
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN),
   EventController.updateEvent,
 );
+// latest update event data
+router.patch(
+  '/edit/:id',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN),
+  EventController.editEventFromDB,
+);
 router.delete(
   '/:id',
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN),

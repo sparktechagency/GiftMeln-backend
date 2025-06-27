@@ -11,11 +11,6 @@ const eventSchema = new Schema<IEvent, EventModel>(
       type: String,
       required: true,
     },
-    category: {
-      type: String,
-      required: true,
-      default: 'Other',
-    },
     preferences: {
       type: [String],
       required: true,
@@ -40,6 +35,11 @@ const eventSchema = new Schema<IEvent, EventModel>(
     phone: {
       type: String,
       required: true,
+    },
+    status: {
+      type: String,
+      enum: ['push', 'active'],
+      default: 'active',
     },
   },
   {

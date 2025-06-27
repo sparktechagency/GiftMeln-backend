@@ -8,11 +8,10 @@ import { GiftCollection } from '../giftcollection/giftcollection.model';
 import { JwtPayload } from 'jsonwebtoken';
 import { Subscription } from '../payment/payment.model';
 import { SurveyModel } from '../servey/servey.model';
+import { Types } from 'mongoose';
 
 const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
-  const products = await ProductModel.find({
-    category: eventData.category,
-  });
+  const products = await ProductModel.find();
 
   if (!products || products.length === 0) {
     throw new ApiError(
@@ -36,14 +35,17 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
   }
 
   // 3️⃣ Create event
-  const event = await Event.create(eventData);
+  const event = await Event.create({
+    ...eventData,
+    user: userId.authId || userId,
+  });
   if (!event) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create event');
   }
 
   // 4️⃣ Get survey data
   const surveyQuestion = await SurveyModel.findOne({
-    user: userId.authId || userId,
+    user: new Types.ObjectId(userId.authId || userId.id || userId),
   }).lean();
 
   if (!surveyQuestion) {
@@ -180,7 +182,16 @@ const getUserEventFromDB = async (userId: string) => {
   const result = await Event.find({ user: userId });
   return result;
 };
-
+// edit event by user id
+const eventEditFromDB = async (id: string, payload: IEvent) => {
+  const result = await Event.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Event not found');
+  }
+  return result;
+};
 export const EventServices = {
   createEventIntoDB,
   getAllEventsFromDB,
@@ -188,4 +199,5 @@ export const EventServices = {
   deleteEventFromDB,
   updateEventInDB,
   getUserEventFromDB,
+  eventEditFromDB,
 };

@@ -9,11 +9,11 @@ export type IEvent = {
   // sales: "inStock" | "soldOut";
   eventDate: Date;
   RecipientName: string;
-  category: string;
   preferences: giftPreferences[];
   giftCreated?: boolean;
   address: string;
   phone: string;
+  status: 'push' | 'active';
 };
 
 export type EventModel = Model<IEvent>;
