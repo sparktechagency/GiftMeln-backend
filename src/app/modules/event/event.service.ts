@@ -69,7 +69,7 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
   }
 
   // 7️⃣ Now decide product list based on answer
-  let selectedProducts: typeof products = [];
+  const selectedProducts: typeof products = [];
 
   if (answer === '✅ Yes, if I have enough balance') {
     let totalPrice = 0;
