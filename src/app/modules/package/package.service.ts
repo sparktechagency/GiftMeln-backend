@@ -17,27 +17,40 @@ const createPackageIntoDB = async (payload: IPackage) => {
   let product;
 
   if (payload.paymentType === 'Free') {
-    // ✅ Generate a Stripe Checkout session for Free Trial
+    const stripeProduct = await stripe.products.create({
+      name: payload.name,
+      description: payload.description,
+    });
+    const priceAmount = Number(payload.price) * 100;
+
+    const stripePrice = await stripe.prices.create({
+      product: stripeProduct.id,
+      unit_amount: priceAmount,
+      currency: 'usd',
+      recurring: {
+        interval: 'month',
+      },
+    });
+
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
       mode: 'subscription',
+      payment_method_types: ['card'],
       line_items: [
         {
-          price_data: {
-            currency: 'usd',
-            product_data: { name: 'Free Trial Plan' },
-            unit_amount: 0,
-            recurring: { interval: 'month' },
-          },
+          price: stripePrice.id,
           quantity: 1,
         },
       ],
+      subscription_data: {
+        trial_period_days: 7,
+      },
       success_url: 'https://giftmein.com/surveyQuestions',
       cancel_url: 'https://giftmein.com/cancel',
     });
+
     product = {
       paymentLink: session.url,
-      productId: session.id,
+      productId: stripeProduct.id,
     };
   } else {
     const productPayload = {
@@ -51,7 +64,9 @@ const createPackageIntoDB = async (payload: IPackage) => {
       isRecommended: payload.isRecommended,
       updatePrice: payload.updatePrice,
     };
+
     product = await createSubscriptionProductHelper(productPayload);
+
     if (!product) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
@@ -59,19 +74,17 @@ const createPackageIntoDB = async (payload: IPackage) => {
       );
     }
   }
-  // @ts-ignore
-  payload.paymentLink = product.paymentLink;
-  payload.productId = product.productId;
 
-  // ✅ Create Package in MongoDB
+  payload.paymentLink = product.paymentLink || undefined;
+  payload.productId = product.productId;
   const result = await Package.create(payload);
+
   if (!result) {
     if (payload.paymentType !== 'Free') {
       await stripe.products.del(payload.productId!);
     }
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create Package');
   }
-
   return result;
 };
 
