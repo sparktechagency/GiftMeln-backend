@@ -6,6 +6,7 @@ export type IEvent = {
   eventName: string;
   price?: number;
   user: Types.ObjectId;
+  category: string
   // sales: "inStock" | "soldOut";
   eventDate: Date;
   RecipientName: string;

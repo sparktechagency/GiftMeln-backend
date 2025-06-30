@@ -11,78 +11,87 @@ import { SurveyModel } from '../servey/servey.model';
 import { Types } from 'mongoose';
 
 const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
+  // 1️⃣ Get all products
   const products = await ProductModel.find();
-
   if (!products || products.length === 0) {
-    throw new ApiError(
-      StatusCodes.NOT_FOUND,
-      'No product found for this category',
-    );
+    throw new ApiError(StatusCodes.NOT_FOUND, 'No product found');
   }
 
-  // 2️⃣ Event date validation
+  // 2️⃣ Event date must be 32 days ahead
   const today = new Date();
-  const thirtyTwoDaysLater = new Date(today);
-  thirtyTwoDaysLater.setDate(today.getDate() + 32);
-
+  const minEventDate = new Date(today);
+  minEventDate.setDate(today.getDate() + 32);
   const selectedEventDate = new Date(eventData.eventDate);
 
-  if (selectedEventDate <= thirtyTwoDaysLater) {
+  if (selectedEventDate <= minEventDate) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
       'Event date must be more than 32 days from today',
     );
   }
 
-  // 3️⃣ Create event
+  // 3️⃣ Create the event
   const event = await Event.create({
     ...eventData,
-    user: userId.authId || userId,
+    user: userId.authId || userId.id || userId,
   });
+
   if (!event) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create event');
   }
 
-  // 4️⃣ Get survey data
-  const surveyQuestion = await SurveyModel.findOne({
+  // 4️⃣ Get survey for this user
+  const survey = await SurveyModel.findOne({
     user: new Types.ObjectId(userId.authId || userId.id || userId),
   }).lean();
 
-  if (!surveyQuestion) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Survey data not found for user');
+  if (!survey) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Survey data not found');
   }
 
-  // 5️⃣ Get target question and answer
-  const targetQuestion = surveyQuestion.body?.[7];
-  const answer = targetQuestion?.answer?.[0] || '';
+  // 5️⃣ Extract tags from survey answers
+  const removeEmojis = (text: string) =>
+    text
+      .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
+      .trim();
+  const surveyTags: string[] =
+    survey.body?.flatMap(q =>
+      Array.isArray(q.answer) ? q.answer.map(ans => removeEmojis(ans)) : [],
+    ) || [];
 
-  // 6️⃣ Get subscription
+  // 6️⃣ Filter matching products
+  const matchingProducts = products.filter(product =>
+    product.tag?.some(tag => surveyTags.includes(tag.trim().toLowerCase())),
+  );
+
+  // 7️⃣ Get user's subscription
   const subscription = await Subscription.findOne({
-    user: surveyQuestion.user,
+    user: survey.user,
   });
 
   if (!subscription || subscription.balance === undefined) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      'Subscription not found or invalid',
-    );
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Subscription not found');
   }
 
-  // 7️⃣ Now decide product list based on answer
-  const selectedProducts: typeof products = [];
+  // 8️⃣ Gift preference answer
+  const giftPreferenceQuestion = survey.body?.[7];
+  const answer = giftPreferenceQuestion?.answer?.[0] || '';
+
+  const selectedProducts: string[] = [];
 
   if (answer === '✅ Yes, if I have enough balance') {
     let totalPrice = 0;
+    const addedProductIds = new Set<string>();
     for (const product of products) {
+      if (addedProductIds.has(product._id.toString())) continue;
       const price = product.discountedPrice ?? product.regularPrice ?? 0;
       if (subscription.balance >= totalPrice + price) {
-        selectedProducts.push(product);
+        selectedProducts.push(product._id.toString());
         totalPrice += price;
       } else {
         break;
       }
     }
-
     if (selectedProducts.length === 0) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
@@ -90,34 +99,31 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
       );
     }
 
-    // Create gifts
-    for (const product of selectedProducts) {
-      await GiftCollection.create({
-        event: event._id,
-        user: event.user,
-        product: product._id,
-        status: 'initial',
-      });
-    }
+    await GiftCollection.create({
+      event: event._id,
+      user: event.user,
+      product: selectedProducts,
+      status: 'initial',
+    });
 
-    // Update balance
     subscription.balance -= totalPrice;
     await subscription.save();
   } else {
-    const product = products[0];
-    const price = product.discountedPrice ?? product.regularPrice ?? 0;
+    // Single gift logic
+    const product = matchingProducts[0];
+    const price = product?.discountedPrice ?? product?.regularPrice ?? 0;
 
     if (subscription.balance < price) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
-        'Insufficient balance for even one product',
+        'Insufficient balance for the selected product',
       );
     }
-
+    // +971 52 551 3733
     await GiftCollection.create({
       event: event._id,
       user: event.user,
-      product: product._id,
+      product: selectedProducts,
       status: 'initial',
     });
 
@@ -125,6 +131,7 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
     await subscription.save();
   }
 
+  // 9️⃣ Final return
   return event;
 };
 
@@ -134,7 +141,6 @@ const getAllEventsFromDB = async () => {
   if (!events) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'No events found');
   }
-
   return events;
 };
 
@@ -153,21 +159,11 @@ const deleteEventFromDB = async (id: string) => {
   if (!deletedEvent) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Event not found');
   }
-
   return deletedEvent;
 };
 
 // update event in database
 const updateEventInDB = async (id: string, eventData: EventModel) => {
-  const { category }: any = eventData;
-
-  if (!category || !Object.values(CATEGORY).includes(category)) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      'Category must be one of: Birthday, Anniversary, Wedding, Friendship Day, Graduation, or Others',
-    );
-  }
-
   const updatedEvent = await Event.findByIdAndUpdate(id, eventData, {
     new: true,
   });
