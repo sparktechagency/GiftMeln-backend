@@ -17,6 +17,7 @@ import { GiftCollectionRoutes } from '../app/modules/giftcollection/giftcollecti
 import { NotificationRoute } from '../app/modules/notification/notification.route';
 import { FaqRoutes } from '../app/modules/faq/faq.route';
 import { ProductListRoutes } from '../app/modules/productlist/productlist.route';
+import { DashboardRoutes } from '../app/modules/dashboaed/dashboaed.routes';
 const router = express.Router();
 
 const apiRoutes = [
@@ -91,6 +92,10 @@ const apiRoutes = [
   {
     path: '/faq',
     route: FaqRoutes,
+  },
+  {
+    path: '/dashboard/delivery-subscriber',
+    route: DashboardRoutes,
   },
 ];
 
