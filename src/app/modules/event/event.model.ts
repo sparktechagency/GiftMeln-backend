@@ -42,7 +42,7 @@ const eventSchema = new Schema<IEvent, EventModel>(
     },
     status: {
       type: String,
-      enum: ['push', 'active'],
+      enum: ['push', 'active', 'completed'],
       default: 'active',
     },
   },

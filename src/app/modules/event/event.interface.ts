@@ -14,7 +14,7 @@ export type IEvent = {
   giftCreated?: boolean;
   address: string;
   phone: string;
-  status: 'push' | 'active';
+  status: 'push' | 'active' | 'completed';
 };
 
 export type EventModel = Model<IEvent>;

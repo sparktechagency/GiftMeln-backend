@@ -9,6 +9,7 @@ import {
 import auth from '../../middlewares/auth';
 import { USER_ROLES } from '../../../enums/user';
 import { IProduct } from './product.interface';
+import { productParse } from './product.parse';
 
 const router = Router();
 router.post(
@@ -19,23 +20,28 @@ router.post(
     try {
       let people: IProduct[] = [];
 
+      // If CSV file exists in the request
       if (req.files && 'csv' in req.files && req.files.csv[0]) {
+        // Read CSV data
         people = await csv().fromFile(req.files.csv[0].path);
 
+        // Transform CSV data into required format
         const transformedPeople = people.map(person => ({
           ...person,
-          size: person.size?.split(',').map((s: string) => s.trim()) || [],
-          color: person.color?.split(',').map((c: string) => c.trim()) || [],
-          tag: person.tag?.split(',').map((t: string) => t.trim()) || [],
-          additional:
-            person.additional?.split(',').map((a: string) => a.trim()) || [],
+          size: productParse(person.size), // Parsing size field
+          color: productParse(person.color), // Parsing color field
+          tag: productParse(person.tag), // Parsing tag field
+          additional: productParse(person.additional), // Parsing additional field
         }));
 
+        // Attach transformed data to request body
         req.body = { people: transformedPeople };
       } else {
+        // Handle case if CSV file is not provided
         return res.status(400).json({ message: 'CSV file is required.' });
       }
 
+      // Continue to the next middleware/controller
       next();
     } catch (error) {
       return res.status(500).json({
@@ -43,6 +49,7 @@ router.post(
       });
     }
   },
+  // Call the controller function to create products in the DB
   productController.createBulkProduct,
 );
 
@@ -101,7 +108,6 @@ const parseTag = (value: any) => {
       : [value];
   }
 };
-// * shopify
 // * shopify
 router.get(
   '/search',

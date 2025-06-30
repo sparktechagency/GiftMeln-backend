@@ -2,7 +2,6 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { EventModel, IEvent } from './event.interface';
 import { Event } from './event.model';
-import { CATEGORY } from '../../../enums/category';
 import { ProductModel } from '../product/product.model';
 import { GiftCollection } from '../giftcollection/giftcollection.model';
 import { JwtPayload } from 'jsonwebtoken';

@@ -57,8 +57,9 @@ const getSingleProduct = async (id: string) => {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
   }
   const relatedProducts = await ProductModel.find({
-    productCategory: product.category,
-    _id: { $ne: id },
+    category: product.category,
+    _id: { $ne: product._id },
+    tag: { $in: product.tag }
   }).limit(4);
 
   return { product, relatedProducts };
