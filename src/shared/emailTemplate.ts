@@ -57,9 +57,43 @@ const loginOTP = (values: IResetPassword) => {
   };
   return data;
 };
+const giftStatusUpdate = (values: {
+  email: string;
+  name: string;
+  status: string;
+}) => {
+  return {
+    to: values.email,
+    subject: '🎁 Gift Collection Status Updated!',
+    html: `
+      <body style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 30px;">
+        <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+          <div style="background-color: #f82ba9; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0; font-size: 24px;">Hello, ${values.name} 👋</h1>
+            <p style="margin: 5px 0 0;">Your gift collection status has been updated!</p>
+          </div>
+
+          <div style="padding: 30px; text-align: center;">
+            <p style="font-size: 16px; color: #555;">We wanted to let you know that the status of your gift collection has changed to:</p>
+            <div style="margin: 20px auto; display: inline-block; background-color: #f82ba9; color: white; padding: 12px 24px; border-radius: 30px; font-size: 18px; font-weight: bold;">
+              ${values.status.toUpperCase()}
+            </div>
+
+            <p style="margin-top: 20px; font-size: 15px; color: #777;">Thank you for being with us. If you have any questions, feel free to reply to this email.</p>
+          </div>
+
+          <div style="background-color: #fafafa; padding: 20px; text-align: center; font-size: 13px; color: #999;">
+            <p style="margin: 0;">&copy; ${new Date().getFullYear()} Giftmein | All rights reserved</p>
+          </div>
+        </div>
+      </body>
+    `,
+  };
+};
 
 export const emailTemplate = {
   createAccount,
   resetPassword,
   loginOTP,
+  giftStatusUpdate,
 };

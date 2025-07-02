@@ -4,7 +4,9 @@ import { IProduct } from './product.interface';
 import { ProductModel } from './product.model';
 import config from '../../../config';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { productParse } from './product.parse';
 const baseURL = `https://${config.shopify.storeDomain}/admin/api/${config.shopify.apiVersion}`;
+
 const createProductIntoDB = async (productData: IProduct) => {
   const product = await ProductModel.create(productData);
   if (!product) {
@@ -59,7 +61,7 @@ const getSingleProduct = async (id: string) => {
   const relatedProducts = await ProductModel.find({
     category: product.category,
     _id: { $ne: product._id },
-    tag: { $in: product.tag }
+    tag: { $in: product.tag },
   }).limit(4);
 
   return { product, relatedProducts };
@@ -71,11 +73,12 @@ const updateProductInDB = async (
   updatedData: Partial<IProduct>,
   files: { [fieldname: string]: Express.Multer.File[] },
 ) => {
-  // Process files
+  // Process image uploads
   if (files.featureImage && files.featureImage.length > 0) {
     // @ts-ignore
     updatedData.featureImage = files.featureImage[0].path;
   }
+
   if (files.additionalImages && files.additionalImages.length > 0) {
     // @ts-ignore
     updatedData.additionalImages = files.additionalImages.map(
@@ -83,11 +86,11 @@ const updateProductInDB = async (
     );
   }
 
-  // Parse JSON fields if needed
+  // ✅ Properly parse stringified fields to arrays
   if (updatedData.tag) {
     try {
       updatedData.tag = JSON.parse(updatedData.tag as unknown as string);
-    } catch (error) {
+    } catch {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
         'Invalid JSON format for tags',
@@ -95,10 +98,14 @@ const updateProductInDB = async (
     }
   }
 
-  // Update the product in the database
+  // ✅ Use helper for size and color
+  updatedData.size = productParse(updatedData.size);
+  updatedData.color = productParse(updatedData.color);
+
+  // Update DB
   const product = await ProductModel.findByIdAndUpdate(productId, updatedData, {
-    new: true, // Return the updated product
-    runValidators: true, // Apply schema validators
+    new: true,
+    runValidators: true,
   });
 
   if (!product) {

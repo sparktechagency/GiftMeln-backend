@@ -1,4 +1,7 @@
+import { emailHelper } from '../../../helpers/emailHelper';
+import { emailTemplate } from '../../../shared/emailTemplate';
 import { ProductModel } from '../product/product.model';
+import { User } from '../user/user.model';
 import { IGiftCollection } from './giftcollection.interface';
 import { GiftCollection } from './giftcollection.model';
 
@@ -24,7 +27,21 @@ const updateGiftCollection = async (
 ) => {
   const result = await GiftCollection.findOneAndUpdate({ _id: id }, payload, {
     new: true,
-  });
+  }).populate('user');
+
+  // ✅ user info directly from populated result.user
+  const user = result?.user as any;
+
+  if (payload.status && user?.email) {
+    const emailContent = emailTemplate.giftStatusUpdate({
+      email: user.email,
+      name: user.name || 'User',
+      status: payload.status,
+    });
+
+    await emailHelper.sendEmail(emailContent);
+  }
+
   return result;
 };
 const deleteGiftCollection = async (id: string) => {

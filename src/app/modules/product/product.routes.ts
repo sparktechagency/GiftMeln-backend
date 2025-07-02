@@ -131,7 +131,6 @@ router.get('/shopify/:id', productController.getSingleShopifyProduct);
 router.patch(
   '/update/:id',
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-  // @ts-ignore
   fileUploadHandler(),
   productController.updateProduct,
 );
