@@ -31,25 +31,16 @@ const createPackageIntoDB = async (payload: IPackage) => {
         interval: 'month',
       },
     });
-
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      payment_method_types: ['card'],
+    const paymentLink = await stripe.paymentLinks.create({
       line_items: [
         {
           price: stripePrice.id,
           quantity: 1,
         },
       ],
-      subscription_data: {
-        trial_period_days: 7,
-      },
-      success_url: 'https://giftmein.com/surveyQuestions',
-      cancel_url: 'https://giftmein.com/cancel',
     });
-
     product = {
-      paymentLink: session.url,
+      paymentLink: paymentLink.url,
       productId: stripeProduct.id,
     };
   } else {

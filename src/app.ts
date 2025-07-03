@@ -30,10 +30,10 @@ app.use(
     origin: [
       // "http://139.59.0.25:6009",
       // "http://139.59.0.25:6007"
-      "http://localhost:3002",
+      'http://10.0.70.111:3000',
+      'http://localhost:3002',
       'http://10.0.70.111:3002',
       'http://10.0.70.111:3005',
-      'http://10.0.70.111:3000',
       'http://localhost:3000',
       'https://mahmud.binarybards.online/',
       'https://accounts.google.com/o/oauth2/v2/auth',
