@@ -5,7 +5,7 @@ export type IGiftCollection = {
   product: Types.ObjectId[];
   user: Types.ObjectId;
   event: Types.ObjectId;
-  status: 'pending' | 'send' | 'initial';
+  status: 'pending' | 'send' | 'initial' | 'delivery';
 };
 
 export type GiftCollectionModel = Model<IGiftCollection>;

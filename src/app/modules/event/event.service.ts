@@ -29,16 +29,6 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
     );
   }
 
-  // 3️⃣ Create the event
-  const event = await Event.create({
-    ...eventData,
-    user: userId.authId || userId.id || userId,
-  });
-
-  if (!event) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create event');
-  }
-
   // 4️⃣ Get survey for this user
   const survey = await SurveyModel.findOne({
     user: new Types.ObjectId(userId.authId || userId.id || userId),
@@ -77,7 +67,15 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
   const answer = giftPreferenceQuestion?.answer?.[0] || '';
 
   const selectedProducts: string[] = [];
+  // 3️⃣ Create the event
+  const event = await Event.create({
+    ...eventData,
+    user: userId.authId || userId.id || userId,
+  });
 
+  if (!event) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create event');
+  }
   if (answer === '✅ Yes, if I have enough balance') {
     let totalPrice = 0;
     const addedProductIds = new Set<string>();
