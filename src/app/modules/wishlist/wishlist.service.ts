@@ -4,9 +4,9 @@ import { IwishlistItems } from "./wishlist.interface";
 import { Wishlist } from "./wishlist.model";
 
 const createWishListService = async (payload: IwishlistItems) => {
-    const existingWishList = await Wishlist.findOne({ user: payload.user, event: payload.event });
+    const existingWishList = await Wishlist.findOne({ user: payload.user, event: payload.product?._id || payload.product });
     if (existingWishList) {
-        await Wishlist.findOneAndDelete({ user: payload.user, event: payload.event });
+        await Wishlist.findOneAndDelete({ user: payload.user, event: payload.product });
         return { message: "Wishlist item removed" };
     } else {
         const wishList = await Wishlist.create(payload);
