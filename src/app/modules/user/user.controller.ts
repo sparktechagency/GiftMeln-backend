@@ -7,7 +7,7 @@ import { UserService } from './user.service';
 
 const createUser = catchAsync(async (req: Request, res: Response) => {
   const { ...userData } = req.body;
-  await UserService.createUserToDB(userData);
+ const result =  await UserService.createUserToDB(userData);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -49,7 +49,6 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
 
 const getAllAdmins = catchAsync(async (req: Request, res: Response) => {
   const result = await UserService.getAllAdminsFromDB();
-
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,

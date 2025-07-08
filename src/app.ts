@@ -33,6 +33,7 @@ app.use(
       //
       'https://giftmein.com',
       'https://admin.giftmein.com',
+      // "http://10.10.7.47:3000",
       // 'http://10.0.70.111:3000',
       // 'http://localhost:3002',
       // 'http://10.0.70.111:3002',

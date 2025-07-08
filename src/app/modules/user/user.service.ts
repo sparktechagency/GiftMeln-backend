@@ -49,13 +49,13 @@ const updateProfileToDB = async (
   user: JwtPayload,
   payload: Partial<IUser>,
 ): Promise<Partial<IUser | null>> => {
-  const { id } = user;
+  const id = user?.authId || user?.id;
   const isExistUser = await User.isExistUserById(id);
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
 
-  //unlink file here
+  // Unlink file here
   if (payload.image) {
     unlinkFile(isExistUser.image);
   }

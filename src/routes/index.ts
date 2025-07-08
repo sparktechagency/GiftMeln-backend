@@ -96,7 +96,7 @@ const apiRoutes = [
   {
     path: '/dashboard/delivery-subscriber',
     route: DashboardRoutes,
-  },
+  }
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
