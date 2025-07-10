@@ -4,6 +4,7 @@ import { Wishlist } from './wishlist.model';
 import mongoose from 'mongoose';
 
 const createWishListService = async ( payload: any) => {
+  console.log("Payload received in service:", payload);
   const productId = new mongoose.Types.ObjectId(payload);
 
   const existingWishList = await Wishlist.findOne({
@@ -19,7 +20,7 @@ const createWishListService = async ( payload: any) => {
     return { message: 'Wishlist item removed' };
   } else {
     const wishList = await Wishlist.create({
-      user: payload.user, // Assuming payload contains user ID
+      user: payload.user,
       product: productId,
     });
     return { message: 'Wishlist item added', data: wishList };
