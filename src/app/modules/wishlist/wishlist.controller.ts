@@ -7,10 +7,10 @@ import ApiError from '../../../errors/ApiError';
 const createWishList = catchAsync(async (req, res) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-  const user = req.user?.id || req.user?.authId;
+
   const wishListData = req.body;
 
-  const result = await WishListService.createWishListService(user,wishListData);
+  const result = await WishListService.createWishListService(wishListData);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
