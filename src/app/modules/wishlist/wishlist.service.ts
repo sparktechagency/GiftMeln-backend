@@ -4,6 +4,7 @@ import { IwishlistItems } from './wishlist.interface';
 import { Wishlist } from './wishlist.model';
 
 const createWishListService = async (user: string, payload: IwishlistItems) => {
+  console.log( 'createWishListService called with payload:', payload);
   const existingWishList = await Wishlist.findOne({
     user,
     product: payload.product?._id || payload.product,
