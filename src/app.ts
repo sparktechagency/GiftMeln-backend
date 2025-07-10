@@ -58,7 +58,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('uploads'));
 
 //router
-app.use('/api/v1', apiRateLimiter, router);
+// app.use('/api/v1', apiRateLimiter, router);
 
 //file retrieve
 app.use(express.static('uploads'));
