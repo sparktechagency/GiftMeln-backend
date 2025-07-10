@@ -2,23 +2,32 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { IwishlistItems } from './wishlist.interface';
 import { Wishlist } from './wishlist.model';
+import mongoose from 'mongoose';
 
 const createWishListService = async (user: string, payload: IwishlistItems) => {
+  const productId = new mongoose.Types.ObjectId(payload.product._id || payload.product);
+
   const existingWishList = await Wishlist.findOne({
     user,
-    product: payload.product?._id || payload.product,
+    product: productId,
   });
+
   if (existingWishList) {
-    await Wishlist.findByIdAndDelete({
-      user: payload.user,
-      product: payload.product?._id || payload.product,
+    await Wishlist.deleteOne({
+      user,
+      product: productId,
     });
     return { message: 'Wishlist item removed' };
   } else {
-    const wishList = await Wishlist.create(payload);
+    const wishList = await Wishlist.create({
+      ...payload,
+      user,
+      product: productId,
+    });
     return { message: 'Wishlist item added', data: wishList };
   }
 };
+
 
 // get all wishlist items
 
