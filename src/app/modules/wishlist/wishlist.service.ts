@@ -19,7 +19,7 @@ const createWishListService = async ( payload: any) => {
     return { message: 'Wishlist item removed' };
   } else {
     const wishList = await Wishlist.create({
-      user,
+      user: payload.user, // Assuming payload contains user ID
       product: productId,
     });
     return { message: 'Wishlist item added', data: wishList };
