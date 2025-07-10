@@ -2,10 +2,11 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { IwishlistItems } from './wishlist.interface';
 import { Wishlist } from './wishlist.model';
+import { JwtPayload } from 'jsonwebtoken';
 
-const createWishListService = async (payload: IwishlistItems) => {
+const createWishListService = async (user:JwtPayload,payload: IwishlistItems) => {
   const existingWishList = await Wishlist.findOne({
-    user: payload.user,
+    user: user?.id || user?.authId,
     product: payload.product?._id || payload.product,
   });
   if (existingWishList) {
