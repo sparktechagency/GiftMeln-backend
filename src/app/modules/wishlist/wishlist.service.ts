@@ -1,11 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
-import { IwishlistItems } from './wishlist.interface';
 import { Wishlist } from './wishlist.model';
 import mongoose from 'mongoose';
 
-const createWishListService = async (user: string, payload: IwishlistItems) => {
-  const productId = new mongoose.Types.ObjectId(payload.product._id || payload.product);
+const createWishListService = async (user: string, payload: string) => {
+  console.log("payload", payload);
+  const productId = new mongoose.Types.ObjectId(payload);
 
   const existingWishList = await Wishlist.findOne({
     user,
@@ -20,7 +20,6 @@ const createWishListService = async (user: string, payload: IwishlistItems) => {
     return { message: 'Wishlist item removed' };
   } else {
     const wishList = await Wishlist.create({
-      ...payload,
       user,
       product: productId,
     });
