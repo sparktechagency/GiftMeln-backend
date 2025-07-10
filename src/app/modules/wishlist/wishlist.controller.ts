@@ -5,6 +5,8 @@ import { WishListService } from './wishlist.service';
 import ApiError from '../../../errors/ApiError';
 
 const createWishList = catchAsync(async (req, res) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
   const user = req.user?.id || req.user?.authId;
   const wishListData = req.body;
 

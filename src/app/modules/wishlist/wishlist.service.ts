@@ -4,15 +4,14 @@ import { IwishlistItems } from './wishlist.interface';
 import { Wishlist } from './wishlist.model';
 
 const createWishListService = async (user: string, payload: IwishlistItems) => {
-  console.log( 'createWishListService called with payload:', payload);
   const existingWishList = await Wishlist.findOne({
     user,
     product: payload.product?._id || payload.product,
   });
   if (existingWishList) {
-    await Wishlist.findOneAndDelete({
+    await Wishlist.findByIdAndDelete({
       user: payload.user,
-      product: payload.product,
+      product: payload.product?._id || payload.product,
     });
     return { message: 'Wishlist item removed' };
   } else {
@@ -26,7 +25,7 @@ const createWishListService = async (user: string, payload: IwishlistItems) => {
 const getAllWishlistItemsService = async () => {
   const wishlistItems = await Wishlist.find().populate('product');
   if (!wishlistItems) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Wishlist items not found');
+    return [];
   }
   return wishlistItems;
 };
