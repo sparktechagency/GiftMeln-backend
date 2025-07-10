@@ -5,8 +5,8 @@ import { WishListService } from './wishlist.service';
 import ApiError from '../../../errors/ApiError';
 
 const createWishList = catchAsync(async (req, res) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
 
   const wishListData = req.body;
 
@@ -19,7 +19,9 @@ const createWishList = catchAsync(async (req, res) => {
   });
 });
 const getAllWishLists = catchAsync(async (req, res) => {
-  const result = await WishListService.getAllWishlistItemsService();
+  const result = await WishListService.getAllWishlistItemsService(
+    req.user.id || req.user.authId,
+  );
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'No wishlists found');
   }

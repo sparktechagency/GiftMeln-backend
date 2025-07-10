@@ -4,7 +4,6 @@ import { Wishlist } from './wishlist.model';
 import mongoose from 'mongoose';
 
 const createWishListService = async ( payload: any) => {
-  console.log("Payload received in service:", payload);
 
   const existingWishList = await Wishlist.findOne({
     user: payload.user, // Assuming payload is the user ID
@@ -29,8 +28,8 @@ const createWishListService = async ( payload: any) => {
 
 // get all wishlist items
 
-const getAllWishlistItemsService = async () => {
-  const wishlistItems = await Wishlist.find().populate('product');
+const getAllWishlistItemsService = async (userId: string) => {
+  const wishlistItems = await Wishlist.find({ user: userId }).populate('product');
   if (!wishlistItems) {
     return [];
   }

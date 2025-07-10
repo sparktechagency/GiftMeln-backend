@@ -8,7 +8,7 @@ const route = Router()
 // all routes for wishlist
 route.post('/create', auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN), WishListController.createWishList)
 
-route.get('/', WishListController.getAllWishLists)
+route.get('/',auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN), WishListController.getAllWishLists)
 
 route.get('/:id', WishListController.getSingleWishlist)
 
