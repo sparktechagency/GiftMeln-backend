@@ -3,18 +3,17 @@ import ApiError from '../../../errors/ApiError';
 import { Wishlist } from './wishlist.model';
 import mongoose from 'mongoose';
 
-const createWishListService = async (user: string, payload: string) => {
-  console.log("payload", payload);
+const createWishListService = async ( payload: any) => {
   const productId = new mongoose.Types.ObjectId(payload);
 
   const existingWishList = await Wishlist.findOne({
-    user,
+    user: payload.user, // Assuming payload is the user ID
     product: productId,
   });
 
   if (existingWishList) {
     await Wishlist.deleteOne({
-      user,
+      user: payload.user,
       product: productId,
     });
     return { message: 'Wishlist item removed' };
