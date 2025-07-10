@@ -12,8 +12,26 @@ const getAllGiftCollectionFromDB = async () => {
     .populate('product')
     .populate('event');
 
-  return allCollections;
+  // Calculate total price for each collection
+  const updatedCollections = allCollections.map(collection => {
+    const products = Array.isArray(collection.product)
+      ? collection.product
+      : [collection.product];
+
+    const selectedGiftPrice = products.reduce(
+      (acc, curr) => acc + (curr?.price || 0),
+      0,
+    );
+
+    return {
+      ...collection.toObject(),
+      selectedGiftPrice,
+    };
+  });
+
+  return updatedCollections;
 };
+
 const getAllGiftFromDB = async () => {
   const allGifts = await GiftCollection.find({
     status: 'pending',
