@@ -31,7 +31,6 @@ export const createOneTimeProductHelper = async (params: {
           after_completion: {
             type: 'redirect',
             redirect: { url: 'https://giftmein.com/payment/success' },
-            // redirect: { url: 'http://10.0.70.111:3000/payment/success' },
           },
         });
 

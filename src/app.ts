@@ -8,7 +8,6 @@ import router from './routes';
 import { Morgan } from './shared/morgen';
 import passport from 'passport';
 import handleStripeWebhook from './app/stripe/handleStripeWebhook';
-import { apiRateLimiter } from './rateLimiter';
 const app = express();
 
 app.post(
@@ -28,23 +27,8 @@ app.use(passport.session());
 app.use(
   cors({
     origin: [
-      "http://139.59.0.25:6009",
-      "http://139.59.0.25:6007",
-      //
       'https://giftmein.com',
-      'https://admin.giftmein.com',
-      // "http://10.10.7.47:3000",
-      // 'http://10.0.70.111:3000',
-      // 'http://localhost:3002',
-      // 'http://10.0.70.111:3002',
-      // 'http://10.0.70.111:3005',
-      // 'http://localhost:3000',
-      // 'https://mahmud.binarybards.online/',
-      // 'https://accounts.google.com/o/oauth2/v2/auth',
-      // 'http://64.23.193.89:3000',
-      // // 'http://64.23.193.89:3001',
-      // 'http://64.23.193.89:3002',
-      // 'https://api.giftmein.com',
+      'https://admin.giftmein.com'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],

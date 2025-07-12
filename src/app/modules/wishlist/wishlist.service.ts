@@ -1,12 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { Wishlist } from './wishlist.model';
-import mongoose from 'mongoose';
 
 const createWishListService = async ( payload: any) => {
 
   const existingWishList = await Wishlist.findOne({
-    user: payload.user, // Assuming payload is the user ID
+    user: payload.user,
     product: payload.product,
   });
 

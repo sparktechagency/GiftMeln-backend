@@ -73,9 +73,6 @@ export const createSubscriptionProductHelper = async (
       after_completion: {
         type: 'redirect',
         redirect: { url: 'https://giftmein.com/surveyQuestions' },
-        // redirect: {
-        //   url: 'http://10.0.70.111:3000/surveyQuestions',
-        // },
       },
       metadata: {
         productId: String(product.id),
