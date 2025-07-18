@@ -10,7 +10,7 @@ export type IEvent = {
   // sales: "inStock" | "soldOut";
   eventDate: Date;
   RecipientName: string;
-  preferences: giftPreferences[];
+  preferences: string[];
   giftCreated?: boolean;
   address: string;
   phone: string;

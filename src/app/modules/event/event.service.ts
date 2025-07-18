@@ -10,11 +10,11 @@ import { SurveyModel } from '../servey/servey.model';
 import { Types } from 'mongoose';
 
 const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
-  // 1️⃣ Get all products
-  const products = await ProductModel.find();
-  if (!products || products.length === 0) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'No product found');
-  }
+  // // 1️⃣ Get all products
+  // const products = await ProductModel.find();
+  // if (!products || products.length === 0) {
+  //   throw new ApiError(StatusCodes.NOT_FOUND, 'No product found');
+  // }
 
   // 2️⃣ Event date must be 32 days ahead
   const today = new Date();
@@ -49,24 +49,24 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
     ) || [];
 
   // 6️⃣ Filter matching products
-  const matchingProducts = products.filter(product =>
-    product.tag?.some(tag => surveyTags.includes(tag.trim().toLowerCase())),
-  );
+  // const matchingProducts = products.filter(product =>
+  //   product.tag?.some(tag => surveyTags.includes(tag.trim().toLowerCase())),
+  // );
 
   // 7️⃣ Get user's subscription
   const subscription = await Subscription.findOne({
     user: survey.user,
   });
 
-  if (!subscription || subscription.balance === undefined) {
+  if (!subscription) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Subscription not found');
   }
 
   // 8️⃣ Gift preference answer
-  const giftPreferenceQuestion = survey.body?.[7];
-  const answer = giftPreferenceQuestion?.answer?.[0] || '';
+  // const giftPreferenceQuestion = survey.body?.[7];
+  // const answer = giftPreferenceQuestion?.answer?.[0] || '';
 
-  const selectedProducts: string[] = [];
+  // const selectedProducts: string[] = [];
   // 3️⃣ Create the event
   const event = await Event.create({
     ...eventData,
@@ -76,57 +76,57 @@ const createEventIntoDB = async (userId: JwtPayload, eventData: IEvent) => {
   if (!event) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create event');
   }
-  if (answer === '✅ Yes, if I have enough balance') {
-    let totalPrice = 0;
-    const addedProductIds = new Set<string>();
-    for (const product of products) {
-      if (addedProductIds.has(product._id.toString())) continue;
-      const price = product.discountedPrice ?? product.regularPrice ?? 0;
-      if (subscription.balance >= totalPrice + price) {
-        selectedProducts.push(product._id.toString());
-        totalPrice += price;
-      } else {
-        break;
-      }
-    }
-    if (selectedProducts.length === 0) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        'Insufficient balance for any product based on your answer',
-      );
-    }
+  // if (answer === '✅ Yes, if I have enough balance') {
+  //   let totalPrice = 0;
+  //   const addedProductIds = new Set<string>();
+  //   for (const product of products) {
+  //     if (addedProductIds.has(product._id.toString())) continue;
+  //     const price = product.discountedPrice ?? product.regularPrice ?? 0;
+  //     if (subscription.balance >= totalPrice + price) {
+  //       selectedProducts.push(product._id.toString());
+  //       totalPrice += price;
+  //     } else {
+  //       break;
+  //     }
+  //   }
+  //   if (selectedProducts.length === 0) {
+  //     throw new ApiError(
+  //       StatusCodes.BAD_REQUEST,
+  //       'Insufficient balance for any product based on your answer',
+  //     );
+  //   }
 
-    await GiftCollection.create({
-      event: event._id,
-      user: event.user,
-      product: selectedProducts,
-      status: 'initial',
-    });
+  //   await GiftCollection.create({
+  //     event: event._id,
+  //     user: event.user,
+  //     product: selectedProducts,
+  //     status: 'initial',
+  //   });
 
-    subscription.balance -= totalPrice;
-    await subscription.save();
-  } else {
-    // Single gift logic
-    const product = matchingProducts[0];
-    const price = product?.discountedPrice ?? product?.regularPrice ?? 0;
+  //   subscription.balance -= totalPrice;
+  //   await subscription.save();
+  // } else {
+  //   // Single gift logic
+  //   const product = matchingProducts[0];
+  //   const price = product?.discountedPrice ?? product?.regularPrice ?? 0;
 
-    if (subscription.balance < price) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        'Insufficient balance for the selected product',
-      );
-    }
-    // +971 52 551 3733
-    await GiftCollection.create({
-      event: event._id,
-      user: event.user,
-      product: selectedProducts,
-      status: 'initial',
-    });
+  //   if (subscription.balance < price) {
+  //     throw new ApiError(
+  //       StatusCodes.BAD_REQUEST,
+  //       'Insufficient balance for the selected product',
+  //     );
+  //   }
+  //   // +971 52 551 3733
+  //   await GiftCollection.create({
+  //     event: event._id,
+  //     user: event.user,
+  //     product: selectedProducts,
+  //     status: 'initial',
+  //   });
 
-    subscription.balance -= price;
-    await subscription.save();
-  }
+  //   subscription.balance -= price;
+  //   await subscription.save();
+  // }
 
   // 9️⃣ Final return
   return event;

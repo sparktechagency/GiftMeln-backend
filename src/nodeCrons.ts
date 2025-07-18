@@ -6,13 +6,18 @@ import { Event } from './app/modules/event/event.model';
 import { USER_ROLES } from './enums/user';
 import { User } from './app/modules/user/user.model';
 import { sendNotifications } from './helpers/notificationSender';
+import { ProductModel } from './app/modules/product/product.model';
+import { Subscription } from './app/modules/payment/payment.model';
+import { SurveyModel } from './app/modules/servey/servey.model';
 
 export const startGiftExpiryJob = () => {
   cron.schedule(
-    '*/1 * * * *',
+    '*/5 * * * * *',
     async () => {
       try {
-        const today = new Date('2025-06-05T06:48:19.969+00:00');
+        const today = new Date(); // For testing
+
+        console.log(today)
 
         const events = await Event.find({
           eventDate: { $gte: today },
@@ -21,42 +26,171 @@ export const startGiftExpiryJob = () => {
         for (const event of events) {
           const eventDate = new Date(event.eventDate);
           const date32DaysBefore = subDays(eventDate, 32);
-          const date2DaysBefore = subDays(eventDate, 2);
+          const date30DaysBefore = subDays(eventDate, 30);
 
+          // ✅ STEP 1: Gift Creation if 32 days before
           if (isSameDay(today, date32DaysBefore)) {
-            const updated = await GiftCollection.updateMany(
-              { event: event._id, status: 'initial' },
-              { $set: { status: 'pending' } },
+            const existingGift = await GiftCollection.findOne({
+              event: event._id,
+              user: event.user,
+            });
+
+            if (existingGift) {
+              logger.info(
+                `⛔ Gift already exists for event: ${event.eventName}, skipping creation.`,
+              );
+              continue;
+            }
+
+            const subscriptionDetails = await Subscription.findOne({
+              user: event.user,
+            });
+            const userBalance = subscriptionDetails?.balance || 0;
+            logger.info('💰 User Balance:', userBalance);
+
+            const userServe = await SurveyModel.findOne({
+              user: event.user,
+            });
+            if (!userServe) continue;
+
+            const removeEmojis = (text: string) =>
+              text
+                .replace(
+                  /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu,
+                  '',
+                )
+                .trim();
+
+            const surveyAnswers = userServe.body
+              .map(single => single.answer)
+              .flat();
+            const cleanedSurveyAnswers = surveyAnswers.map(removeEmojis);
+
+            const preferences =
+              event.preferences?.map(p => p.toLowerCase()) || [];
+            const matchedPreferences = [
+              ...preferences,
+              ...cleanedSurveyAnswers,
+            ];
+
+            if (matchedPreferences.length === 0) {
+              logger.info(
+                `❌ No matched preferences for event: ${event.eventName}`,
+              );
+              continue;
+            }
+
+            const allProducts = await ProductModel.find({});
+            const matchedTagProducts = allProducts.filter(product => {
+              const productTags = product.tag.map(t => t.toLowerCase());
+              return matchedPreferences.some(pref =>
+                productTags.includes(pref),
+              );
+            });
+
+            if (matchedTagProducts.length === 0) {
+              logger.info(
+                `❌ No tag-matched products for event: ${event.eventName}`,
+              );
+              continue;
+            }
+
+            const rawColor = userServe.body[5]?.answer?.[0];
+            const preferedColor = rawColor
+              ? removeEmojis(rawColor).toLowerCase()
+              : '';
+
+            const finalMatchedProducts = matchedTagProducts.filter(product =>
+              product.color.map(c => c.toLowerCase()).includes(preferedColor),
             );
 
-            if (updated.modifiedCount > 0) {
+            if (finalMatchedProducts.length === 0) {
               logger.info(
-                `🎁 GiftCollection updated to 'pending' for ${event.eventName}`,
+                `❌ No color-matched products for event: ${event.eventName}`,
               );
+              continue;
+            }
 
-              const admins = await User.find({
-                role: { $in: [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN] },
-              });
+            const sortedProducts = finalMatchedProducts.sort(
+              (a, b) => a.discountedPrice - b.discountedPrice,
+            );
 
-              for (const admin of admins) {
-                await sendNotifications({
-                  userId: admin._id.toString(),
-                  title: 'Gift Pending',
-                  message: `Gift for event ${event.eventName} is now pending.`,
-                  isRead: false,
-                });
+            const selectedProducts = [];
+            let total = 0;
+            for (const product of sortedProducts) {
+              if (total + product.discountedPrice <= userBalance) {
+                selectedProducts.push(product);
+                total += product.discountedPrice;
+              } else {
+                break;
               }
             }
-          }
-          if (isSameDay(today, date2DaysBefore)) {
-            const updated = await GiftCollection.updateMany(
-              { event: event._id, status: 'pending' },
-              { $set: { status: 'send' } },
-            );
-            if (updated.modifiedCount > 0) {
+
+            if (selectedProducts.length === 0) {
               logger.info(
-                `✅ GiftCollection updated to 'send' for ${event.eventName}`,
+                `💸 Not enough balance for any product for event: ${event.eventName}`,
               );
+              continue;
+            }
+
+            const multipleGift = userServe?.body[7]?.answer?.[0];
+            const giftCreate = await GiftCollection.create({
+              event: event._id,
+              user: event.user,
+              product:
+                multipleGift === '✅ Yes, if I have enough balance'
+                  ? selectedProducts.map(p => p._id.toString())
+                  : [selectedProducts[0]._id.toString()],
+              status: 'pending',
+            });
+
+            // logger.info(`🎁 GiftCollection created: ${giftCreate}`);
+
+            const admins = await User.find({
+              role: { $in: [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN] },
+            });
+
+            for (const admin of admins) {
+              await sendNotifications({
+                userId: admin._id.toString(),
+                title: 'Gift Pending',
+                message: `Gift for event "${event.eventName}" is now pending.`,
+                isRead: false,
+              });
+            }
+          }
+
+          // ✅ STEP 2: Update Gift Status to "sent" if 30 days before
+          if (isSameDay(today, date30DaysBefore)) {
+            const gift = await GiftCollection.findOne({
+              event: event._id,
+              user: event.user,
+              status: 'pending',
+            });
+
+            if (!gift) {
+              logger.info(
+                `⛔ No pending gift found to send for event: ${event.eventName}`,
+              );
+              continue;
+            }
+
+            gift.status = 'send';
+            await gift.save();
+
+            logger.info(`🚚 Gift sent for event: ${event.eventName}`);
+
+            const admins = await User.find({
+              role: { $in: [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN] },
+            });
+
+            for (const admin of admins) {
+              await sendNotifications({
+                userId: admin._id.toString(),
+                title: 'Gift Sent',
+                message: `Gift for event "${event.eventName}" has been sent.`,
+                isRead: false,
+              });
             }
           }
         }
@@ -70,8 +204,9 @@ export const startGiftExpiryJob = () => {
     },
   );
 
-  logger.info('✅ Gift Expiry Cron Job started and runs every minute');
+  logger.info('✅ Gift Expiry Cron Job started and runs every 5 seconds');
 };
+
 export const unVerifiedUserDeleteJob = () => {
   cron.schedule(
     // delete after 12 hours
