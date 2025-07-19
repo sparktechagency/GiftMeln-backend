@@ -21,8 +21,12 @@ import {
   startOfWeek,
   formatDate,
   endOfMonth,
+  sub,
 } from 'date-fns';
 import { Response } from 'express';
+import { ProductModel } from '../product/product.model';
+import { GiftCollection } from '../giftcollection/giftcollection.model';
+import { OneTimePayment } from '../onetimepayment/onetimepayment.model';
 
 const subscriptionDetailsFromDB = async (
   user: JwtPayload,
@@ -66,10 +70,36 @@ const getAllSubscriptionIntoDB = async (userId: string) => {
       path: 'user',
       select: 'name email phone image',
     });
+
+  const userBalance = subscription[0].balance;
+  const product = await (
+    await ProductModel.find()
+  ).map(prices => prices.discountedPrice);
+
+  const sortedPrices = product.sort((a, b) => a - b);
+
+  // Calculate how many products user can afford
+  let affordableProductCount = 0;
+  let totalCost = 0;
+
+  for (const price of sortedPrices) {
+    if (totalCost + price <= userBalance!) {
+      totalCost += price;
+      affordableProductCount++;
+    } else {
+      break;
+    }
+  }
+
   if (!subscription.length) {
     throw new ApiError(StatusCodes.BAD_GATEWAY, "Can't Find any Subscription");
   }
-  return subscription;
+
+  const subscriptionsWithAffordableProducts = subscription.map(sub => ({
+    ...sub.toObject(),
+    affordableProductCount,
+  }));
+  return subscriptionsWithAffordableProducts;
 };
 // it's for show all user subscription
 const getUserSubscriptionIntoDB = async () => {
@@ -125,12 +155,15 @@ const overViewFromDB = async () => {
 
   const allAmountPaid = result.map(item => item.amountPaid || 0);
   const totalAmount = allAmountPaid.reduce((sum, val) => sum + val, 0);
-
-  if (!totalAmount && !activeUser) {
+  const giftSend = await (await GiftCollection.find())
+  const totalGiftSend = giftSend.length;
+  const selectedGiftOrder = giftSend.filter(item => item.status === 'pending').length;
+  const showOrder = await OneTimePayment.find().countDocuments();
+  if (!totalAmount && !activeUser && !totalGiftSend && !showOrder && !selectedGiftOrder) {
     return [];
   }
 
-  return { totalAmount, activeUser };
+  return { totalAmount, activeUser, totalGiftSend, showOrder, selectedGiftOrder };
 };
 
 // TODO: Revenue analytics base on daily, weekly, monthly also yearly

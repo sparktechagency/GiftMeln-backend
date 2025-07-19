@@ -15,9 +15,7 @@ export const startGiftExpiryJob = () => {
     '*/5 * * * * *',
     async () => {
       try {
-        const today = new Date(); // For testing
-
-        console.log(today)
+        const today = new Date();
 
         const events = await Event.find({
           eventDate: { $gte: today },
