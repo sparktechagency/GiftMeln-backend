@@ -12,7 +12,7 @@ import { SurveyModel } from './app/modules/servey/servey.model';
 
 export const startGiftExpiryJob = () => {
   cron.schedule(
-    '*/5 * * * * *',
+    '*/1 * * * *',
     async () => {
       try {
         const today = new Date();
