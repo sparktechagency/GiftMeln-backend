@@ -198,7 +198,7 @@ export const startGiftExpiryJob = () => {
     },
     {
       scheduled: true,
-      timezone: 'Asia/Dhaka',
+      timezone: 'America/New_York',
     },
   );
 
