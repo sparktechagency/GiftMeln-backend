@@ -5,9 +5,7 @@ import { IGiftCollection } from './giftcollection.interface';
 import { GiftCollection } from './giftcollection.model';
 
 const getAllGiftCollectionFromDB = async () => {
-  const allCollections = await GiftCollection.find({
-    status: 'pending',
-  })
+  const allCollections = await GiftCollection.find()
     .populate('user')
     .populate('product')
     .populate('event');
