@@ -58,10 +58,23 @@ const getProductBaseOnCtg = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllGiftBaseOnUserAlsoStatusSend = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id || req.user?.authId || req.user?.id;  
+  const result = await GiftCollectionServices.getAllGiftBaseOnUserFromDBAlsoStatusSend(userId);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Gift collection retrieved successfully',
+    data: result,
+  });
+});
+
+
 export const GiftCollectionController = {
   getAllGift,
   updateGift,
   deleteGift,
   allGift,
   getProductBaseOnCtg,
-};
+  getAllGiftBaseOnUserAlsoStatusSend,
+  };

@@ -73,10 +73,19 @@ const getProductBaseOnCategory = async (category: string) => {
   return result;
 };
 
+const getAllGiftBaseOnUserFromDBAlsoStatusSend = async (userId: string) => {
+  const result = await GiftCollection.find({ user: userId }, { status: "send" }).populate("event").populate("product");
+  if (!result) {
+    return [];
+  }
+  return result;
+};
+
 export const GiftCollectionServices = {
   getAllGiftCollectionFromDB,
   updateGiftCollection,
   deleteGiftCollection,
   getAllGiftFromDB,
   getProductBaseOnCategory,
+  getAllGiftBaseOnUserFromDBAlsoStatusSend
 };

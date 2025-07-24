@@ -11,15 +11,22 @@ router.get(
   GiftCollectionController.getAllGift,
 );
 router.get(
-  '/:category',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-  GiftCollectionController.getProductBaseOnCtg,
-);
-router.get(
   '/',
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
   GiftCollectionController.allGift,
 );
+router.get(
+  '/user-history',
+  auth(USER_ROLES.USER),
+  GiftCollectionController.getAllGiftBaseOnUserAlsoStatusSend,
+);
+
+router.get(
+  '/:category',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  GiftCollectionController.getProductBaseOnCtg,
+);
+
 
 router.patch(
   '/:id',

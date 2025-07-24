@@ -54,8 +54,8 @@ export const handleSubscriptionCreated = async (
       // const customer = await stripe.customers.retrieve(fullSubscription.customer as string);
       // //@ts-nocheck
       // email = customer.email;
-      // @ts-ignore
       const customer = await stripe.customers.retrieve(
+        // @ts-ignore
         fullSubscription?.customer,
       );
       // @ts-ignore
