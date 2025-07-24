@@ -12,9 +12,10 @@ import { SurveyModel } from './app/modules/servey/servey.model';
 
 export const startGiftExpiryJob = () => {
   cron.schedule(
-    '*/1 * * * *',
+    '*/5 * * * * *',
     async () => {
       try {
+        console.log('🚀 Cron is running at:', new Date().toLocaleString());
         const today = new Date();
 
         const events = await Event.find({
@@ -39,12 +40,13 @@ export const startGiftExpiryJob = () => {
               );
               continue;
             }
-
             const subscriptionDetails = await Subscription.findOne({
               user: event.user,
             });
+
+            // logger.info(`💰 subscriptionDetails: ${subscriptionDetails}`);
             const userBalance = subscriptionDetails?.balance || 0;
-            logger.info('💰 User Balance:', userBalance);
+            logger.info(`💰 User Balance: ${userBalance}`);
 
             const userServe = await SurveyModel.findOne({
               user: event.user,
@@ -198,7 +200,7 @@ export const startGiftExpiryJob = () => {
     },
     {
       scheduled: true,
-      timezone: 'America/New_York',
+      timezone: 'America/New_York'
     },
   );
 
