@@ -6,7 +6,7 @@ import { GiftCollection } from './giftcollection.model';
 
 const getAllGiftCollectionFromDB = async () => {
   const allCollections = await GiftCollection.find({
-    status: { $ne: 'initial' },
+    status: 'pending',
   })
     .populate('user')
     .populate('product')
@@ -19,7 +19,7 @@ const getAllGiftCollectionFromDB = async () => {
       : [collection.product];
 
     const selectedGiftPrice = products.reduce(
-      (acc, curr) => acc + (curr?.price || 0),
+      (acc, curr) => acc + (curr?.discountedPrice || 0),
       0,
     );
 
@@ -28,7 +28,7 @@ const getAllGiftCollectionFromDB = async () => {
       selectedGiftPrice,
     };
   });
-
+  // console.log('Selected gift', updatedCollections);
   return updatedCollections;
 };
 
