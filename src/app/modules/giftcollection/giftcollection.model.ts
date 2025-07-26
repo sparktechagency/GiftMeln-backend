@@ -19,8 +19,8 @@ const giftCollectionSchema = new Schema<IGiftCollection, GiftCollectionModel>(
     },
     status: {
       type: String,
-      enum: ['pending', 'send', 'initial', "delivery"],
-      default: 'initial',
+      enum: ['pending', 'send', 'delivery'],
+      default: 'pending',
     },
   },
   {

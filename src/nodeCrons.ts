@@ -15,7 +15,7 @@ export const startGiftExpiryJob = () => {
     '*/5 * * * * *',
     async () => {
       try {
-        console.log('🚀 Cron is running at:', new Date().toLocaleString());
+        // console.log('🚀 Cron is running at:', new Date().toLocaleString());
         const today = new Date();
 
         const events = await Event.find({
