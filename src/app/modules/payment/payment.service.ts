@@ -72,7 +72,7 @@ const getAllSubscriptionIntoDB = async (userId: string) => {
     });
 
   const userBalance = subscription[0].balance;
-  const giftCollection = await GiftCollection.find({ user: userId }).lean();
+  const giftCollection = await GiftCollection.find({ user: userId, status: 'delivered' }).lean();
   const oneTimePayment = await OneTimePayment.find({ user: userId }).lean();
   const totalOneTimePayment = oneTimePayment.map(price => price.amountPaid).reduce((a, b) => a + b, 0);
   // 1. Flatten all product IDs from all gift collections
@@ -87,7 +87,7 @@ const getAllSubscriptionIntoDB = async (userId: string) => {
     (sum, p) => sum + (p.discountedPrice || 0),
     0
   );
-const totalSpentPrice = totalGiftProductPrice + totalOneTimePayment!;
+  const totalSpentPrice = totalGiftProductPrice + totalOneTimePayment!;
 
   const product = await (
     await ProductModel.find()

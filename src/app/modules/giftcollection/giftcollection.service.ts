@@ -68,17 +68,23 @@ const updateGiftCollection = async (
 
   const currentBalance = subscription?.balance || 0;
 
-  if (currentBalance < newTotal) {
-    throw new ApiError(400, `Insufficient balance. Current: $${currentBalance}, Required: $${newTotal}`);
+
+  if (payload.status === 'send') {
+    if (currentBalance < newTotal) {
+      throw new ApiError(400, `Insufficient balance. Current: $${currentBalance}, Required: $${newTotal}`);
+    }
+    await Subscription.findOneAndUpdate(
+      { user: user._id },
+      { $inc: { balance: -newTotal } }
+    );
+
   }
-  await Subscription.findOneAndUpdate(
-    { user: user._id },
-    { $inc: { balance: -newTotal } }
-  );
+
+
 
 
   // ✅ 5. Email send
-  if (payload.status === 'delivery' && user?.email) {
+  if (payload.status === 'delivered' && user?.email) {
     const emailContent = emailTemplate.giftStatusUpdate({
       email: user.email,
       name: user.name || 'User',

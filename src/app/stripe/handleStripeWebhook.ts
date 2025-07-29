@@ -9,6 +9,7 @@ import { handleSubscriptionCreated } from '../../helpers/handleSubscriptionCreat
 import { logger } from '../../shared/logger';
 import { InvoiceModel } from '../modules/invoiceModel/invoiceModel.model';
 import { emailHelper } from '../../helpers/emailHelper';
+import { handleOneTimePayment } from '../../helpers/handleOneTimePayment';
 
 const handleStripeWebhook = async (req: Request, res: Response) => {
   let event: Stripe.Event | undefined;
@@ -35,9 +36,10 @@ const handleStripeWebhook = async (req: Request, res: Response) => {
   }
 
   // Extract event data and type
-  const data = event.data.object as Stripe.Subscription | Stripe.Account;
+  const data = event.data.object;
 
   const eventType = event.type;
+
   try {
     switch (eventType) {
       case 'customer.subscription.created':
@@ -78,14 +80,17 @@ const handleStripeWebhook = async (req: Request, res: Response) => {
 
         break;
       }
+      case 'checkout.session.completed':
+        const session = data as Stripe.Checkout.Session;
+        await handleOneTimePayment(session);
+        break
 
       default:
         logger.warn(colors.bgGreen.bold(`Unhandled event type: ${eventType}`));
     }
   } catch (error) {
     logger.error(
-      `Webhook error: ${(error as Error).message || 'Unknown error'}\n${
-        (error as Error).stack || 'No stack trace provided'
+      `Webhook error: ${(error as Error).message || 'Unknown error'}\n${(error as Error).stack || 'No stack trace provided'
       }`
     );
   }

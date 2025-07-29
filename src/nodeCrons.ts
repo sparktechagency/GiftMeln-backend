@@ -12,6 +12,7 @@ import { SurveyModel } from './app/modules/servey/servey.model';
 
 export const startGiftExpiryJob = () => {
   cron.schedule(
+    // for every minute
     '* * * * *',
     async () => {
       try {
@@ -175,9 +176,8 @@ export const startGiftExpiryJob = () => {
               continue;
             }
 
-            gift.status = 'send';
+            gift.status = 'orderPlaced';
             await gift.save();
-
             logger.info(`🚚 Gift sent for event: ${event.eventName}`);
 
             const admins = await User.find({

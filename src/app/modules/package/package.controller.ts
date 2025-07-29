@@ -41,7 +41,7 @@ const getPackageById = catchAsync(async (req: Request, res: Response) => {
 
 // Check User Trial
 const checkUserTrial = catchAsync(async (req: Request, res: Response) => {
-  const result = await PackageServices.checkTrialStatus(req.user.id);
+  const result = await PackageServices.checkTrialStatus(req.user?.id!);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -76,13 +76,11 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
       products.map(async (product: any) => {
         const { productName, price, quantity, color, size, id } = product;
 
-        // Log incoming price for each product
         const stripeProduct = await stripe.products.create({
-          name: product.productName || `Product ${id}`,
+          name: productName || `Product ${id}`,
           metadata: { productId: id, color, size },
         });
 
-        // If the price is already in cents (e.g., 450), use it directly
         const unitAmount = price * 100;
 
         const priceObject = await stripe.prices.create({
@@ -105,43 +103,24 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
         quantity: item.quantity,
       })),
       mode: 'payment',
-      // success_url: 'http://139.59.0.25:6009/payment/success',
-      success_url: 'http://10.0.70.111:3000/payment/success',
-      cancel_url: 'http://10.0.70.111:3000/payment/cancel',
-      // cancel_url: 'http://139.59.0.25:6009/payment/cancel',
+      // success_url: 'http://10.10.7.47:3000/payment/success',
+      // cancel_url: 'http://10.10.7.47:3000/payment/cancel',
+      success_url: 'https://giftmein.com/payment/success',
+      cancel_url: 'https://giftmein.com/payment/cancel',
+
+      // ✅ Add metadata to pass info to webhook
+      metadata: {
+        userId: user._id.toString(),
+        userEmail,
+        userName,
+        country,
+        city,
+        streetAddress,
+        postCode,
+        orderMessage,
+        products: JSON.stringify(products),
+      },
     });
-
-    // Stripe returns amount_total in cents
-    const amountPaid = session.amount_total ?? 0;
-
-    // Store only the productName for each product
-    const paymentData = {
-      user: user._id,
-      status: 'completed',
-      products: products.map((p: any) => ({
-        id: p.id,
-        name: p.productName || `Product ${p.id}`,
-        price: p.price,
-        quantity: p.quantity || 1,
-      })),
-      userName,
-      userEmail,
-      country,
-      city,
-      streetAddress,
-      postCode,
-      orderMessage,
-      checkoutSessionId: session.id,
-      paymentUrl: session.url,
-      amountPaid,
-    };
-
-    const oneTimePayment = new OneTimePayment(paymentData);
-    const confirmPayment = await oneTimePayment.save();
-
-    if (confirmPayment.status === 'completed') {
-      await Cart.deleteMany({ user: user._id });
-    }
 
     return res.status(StatusCodes.OK).json({
       success: true,
@@ -158,6 +137,9 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+
 
 const startTrial = catchAsync(async (req: Request, res: Response) => {
   const { userId, packageId, paymentMethodId } = req.body;
