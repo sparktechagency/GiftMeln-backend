@@ -38,6 +38,8 @@ const getAllGiftFromDB = async () => {
   });
   return allGifts;
 };
+
+
 const updateGiftCollection = async (
   id: string,
   payload: Partial<IGiftCollection>,

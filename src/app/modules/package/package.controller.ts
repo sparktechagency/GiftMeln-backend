@@ -73,7 +73,7 @@ export const createOneTimePackage = async (req: Request, res: Response) => {
 
   try {
     const lineItems = await Promise.all(
-      products.map(async (product: any) => {
+      products.map(async (product: any) => {  
         const { productName, price, quantity, color, size, id } = product;
 
         const stripeProduct = await stripe.products.create({

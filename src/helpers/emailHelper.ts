@@ -4,6 +4,7 @@ import sgMail from '@sendgrid/mail';
 import { ISendEmail } from '../types/email';
 import ApiError from '../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
+import { logger } from '../shared/logger';
 
 sgMail.setApiKey(config.sendgrid.apiKey!);
 const sendOtpEmail = async (email: string, name: string, otp: number) => {
@@ -28,13 +29,9 @@ const sendEmail = async (values: ISendEmail) => {
   try {
     // @ts-ignore
     const response = await sgMail.send(msg);
-    console.log('✅ Email sent successfully:', response[0].statusCode);
+    logger.info('✅ Email sent successfully:', response[0].statusCode);
   } catch (error) {
-    console.error('❌ Failed to send email:', error);
-    throw new ApiError(
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      'Email sending failed',
-    );
+    logger.error('❌ Failed to send OTP email:', error);
   }
 };
 
