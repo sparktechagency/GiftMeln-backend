@@ -71,7 +71,7 @@ const getAllSubscriptionIntoDB = async (userId: string) => {
       select: 'name email phone image',
     });
 
-  const userBalance = subscription[0].balance;
+  const userBalance = subscription[0]?.balance!;
   const giftCollection = await GiftCollection.find({ user: userId, status: 'delivered' }).lean();
   const oneTimePayment = await OneTimePayment.find({ user: userId }).lean();
   const totalOneTimePayment = oneTimePayment.map(price => price.amountPaid).reduce((a, b) => a + b, 0);
@@ -100,7 +100,7 @@ const getAllSubscriptionIntoDB = async (userId: string) => {
   let totalCost = 0;
 
   for (const price of sortedPrices) {
-    if (totalCost + price <= userBalance!) {
+    if (totalCost + price <= userBalance) {
       totalCost += price;
       affordableProductCount++;
     } else {
