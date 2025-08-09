@@ -2,8 +2,6 @@ import config from '../config';
 import { emailTemplate } from '../shared/emailTemplate';
 import sgMail from '@sendgrid/mail';
 import { ISendEmail } from '../types/email';
-import ApiError from '../errors/ApiError';
-import { StatusCodes } from 'http-status-codes';
 import { logger } from '../shared/logger';
 
 sgMail.setApiKey(config.sendgrid.apiKey!);

@@ -3,8 +3,8 @@ import { OneTimePayment } from './onetimepayment.model';
 import { Cart } from '../cart/cart.model';
 import { Types } from 'mongoose';
 
-const getAllProductPurchaseDataIntoDB = async () => {
-  const result = await OneTimePayment.find();
+const getAllProductPurchaseDataIntoDB = async (user: string) => {
+  const result = await OneTimePayment.find({ user: user });
   if (result.length === 0) {
     return [];
   }
@@ -13,7 +13,7 @@ const getAllProductPurchaseDataIntoDB = async () => {
 
 // TODO: checkout product base on subscription balance
 const checkoutProduct = async (data: any, user: any) => {
-  const userId = user.authId || user.id;
+  const userId = user.authId || user.id || user;
   const userSubscription = await Subscription.findOne({ user: userId });
   if (!userSubscription) {
     throw new Error('Subscription not found for user');
