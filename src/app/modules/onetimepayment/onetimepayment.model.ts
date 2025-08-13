@@ -24,7 +24,7 @@ const oneTimePaymentSchema = new Schema<IOnetimePayment, OnetimePaymentModel>(
     products: [
       {
         id: { type: String, required: true },
-        name: { type: String, required: false },
+        productName: { type: String, required: false },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
         color: { type: String },

@@ -15,7 +15,7 @@ export interface IOnetimePayment extends Document {
 
   products: Array<{
     id: string;
-    name?: string;
+    productName?: string;
     quantity: number;
     price: number;
     color?: string;

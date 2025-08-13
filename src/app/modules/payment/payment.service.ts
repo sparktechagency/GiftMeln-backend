@@ -74,6 +74,7 @@ const getAllSubscriptionIntoDB = async (userId: string) => {
   const userBalance = subscription[0]?.balance!;
   const giftCollection = await GiftCollection.find({ user: userId, status: 'delivered' }).lean();
   const oneTimePayment = await OneTimePayment.find({ user: userId }).lean();
+  // @ts-ignore
   const totalOneTimePayment = oneTimePayment.map(price => price.amountPaid).reduce((a, b) => a + b, 0);
   // 1. Flatten all product IDs from all gift collections
   const allProductIds = giftCollection.flatMap(gift => gift.product);
@@ -206,7 +207,7 @@ const getRevenueAnalytics = async (query: Record<string, any>) => {
       break;
 
     case 'weekly':
-      startDate = startOfDay(subDays(now, 6)); // last 7 days
+      startDate = startOfDay(subDays(now, 6));
       endDate = endOfDay(now);
       groupFormat = 'EEE';
       groupByLabels = eachDayOfInterval({ start: startDate, end: endDate }).map(
@@ -216,8 +217,8 @@ const getRevenueAnalytics = async (query: Record<string, any>) => {
 
     case 'monthly':
       startDate = startOfMonth(now);
-      endDate = endOfMonth(now); // ✅ fix to include full month
-      groupFormat = 'dd'; // two-digit day label (01, 02, ..., 31)
+      endDate = endOfMonth(now);
+      groupFormat = 'dd';
       groupByLabels = eachDayOfInterval({ start: startDate, end: endDate }).map(
         date => format(date, 'dd'),
       );
@@ -408,11 +409,17 @@ const exportAllSubscriberCSVIndoDB = async (res: Response) => {
 
   subscriptions.forEach(sub => {
     csvStream.write({
+      // @ts-ignore
       Name: sub?.user?.name,
+      // @ts-ignore
       Email: sub?.user?.email,
+      // @ts-ignore
       Phone: sub?.user?.phone,
+      // @ts-ignore
       Package: sub?.package?.name,
+      // @ts-ignore
       Price: sub?.package?.price,
+      // @ts-ignore
       Duration: sub?.package?.duration,
       Status: sub?.status,
     });

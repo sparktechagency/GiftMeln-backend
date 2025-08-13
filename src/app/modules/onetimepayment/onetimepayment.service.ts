@@ -2,9 +2,11 @@ import { Subscription } from '../payment/payment.model';
 import { OneTimePayment } from './onetimepayment.model';
 import { Cart } from '../cart/cart.model';
 import { Types } from 'mongoose';
+import { JwtPayload } from 'jsonwebtoken';
 
-const getAllProductPurchaseDataIntoDB = async (user: string) => {
-  const result = await OneTimePayment.find({ user: user });
+const getAllProductPurchaseDataIntoDB = async (user: JwtPayload) => {
+
+  const result = await OneTimePayment.find({ user: user.id || user.authId }).populate("products");
   if (result.length === 0) {
     return [];
   }
@@ -42,7 +44,7 @@ const checkoutProduct = async (data: any, user: any) => {
 
     products: data.products.map((p: any) => ({
       id: p.id,
-      name: p?.productName,
+      productName: p?.productName,
       quantity: p.quantity,
       price: p.price,
       color: p.color || '',
@@ -54,6 +56,7 @@ const checkoutProduct = async (data: any, user: any) => {
   });
   await Cart.deleteMany({ user: new Types.ObjectId(userId) });
   return payment;
+
 };
 
 export const OnetimePaymentServices = {
