@@ -26,13 +26,26 @@ export const handleSubscriptionCreated = async (
   subscription: Stripe.Subscription,
 ) => {
   try {
-    // Retrieve full subscription data
-    const fullSubscription = await stripe.subscriptions.retrieve(
-      subscription.id,
-    );
+    const fullSubscription = await stripe.subscriptions.retrieve(subscription.id);
 
-    // Get productId from subscription
-    const productId = fullSubscription.items.data[0]?.price?.product as string;
+    const billingCycleAnchor = new Date(fullSubscription.billing_cycle_anchor * 1000);
+    // @ts-ignore
+    const planInterval = fullSubscription?.plan?.interval;
+    let currentPeriodEnd;
+
+    if (planInterval === 'month') {
+      currentPeriodEnd = new Date(billingCycleAnchor);
+      currentPeriodEnd.setMonth(billingCycleAnchor.getMonth() + 1);
+    } else if (planInterval === 'year') {
+      currentPeriodEnd = new Date(billingCycleAnchor);
+      currentPeriodEnd.setFullYear(billingCycleAnchor.getFullYear() + 1);
+    } else {
+      console.warn('Unsupported interval type:', planInterval);
+    }
+
+    const currentPeriodStart = billingCycleAnchor;
+
+    const productId = fullSubscription?.items?.data[0]?.price?.product as string;
     if (!productId) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
@@ -40,24 +53,13 @@ export const handleSubscriptionCreated = async (
       );
     }
 
-    // Get the invoice to retrieve payment details
-    const invoice = await stripe.invoices.retrieve(
-      fullSubscription.latest_invoice as string,
-    );
+    const invoice = await stripe.invoices.retrieve(fullSubscription?.latest_invoice as string);
     const trxId = invoice.payment_intent as string;
     const amountPaid = (invoice.total || 0) / 100;
-    // const balance =
-    // Get email from the subscription or customer
     // @ts-ignore
-    let email = fullSubscription.customer_email;
+    let email = fullSubscription?.customer_email;
     if (!email) {
-      // const customer = await stripe.customers.retrieve(fullSubscription.customer as string);
-      // //@ts-nocheck
-      // email = customer.email;
-      const customer = await stripe.customers.retrieve(
-        // @ts-ignore
-        fullSubscription?.customer,
-      );
+      const customer = await stripe.customers.retrieve(fullSubscription?.customer as string);
       // @ts-ignore
       email = customer.email;
     }
@@ -69,10 +71,8 @@ export const handleSubscriptionCreated = async (
       );
     }
 
-    // Retrieve user by email
     const user = await getUserByEmail(email);
 
-    // Find the plan (package) associated with the productId
     const plan = await Package.findOne({ productId });
     if (!plan) {
       throw new ApiError(
@@ -81,22 +81,14 @@ export const handleSubscriptionCreated = async (
       );
     }
 
-    // Format the current period start and end dates
-    const currentPeriodStart = new Date(
-      fullSubscription.current_period_start * 1000,
-    );
-    const currentPeriodEnd = new Date(
-      fullSubscription.current_period_end * 1000,
-    );
-
-    // Prepare subscription data according to IPayment interface
     const subscriptionData: IPayment = {
-      user: user._id,
-      customerId: fullSubscription.customer as string,
+      user: user.id || user.authId,
+      customerId: fullSubscription?.customer as string,
       package: plan._id,
       trxId,
-      subscriptionId: fullSubscription.id,
+      subscriptionId: fullSubscription?.id as string,
       currentPeriodStart,
+      // @ts-ignore
       currentPeriodEnd,
       amountPaid,
       balance: Number(amountPaid) / 2 + plan?.addGiftBalance!,
@@ -104,8 +96,7 @@ export const handleSubscriptionCreated = async (
       paymentType: 'subscription',
     };
 
-    // Check if subscription already exists for this user
-    const existingSubscription = await Subscription.findOne({ user: user._id });
+    const existingSubscription = await Subscription.findOne({ user: user.id || user.authId });
     let result;
 
     if (existingSubscription) {
@@ -118,7 +109,6 @@ export const handleSubscriptionCreated = async (
       result = await Subscription.create(subscriptionData);
     }
 
-    // Update the user's subscription status
     await User.findOneAndUpdate(
       { email },
       { isSubscribed: true },

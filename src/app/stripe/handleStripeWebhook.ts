@@ -52,7 +52,6 @@ const handleStripeWebhook = async (req: Request, res: Response) => {
         const userEmail = invoice.customer_email;
         const amount = invoice.amount_paid / 100;
         const invoiceUrl = invoice.invoice_pdf;
-
         if (userEmail && invoiceUrl) {
           await InvoiceModel.create({
             userEmail,

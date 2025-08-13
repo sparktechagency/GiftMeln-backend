@@ -27,8 +27,8 @@ app.use(passport.session());
 app.use(
   cors({
     origin: [
-      // "http://10.10.7.47:3000",
-      // "http://10.10.7.47:3002",
+      "http://10.10.7.47:3000",
+      "http://10.10.7.47:3002",
       'https://giftmein.com',
       'https://admin.giftmein.com',
     ],
